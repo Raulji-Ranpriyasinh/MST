@@ -12,8 +12,8 @@ import json
 app.secret_key = 'your_secret_key'
 #------------------------------------------
 # # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://admin:Edgespych12345@myappdb.cer0aq8cezxb.us-east-1.rds.amazonaws.com:3306/myappdb'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:5525@localhost/EXAM'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://admin:Edgespych12345@myappdb.cer0aq8cezxb.us-east-1.rds.amazonaws.com:3306/myappdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:8888@localhost/exam'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_recycle": 280,
@@ -201,32 +201,6 @@ with app.app_context():
 @app.route('/')
 def home():
     return render_template('index.html')
-
-# Register API 14/06
-# @app.route('/register', methods=['POST'])
-# def register():
-#     data = request.json
-#     existing_user = StudentDetails.query.filter_by(email=data['email']).first()
-#     if existing_user:
-#         return jsonify({'success': False, 'message': 'Email already registered!'}), 400
-    
-#     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-#     new_user = StudentDetails(
-#         first_name=data['first_name'],
-#         last_name=data['last_name'],
-#         email=data['email'],
-#         mobile_number=data['mobile_number'],
-#         country=data['country'],
-#         curriculum=data['curriculum'],
-#         school_name=data['school_name'],
-#         grade=data['grade'],
-#         referral_source=data.get('referral_source', ''),
-#         password=hashed_password
-#     )
-#     db.session.add(new_user)
-#     db.session.commit()
-#     return jsonify({'success': True, 'message': 'Registration successful!'})
-
 
 
 @app.route('/register', methods=['POST'])
@@ -551,70 +525,6 @@ def aptitudegetquestion():
         return jsonify({'error': 'Database error', 'message': str(e)}), 500
 
 
-#--------------------------------------------------------------------------------------
-# @app.route('/submit_final_responses', methods=['POST'])
-# def submit_final_responses():
-#     if 'user_id' not in session:
-#         return jsonify({'success': False, 'message': 'User not logged in'}), 401  
-
-#     data = request.json  
-#     student_id = session.get('user_id')  
-#     category = data.get('category')
-#     responses = data.get('responses')
-
-#     if not responses or len(responses) < 30:
-#         return jsonify({'success': False, 'message': 'Incomplete responses'}), 400  
-
-#     try:
-#         for question_id, selected_option in responses.items():
-#             question = AptitudeAllQuestions.query.filter_by(id=question_id).first()
-#             #question = AptitudeImgQuestions.query.filter_by(id=question_id).first()
-            
-#             if not question:
-#                 print(f"⚠️ Question ID {question_id} not found in DB")  # Debugging
-#                 continue  
-
-#             is_correct = (selected_option == question.correct_option)
-
-#             existing_response = AptitudeImgResponse.query.filter_by(
-#                 student_id=student_id, question_id=question_id).first()
-            
-#             if existing_response:
-#                 existing_response.selected_option = selected_option
-#                 existing_response.is_correct = is_correct
-#             else:
-#                 new_response = AptitudeImgResponse(
-#                     student_id=student_id,
-#                     question_id=question_id,
-#                     selected_option=selected_option,
-#                     is_correct=is_correct,
-#                     category=category
-#                 )
-#                 db.session.add(new_response)
-
-#         test_status = TestStatus.query.filter_by(user_id=student_id).first()
-#         if not test_status:
-#             test_status = TestStatus(user_id=student_id)
-#             db.session.add(test_status)
-
-#         # ✅ Set only aptitude_test_completed to True
-#         test_status.aptitude_test_completed = True
-
-#         db.session.commit()  
-
-        
-#         return jsonify({'success': True, 'message': 'Responses saved successfully!'})
-
-#     except Exception as e:
-#         db.session.rollback()
-#         print(f"🔥 ERROR: {str(e)}")  # Print full error for debugging
-#         return jsonify({'success': False, 'message': 'Database error', 'error': str(e)}), 500  
-
-#     finally:
-#         db.session.close()
-
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 @app.route('/submit_category_responses', methods=['POST'])
 def submit_category_responses():
     if 'user_id' not in session:
@@ -681,46 +591,6 @@ def submit_category_responses():
     finally:
         db.session.close()
 
-#*******************************************************************************************************
-
-# @app.route('/aptitudetextgetquestion', methods=['GET'])
-# def aptitudetextgetquestion():
-#     try:
-#         with app.app_context():
-#             # Fetch all unique categories dynamically
-#             categories = db.session.query(AptitudeTextQuestions.aptitudecategory).distinct().all()
-#             categories_list = [c[0] for c in categories]  # Convert to list
-            
-#             print("Fetched Categories:", categories_list)  # Debugging
-
-#             # Dictionary to store text questions categorized by category
-#             all_text_questions = {}
-
-#             for category in categories_list:
-#                 print(f"Fetching questions for category: {category}")  # Debugging
-                
-#                 # Fetch 30 random unique questions per category
-#                 questions = (
-#                     AptitudeTextQuestions.query
-#                     .filter_by(aptitudecategory=category)
-#                     .order_by(db.func.rand())  # Random order
-#                     .limit(30)  # Limit to 30 per category
-#                     .all()
-#                 )
-
-#                 print(f"Questions fetched for {category}: {len(questions)}")  # Debugging
-
-#                 # Store questions in a dictionary categorized by category
-#                 all_text_questions[category] = [q.to_dict() for q in questions]
-
-#         if not all_text_questions:
-#             return jsonify({'message': 'No questions found', 'questions_by_category': {}}), 404
-
-#         return jsonify({'questions_by_category': all_text_questions})
-
-#     except Exception as e:
-#         print(f"Error: {e}")  # Log the error
-#         return jsonify({'error': 'Database error', 'message': str(e)}), 500
 
 @app.route('/aptitudetextgetquestion', methods=['GET'])
 def aptitudetextgetquestion():
