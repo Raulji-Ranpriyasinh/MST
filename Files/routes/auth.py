@@ -106,21 +106,39 @@ def login():
         return jsonify({'success': False, 'message': 'Invalid email or password!'}), 401
 
 
+# @auth_bp.route('/admin_login', methods=['POST'])
+# @limiter.limit("5 per minute")
+# def admin_login():
+#     data = request.json
+#     if not data:
+#         return jsonify({'success': False, 'message': 'No data provided'}), 400
+
+#     # Server-side validation
+#     is_valid, errors = validate_admin_login(data)
+#     if not is_valid:
+#         return jsonify({'success': False, 'message': '; '.join(errors)}), 400
+
+#     # Query admin by username only, then verify password hash
+#     admin = Admin.query.filter_by(username=data['username']).first()
+#     if admin and check_password_hash(admin.password, data['password']):
+#         session['admin_id'] = admin.id
+#         return jsonify({
+#             'success': True,
+#             'message': 'Admin login successful!',
+#             'redirect': url_for('admin.admin_dashboard'),
+#         }), 200
+#     else:
+#         return jsonify({'success': False, 'message': 'Invalid username or password!'}), 401
+
+
 @auth_bp.route('/admin_login', methods=['POST'])
-@limiter.limit("5 per minute")
 def admin_login():
     data = request.json
-    if not data:
-        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
 
-    # Server-side validation
-    is_valid, errors = validate_admin_login(data)
-    if not is_valid:
-        return jsonify({'success': False, 'message': '; '.join(errors)}), 400
-
-    # Query admin by username only, then verify password hash
-    admin = Admin.query.filter_by(username=data['username']).first()
-    if admin and check_password_hash(admin.password, data['password']):
+    admin = Admin.query.filter_by(username=username).first()
+    if admin and check_password_hash(admin.password, password):
         session['admin_id'] = admin.id
         return jsonify({
             'success': True,
@@ -129,7 +147,6 @@ def admin_login():
         }), 200
     else:
         return jsonify({'success': False, 'message': 'Invalid username or password!'}), 401
-
 
 @auth_bp.route('/admin', methods=['GET'])
 def admin_login_page():
