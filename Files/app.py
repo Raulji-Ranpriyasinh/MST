@@ -20,6 +20,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_pre_ping": True
 }
 
+#Helo
 
 db = SQLAlchemy(app)
 
