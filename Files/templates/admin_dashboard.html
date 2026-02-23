@@ -321,18 +321,18 @@
                 <td>{{ student.referral_source }}</td>
                 <!-- <td>{{ student.created_at }}</td> -->
                 <!-- <td>
-                <a href="{{ url_for('download_aptitude', student_id=student.id) }}" class="btn aptitude-btn">Download Aptitude</a>
-                <a href="{{ url_for('download_career', student_id=student.id) }}" class="btn career-btn">Download Career</a>
+                <a href="{{ url_for('student.download_aptitude', student_id=student.id) }}" class="btn aptitude-btn">Download Aptitude</a>
+                <a href="{{ url_for('student.download_career', student_id=student.id) }}" class="btn career-btn">Download Career</a>
             </td> -->
 
                 <td>
                     {% if student.aptitude_test_completed %}
-                    <a href="{{ url_for('download_aptitude', student_id=student.id) }}"
+                    <a href="{{ url_for('student.download_aptitude', student_id=student.id) }}"
                         class="btn aptitude-btn">Generate Aptitude</a>
                     {% endif %}
 
                     {% if student.career_test_completed %}
-                    <a href="{{ url_for('download_career', student_id=student.id) }}" class="btn career-btn">Generate 
+                    <a href="{{ url_for('student.download_career', student_id=student.id) }}" class="btn career-btn">Generate 
                         Career</a>
                     {% endif %}
                 </td>

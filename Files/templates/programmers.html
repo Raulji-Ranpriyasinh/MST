@@ -209,13 +209,13 @@
         <div class="status">You can start the questionnaire</div>
 
         {% if not aptitude_completed %}
-        <a href="{{ url_for('aptitude_questionnaire') }}" class="start-btn btn-blue">Start</a>
+        <a href="{{ url_for('assessment.aptitude_questionnaire') }}" class="start-btn btn-blue">Start</a>
         {% else %}
         <a class="start-btn disabled">✅ Test Completed</a>
         {% endif %}
 
         
-        <a href="{{ url_for('download_aptitude', student_id=user_id) }}" class="start-btn btn-blue" style="margin-top: 10px;">
+        <a href="{{ url_for('student.download_aptitude', student_id=user_id) }}" class="start-btn btn-blue" style="margin-top: 10px;">
             View Result
         </a>
     </div>
@@ -226,13 +226,13 @@
         <div class="status">You can start the questionnaire</div>
 
         {% if not career_completed %}
-        <a href="{{ url_for('career_assessment') }}" class="start-btn btn-red">Start</a>
+        <a href="{{ url_for('assessment.career_assessment') }}" class="start-btn btn-red">Start</a>
         {% else %}
         <a class="start-btn disabled">✅ Test Completed</a>
         {% endif %}
 
         
-        <a href="{{ url_for('download_career', student_id=user_id) }}" class="start-btn btn-red" style="margin-top: 10px;">
+        <a href="{{ url_for('student.download_career', student_id=user_id) }}" class="start-btn btn-red" style="margin-top: 10px;">
             View Result
         </a>
     </div> -->
@@ -246,11 +246,11 @@
         <div class="status">You can start the questionnaire</div>
 
         {% if not aptitude_completed %}
-            <a href="{{ url_for('aptitude_questionnaire') }}" class="start-btn btn-blue">Start</a>
+            <a href="{{ url_for('assessment.aptitude_questionnaire') }}" class="start-btn btn-blue">Start</a>
         {% else %}
             <a class="start-btn disabled">✅ Test Completed</a>
             {% if can_view_career_result %}
-                <a href="{{ url_for('download_aptitude', student_id=user_id) }}" class="start-btn btn-blue">📄 View Result</a>
+                <a href="{{ url_for('student.download_aptitude', student_id=user_id) }}" class="start-btn btn-blue">📄 View Result</a>
             {% else %}
                 <a class="start-btn disabled" title="Your result has not been generated yet">📄 View Result</a>
             {% endif %}
@@ -264,11 +264,11 @@
         <div class="status">You can start the questionnaire</div>
 
         {% if not career_completed %}
-            <a href="{{ url_for('career_assessment') }}" class="start-btn btn-red">Start</a>
+            <a href="{{ url_for('assessment.career_assessment') }}" class="start-btn btn-red">Start</a>
         {% else %}
             <a class="start-btn disabled">✅ Test Completed</a>
             {% if can_view_career_result %}
-                <a href="{{ url_for('download_career', student_id=user_id) }}" class="start-btn btn-red">📄 View Result</a>
+                <a href="{{ url_for('student.download_career', student_id=user_id) }}" class="start-btn btn-red">📄 View Result</a>
             {% else %}
                 <a class="start-btn disabled" title="Your result has not been generated yet">📄 View Result</a>
             {% endif %}
