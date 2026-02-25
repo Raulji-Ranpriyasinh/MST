@@ -130,6 +130,9 @@
   </div>
 
   <script>
+    if (window.history && window.history.replaceState) {  
+    window.history.replaceState(null, "", window.location.href);  
+}
     function toggleForms() {
       const studentForm = document.getElementById("studentForm");
       const registerForm = document.getElementById("registerForm");

@@ -69,7 +69,7 @@ def register():
     return jsonify({
         'success': True,
         'message': 'Registered and logged in successfully!',
-        'access_token': access_token,
+
     })
 
 
@@ -100,7 +100,6 @@ def login():
             'success': True,
             'message': 'Login successful!',
             'redirect': url_for('student.dashboard'),
-            'access_token': access_token,
         }), 200
     else:
         return jsonify({'success': False, 'message': 'Invalid email or password!'}), 401
@@ -132,6 +131,7 @@ def login():
 
 
 @auth_bp.route('/admin_login', methods=['POST'])
+@limiter.limit("5 per minute") 
 def admin_login():
     data = request.json
     username = data.get('username', '').strip()
@@ -163,3 +163,8 @@ def logout():
 def admin_logout():
     session.pop('admin_id', None)
     return redirect(url_for('auth.home'))
+@auth_bp.route("/api/v1/session/check")  
+def session_check():  
+    if "user_id" not in session and "admin_id" not in session and "firm_admin_id" not in session:  
+        return jsonify({"valid": False}), 401  
+    return jsonify({"valid": True}), 200

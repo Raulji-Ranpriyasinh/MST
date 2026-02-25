@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from datetime import timedelta  
 
 load_dotenv()
 
@@ -19,13 +20,11 @@ class Config:
     }
 
     # Session cookie security
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True  
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'  
+    SESSION_COOKIE_SAMESITE = 'Lax'  
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
 
-    # JWT configuration
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', os.urandom(32).hex())
-    JWT_ACCESS_TOKEN_EXPIRES = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES', 7200))  # 2 hours
 
     # PDF server configuration
     PDF_SERVER_URL = os.environ.get('PDF_SERVER_URL', 'http://localhost:3000')

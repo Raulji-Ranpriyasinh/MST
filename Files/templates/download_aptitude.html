@@ -756,7 +756,20 @@
 
 
         </div>
-
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>  
+<script>  
+    // student_id is already extracted from URL in these pages  
+    const studentId = getStudentIdFromUrl();  // already defined in both files  
+    const socket = io();  
+    socket.emit('join', { room: 'student_' + studentId });  
+  
+    socket.on('result_access_updated', function(data) {  
+        if (!data.can_view) {  
+            alert('Access to your result has been revoked.');  
+            window.location.href = '/programmers';  // redirect back to dashboard  
+        }  
+    });  
+</script>
 </body>
 
 </html>

@@ -83,22 +83,28 @@
         const username = this.username.value.trim();
         const password = this.password.value;
 
-        try {
-            const res = await fetch('/admin_login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                // Redirect to admin dashboard
-                window.location.href = '/admin_dashboard';
-            } else {
-                alert('Invalid admin credentials');
-            }
-        } catch (err) {
-            console.error('Login error:', err);
-            alert('Something went wrong. Please try again.');
+        try {  
+            const res = await fetch('/admin_login', {  
+                method: 'POST',  
+                headers: { 'Content-Type': 'application/json' },  
+                body: JSON.stringify({ username, password })  
+            });  
+        
+            // NEW: detect rate limit  
+            if (res.status === 429) {  
+                showToast('Too many attempts. Please wait 1 minute.');  
+                return;  
+            }  
+        
+            const data = await res.json();  
+            if (data.success) {  
+                window.location.href = '/admin_dashboard';  
+            } else {  
+                alert('Invalid admin credentials');  
+            }  
+        } catch (err) {  
+            console.error('Login error:', err);  
+            alert('Something went wrong. Please try again.');  
         }
     });
 
@@ -125,6 +131,19 @@
             inputElem.style.backgroundColor = ""; // reset to default
         }
     }
+
+    function showToast(message) {  
+    const toast = document.createElement('div');  
+    toast.textContent = message;  
+    toast.style.cssText = `  
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);  
+        background: #333; color: #fff; padding: 12px 24px; border-radius: 8px;  
+        font-size: 14px; z-index: 9999; opacity: 1; transition: opacity 0.5s;  
+    `;  
+    document.body.appendChild(toast);  
+    setTimeout(() => { toast.style.opacity = '0'; }, 3000);  
+    setTimeout(() => { toast.remove(); }, 3500);  
+}
 </script>
 
 </body>

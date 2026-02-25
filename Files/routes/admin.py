@@ -3,7 +3,7 @@
 import json
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
-
+from extensions import db, socketio  # add socketio to existing import 
 from extensions import db
 from models.student import ExamProcess, StudentDetails, TestStatus
 from services.scoring import get_career_scores, load_mappings
@@ -203,21 +203,43 @@ def career_report(student_id):
     return jsonify({"student_id": student_id, "top_fields": top_subjects})
 
 
-@admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])
-def toggle_career_access(student_id):
-    # Only admin can toggle access
-    if 'admin_id' not in session:
-        return jsonify({'error': 'Forbidden'}), 403
+# @admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])
+# def toggle_career_access(student_id):
+#     # Only admin can toggle access
+#     if 'admin_id' not in session:
+#         return jsonify({'error': 'Forbidden'}), 403
 
-    student = db.session.execute(
-        db.select(StudentDetails).where(StudentDetails.id == student_id)
-    ).scalar_one_or_none()
+#     student = db.session.execute(
+#         db.select(StudentDetails).where(StudentDetails.id == student_id)
+#     ).scalar_one_or_none()
 
-    if student:
-        allow = request.form.get('can_view') == 'true'
-        student.can_view_career_result = allow
-        db.session.commit()
+#     if student:
+#         allow = request.form.get('can_view') == 'true'
+#         student.can_view_career_result = allow
+#         db.session.commit()
 
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return '', 204
+#     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+#         return '', 204
+#     return redirect(url_for('admin.admin_dashboard'))
+
+ 
+  
+@admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])  
+def toggle_career_access(student_id):  
+    if 'admin_id' not in session:  
+        return jsonify({'error': 'Forbidden'}), 403  
+  
+    student = db.session.execute(  
+        db.select(StudentDetails).where(StudentDetails.id == student_id)  
+    ).scalar_one_or_none()  
+  
+    if student:  
+        allow = request.form.get('can_view') == 'true'  
+        student.can_view_career_result = allow  
+        db.session.commit()  
+        # NEW: push to student's room  
+        socketio.emit('result_access_updated', {'can_view': allow}, room=f'student_{student_id}')  
+  
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  
+        return '', 204  
     return redirect(url_for('admin.admin_dashboard'))

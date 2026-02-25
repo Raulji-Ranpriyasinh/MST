@@ -249,11 +249,18 @@
             <a href="{{ url_for('assessment.aptitude_questionnaire') }}" class="start-btn btn-blue">Start</a>
         {% else %}
             <a class="start-btn disabled">✅ Test Completed</a>
-            {% if can_view_career_result %}
+            <!-- {% if can_view_career_result %}
                 <a href="{{ url_for('student.download_aptitude', student_id=user_id) }}" class="start-btn btn-blue">📄 View Result</a>
             {% else %}
                 <a class="start-btn disabled" title="Your result has not been generated yet">📄 View Result</a>
-            {% endif %}
+            {% endif %} -->
+            <a id="aptitude-result-btn"  
+            class="start-btn {% if can_view_career_result %}btn-blue view-result-btn{% else %}disabled{% endif %}"  
+            {% if can_view_career_result %}href="{{ url_for('student.download_aptitude', student_id=user_id) }}"{% endif %}  
+            data-href="{{ url_for('student.download_aptitude', student_id=user_id) }}"  
+            {% if not can_view_career_result %}title="Your result has not been generated yet"{% endif %}>  
+            📄 View Result  
+            </a>  
         {% endif %}
     </div>
 
@@ -267,11 +274,18 @@
             <a href="{{ url_for('assessment.career_assessment') }}" class="start-btn btn-red">Start</a>
         {% else %}
             <a class="start-btn disabled">✅ Test Completed</a>
-            {% if can_view_career_result %}
+            <!-- {% if can_view_career_result %}
                 <a href="{{ url_for('student.download_career', student_id=user_id) }}" class="start-btn btn-red">📄 View Result</a>
             {% else %}
                 <a class="start-btn disabled" title="Your result has not been generated yet">📄 View Result</a>
-            {% endif %}
+            {% endif %} -->
+            <a id="career-result-btn"  
+            class="start-btn {% if can_view_career_result %}btn-red view-result-btn{% else %}disabled{% endif %}"  
+            {% if can_view_career_result %}href="{{ url_for('student.download_career', student_id=user_id) }}"{% endif %}  
+            data-href="{{ url_for('student.download_career', student_id=user_id) }}"  
+            {% if not can_view_career_result %}title="Your result has not been generated yet"{% endif %}>  
+            📄 View Result  
+            </a>
         {% endif %}
     </div>
 </div>
@@ -294,6 +308,34 @@
             }
         });
     </script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>  
+<script>  
+    const socket = io();  
+    socket.emit('join', { room: 'student_{{ user_id }}' });  
+  
+    socket.on('result_access_updated', function(data) {  
+        const aptBtn = document.getElementById('aptitude-result-btn');  
+        const carBtn = document.getElementById('career-result-btn');  
+  
+        [  
+            { btn: aptBtn, colorClass: 'btn-blue' },  
+            { btn: carBtn, colorClass: 'btn-red' }  
+        ].forEach(({ btn, colorClass }) => {  
+            if (!btn) return;  
+            if (data.can_view) {  
+                btn.classList.remove('disabled');  
+                btn.classList.add(colorClass, 'view-result-btn');  
+                btn.href = btn.dataset.href;  
+                btn.removeAttribute('title');  
+            } else {  
+                btn.classList.add('disabled');  
+                btn.classList.remove(colorClass, 'view-result-btn');  
+                btn.removeAttribute('href');  
+                btn.setAttribute('title', 'Your result has not been generated yet');  
+            }  
+        });  
+    });  
+</script>
 </body>
 
 </html>
