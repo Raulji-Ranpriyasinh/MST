@@ -217,12 +217,12 @@
     <img src="/static/nav-img2.png" class="nav-img" alt="Image 2" />
   </div> -->
         <div class="dropdown">
-            <button onclick="toggleDropdown()" class="profile-btn">
-                <span class="user-icon"><img src="/static/profile-icon.png" alt=""></span> <a style="
+            <button onclick="jwtLogout('/admin_logout'); return false;" class="profile-btn">
+                <span class="user-icon"><img src="/static/profile-icon.png" alt=""></span> <span style="
     color: white;
     text-decoration: none;
     font-weight: 100;
-" href="/logout">Logout</a>
+">Logout</span>
             </button>
 
         </div>
@@ -363,6 +363,7 @@
         </table>
     </div>
 
+    <script src="/static/js/jwt_helpers.js"></script>
     <script>
         function filterTable() {
             // Get dropdown filter values
@@ -416,7 +417,7 @@ document.querySelectorAll(".career-toggle-checkbox").forEach(checkbox => {
         const studentId = form.dataset.studentId;
         const canView = this.checked;
 
-        fetch(`/toggle_career_access/${studentId}`, {
+        authFetch(`/toggle_career_access/${studentId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

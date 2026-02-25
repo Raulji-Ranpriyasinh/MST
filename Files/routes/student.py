@@ -1,6 +1,7 @@
 """Student routes: dashboard, programmes, download pages, student data endpoints."""
 
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required, verify_jwt_in_request
 
 from extensions import db
 from models.student import ExamProcess, StudentDetails, TestStatus
@@ -9,39 +10,68 @@ from services.scoring import CATEGORY_MAPPING, get_aptitude_results, get_aptitud
 student_bp = Blueprint('student', __name__)
 
 
-def _require_student_login():
-    """Check if a student is logged in via session. Returns user_id or None."""
-    return session.get('user_id')
+def _get_student_identity():
+    """Return (user_id: int, claims: dict) from a valid JWT, or (None, {})."""
+    try:
+        verify_jwt_in_request(optional=True)
+    except Exception:
+        return None, {}
+    identity = get_jwt_identity()
+    if identity is None:
+        return None, {}
+    claims = get_jwt()
+    if claims.get("role") != "student":
+        return None, {}
+    return int(identity), claims
 
 
 def _check_ownership(student_id):
     """Verify the requesting user owns this student_id or is an admin."""
-    user_id = session.get('user_id')
-    admin_id = session.get('admin_id')
-    return user_id == student_id or admin_id is not None
+    try:
+        verify_jwt_in_request(optional=True)
+    except Exception:
+        return False
+    identity = get_jwt_identity()
+    if identity is None:
+        return False
+    claims = get_jwt()
+    role = claims.get("role")
+    if role == "admin":
+        return True
+    return role == "student" and int(identity) == student_id
 
 
 @student_bp.route('/dashboard')
+@jwt_required(optional=True)
 def dashboard():
-    user_id = _require_student_login()
-    if not user_id:
+    identity = get_jwt_identity()
+    if not identity:
         return redirect(url_for('auth.home'))
-    user_email = session.get('user_email')
-    user_first_name = session.get('user_first_name')
+    claims = get_jwt()
+    if claims.get("role") != "student":
+        return redirect(url_for('auth.home'))
+    user_id = int(identity)
+    user_email = claims.get("email", "")
+    user_first_name = claims.get("first_name", "")
     return render_template(
         'dashboard.html', email=user_email, user_id=user_id, first_name=user_first_name
     )
 
 
 @student_bp.route('/programmes')
+@jwt_required(optional=True)
 def programmes():
-    user_id = _require_student_login()
-    if not user_id:
+    identity = get_jwt_identity()
+    if not identity:
         return redirect(url_for('auth.home'))
+    claims = get_jwt()
+    if claims.get("role") != "student":
+        return redirect(url_for('auth.home'))
+    user_id = int(identity)
+    user_email = claims.get("email", "")
+    user_first_name = claims.get("first_name", "")
 
     test_status = TestStatus.query.filter_by(user_id=user_id).first()
-    user_email = session.get('user_email')
-    user_first_name = session.get('user_first_name')
 
     # Check career question progress
     exam_progress = ExamProcess.query.filter_by(student_id=user_id).first()
@@ -73,6 +103,7 @@ def programmes():
 
 
 @student_bp.route('/download_aptitude/<int:student_id>')
+@jwt_required(optional=True)
 def download_aptitude(student_id):
     # Authorization check: only the student themselves or admin can access
     if not _check_ownership(student_id):
@@ -81,6 +112,7 @@ def download_aptitude(student_id):
 
 
 @student_bp.route('/download_career/<int:student_id>')
+@jwt_required(optional=True)
 def download_career(student_id):
     # Authorization check: only the student themselves or admin can access
     if not _check_ownership(student_id):
@@ -89,6 +121,7 @@ def download_career(student_id):
 
 
 @student_bp.route('/get_student_data/<int:student_id>', methods=['GET'])
+@jwt_required(optional=True)
 def get_student_data(student_id):
     # Authorization check
     if not _check_ownership(student_id):
@@ -107,6 +140,7 @@ def get_student_data(student_id):
 
 
 @student_bp.route('/get_results', methods=['GET', 'POST'])
+@jwt_required(optional=True)
 def get_results():
     student_id = request.json.get('student_id') if request.json else None
     if not student_id:
@@ -121,6 +155,7 @@ def get_results():
 
 
 @student_bp.route('/get_student_dataa', methods=['POST'])
+@jwt_required(optional=True)
 def get_student_dataa():
     data = request.json
     student_id = data.get('student_id')

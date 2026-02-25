@@ -180,7 +180,7 @@
             <div class="dropdown-content" id="dropdownMenu">
                 <p>ID: {{ user_id }}</p>
                 <p>{{ email }}</p>
-                <a href="/logout">Logout</a>
+                <a href="#" onclick="jwtLogout('/logout'); return false;">Logout</a>
             </div>
         </div>
     </div>
@@ -210,6 +210,7 @@
         </div>
     </div>
 
+    <script src="/static/js/jwt_helpers.js"></script>
     <script>
         function toggleDropdown() {
             var dropdown = document.getElementById("dropdownMenu");

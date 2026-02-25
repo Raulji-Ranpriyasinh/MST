@@ -639,7 +639,7 @@
             <div class="dropdown-content" id="dropdownMenu">
                 <p>ID: {{ user_id }}</p>
                 <p>{{ email }}</p>
-                <a href="/logout">Logout</a>
+                <a href="#" onclick="jwtLogout('/logout'); return false;">Logout</a>
             </div>
         </div>
     </div>
@@ -739,6 +739,7 @@
 
 
 
+    <script src="/static/js/jwt_helpers.js"></script>
     <script>
 
         let questionsByCategory = {};
@@ -1256,7 +1257,7 @@ function submitCategoryResponses(category) {
         categoryResponses[q.id] = selected;
     });
 
-    return fetch('/submit_category_responses', {
+    return authFetch('/submit_category_responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -1518,7 +1519,7 @@ function submitCategoryResponses(category) {
         categoryResponses[q.id] = selected;
     });
 
-    fetch('/submit_category_responses', {
+    authFetch('/submit_category_responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -1547,7 +1548,7 @@ async function fetchQuestions() {
     try {
         // Step 1: Get last attempted category
         let lastCategory = null;
-        const lastCategoryRes = await fetch('/get_last_category');
+        const lastCategoryRes = await authFetch('/get_last_category');
         const lastCategoryData = await lastCategoryRes.json();
 
         console.log("🟡 Response from /get_last_category:", lastCategoryData);
@@ -1558,7 +1559,7 @@ async function fetchQuestions() {
         }
 
         // Step 2: Fetch all questions
-        const questionsRes = await fetch('/aptitudegetquestion');
+        const questionsRes = await authFetch('/aptitudegetquestion');
         const questionsData = await questionsRes.json();
 
         questionsByCategory = questionsData.questions_by_category;

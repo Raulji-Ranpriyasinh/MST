@@ -196,7 +196,7 @@
             <div class="dropdown-content" id="dropdownMenu">
                 <p>ID: {{ user_id }}</p>
                 <p>{{ email }}</p>
-                <a href="/logout">Logout</a>
+                <a href="#" onclick="jwtLogout('/logout'); return false;">Logout</a>
             </div>
         </div>
     </div>
@@ -216,6 +216,7 @@
 
 
 
+    <script src="/static/js/jwt_helpers.js"></script>
     <script>
 
         function toggleDropdown() {
@@ -235,7 +236,7 @@
         let currentQuestion = null;  // Stores the current question
 
         function loadQuestion() {
-            fetch('/career_questions')
+            authFetch('/career_questions')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -267,7 +268,7 @@
 
             let questionId = currentQuestion.question_number;  // Use question_number instead of id
 
-            fetch('/submit_response', {
+            authFetch('/submit_response', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

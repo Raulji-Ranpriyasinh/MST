@@ -2,9 +2,10 @@
 
 import json
 
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
-from extensions import db, socketio  # add socketio to existing import 
-from extensions import db
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+
+from extensions import db, socketio
 from models.student import ExamProcess, StudentDetails, TestStatus
 from services.scoring import get_career_scores, load_mappings
 from models.assessment import StudentCareerResponse
@@ -12,9 +13,30 @@ from models.assessment import StudentCareerResponse
 admin_bp = Blueprint('admin', __name__)
 
 
+def _is_admin():
+    """Return True if the current JWT belongs to an admin."""
+    claims = get_jwt()
+    return claims.get("role") == "admin"
+
+
+def _is_admin_or_owner(student_id):
+    """Return True if the current JWT belongs to an admin or the student themselves."""
+    claims = get_jwt()
+    role = claims.get("role")
+    if role == "admin":
+        return True
+    identity = get_jwt_identity()
+    return role == "student" and identity is not None and int(identity) == student_id
+
+
 @admin_bp.route('/admin_dashboard')
+@jwt_required(optional=True)
 def admin_dashboard():
-    if 'admin_id' not in session:
+    identity = get_jwt_identity()
+    if not identity:
+        return redirect(url_for('auth.home'))
+    claims = get_jwt()
+    if claims.get("role") != "admin":
         return redirect(url_for('auth.home'))
 
     students = StudentDetails.query.all()
@@ -58,12 +80,11 @@ def admin_dashboard():
 
 
 @admin_bp.route('/get_career_scores/<int:student_id>')
+@jwt_required()
 def get_career_scores_route(student_id):
-    # Only admin can access career scores
-    if 'admin_id' not in session:
-        # Also allow the student themselves
-        if session.get('user_id') != student_id:
-            return jsonify({'error': 'Forbidden'}), 403
+    # Only admin or the student themselves can access career scores
+    if not _is_admin_or_owner(student_id):
+        return jsonify({'error': 'Forbidden'}), 403
 
     result = get_career_scores(student_id)
     if result is None:
@@ -72,9 +93,10 @@ def get_career_scores_route(student_id):
 
 
 @admin_bp.route('/career_report/<int:student_id>')
+@jwt_required()
 def career_report(student_id):
     # Only admin or the student themselves can access
-    if session.get('admin_id') is None and session.get('user_id') != student_id:
+    if not _is_admin_or_owner(student_id):
         return jsonify({'error': 'Forbidden'}), 403
 
     (
@@ -203,43 +225,23 @@ def career_report(student_id):
     return jsonify({"student_id": student_id, "top_fields": top_subjects})
 
 
-# @admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])
-# def toggle_career_access(student_id):
-#     # Only admin can toggle access
-#     if 'admin_id' not in session:
-#         return jsonify({'error': 'Forbidden'}), 403
+@admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])
+@jwt_required()
+def toggle_career_access(student_id):
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
 
-#     student = db.session.execute(
-#         db.select(StudentDetails).where(StudentDetails.id == student_id)
-#     ).scalar_one_or_none()
+    student = db.session.execute(
+        db.select(StudentDetails).where(StudentDetails.id == student_id)
+    ).scalar_one_or_none()
 
-#     if student:
-#         allow = request.form.get('can_view') == 'true'
-#         student.can_view_career_result = allow
-#         db.session.commit()
+    if student:
+        allow = request.form.get('can_view') == 'true'
+        student.can_view_career_result = allow
+        db.session.commit()
+        # Push to student's room
+        socketio.emit('result_access_updated', {'can_view': allow}, room=f'student_{student_id}')
 
-#     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-#         return '', 204
-#     return redirect(url_for('admin.admin_dashboard'))
-
- 
-  
-@admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])  
-def toggle_career_access(student_id):  
-    if 'admin_id' not in session:  
-        return jsonify({'error': 'Forbidden'}), 403  
-  
-    student = db.session.execute(  
-        db.select(StudentDetails).where(StudentDetails.id == student_id)  
-    ).scalar_one_or_none()  
-  
-    if student:  
-        allow = request.form.get('can_view') == 'true'  
-        student.can_view_career_result = allow  
-        db.session.commit()  
-        # NEW: push to student's room  
-        socketio.emit('result_access_updated', {'can_view': allow}, room=f'student_{student_id}')  
-  
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  
-        return '', 204  
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return '', 204
     return redirect(url_for('admin.admin_dashboard'))

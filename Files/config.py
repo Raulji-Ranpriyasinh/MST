@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from datetime import timedelta  
+from datetime import timedelta
 
 load_dotenv()
 
@@ -19,12 +19,22 @@ class Config:
         "pool_pre_ping": True,
     }
 
-    # Session cookie security
-    SESSION_COOKIE_HTTPONLY = True  
-    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'  
-    SESSION_COOKIE_SAMESITE = 'Lax'  
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
-
+    # ----- JWT configuration -----
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', SECRET_KEY)
+    JWT_TOKEN_LOCATION = ['cookies']
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        hours=int(os.environ.get('JWT_ACCESS_HOURS', 1))
+    )
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(
+        days=int(os.environ.get('JWT_REFRESH_DAYS', 30))
+    )
+    JWT_COOKIE_SECURE = os.environ.get(
+        'JWT_COOKIE_SECURE', 'False'
+    ).lower() == 'true'
+    JWT_COOKIE_SAMESITE = 'Lax'
+    JWT_COOKIE_CSRF_PROTECT = True
+    JWT_ACCESS_CSRF_HEADER_NAME = 'X-CSRF-TOKEN'
+    JWT_REFRESH_CSRF_HEADER_NAME = 'X-CSRF-TOKEN'
 
     # PDF server configuration
     PDF_SERVER_URL = os.environ.get('PDF_SERVER_URL', 'http://localhost:3000')

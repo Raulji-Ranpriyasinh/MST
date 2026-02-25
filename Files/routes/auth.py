@@ -1,8 +1,22 @@
 """Authentication routes: login, register, logout for students and admin."""
 
+<<<<<<< HEAD
 from datetime import timedelta
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+=======
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies,
+)
+>>>>>>> devin/1772022978-jwt-authentication
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter
@@ -55,16 +69,35 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
+<<<<<<< HEAD
     # Set session
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
     session['user_first_name'] = new_user.first_name
 
     return jsonify({
+=======
+    # Generate JWT tokens with custom claims
+    additional_claims = {
+        "role": "student",
+        "email": new_user.email,
+        "first_name": new_user.first_name,
+    }
+    access_token = create_access_token(
+        identity=str(new_user.id), additional_claims=additional_claims
+    )
+    refresh_token = create_refresh_token(
+        identity=str(new_user.id), additional_claims=additional_claims
+    )
+
+    response = jsonify({
+>>>>>>> devin/1772022978-jwt-authentication
         'success': True,
         'message': 'Registered and logged in successfully!',
-
     })
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response
 
 
 @auth_bp.route('/login', methods=['POST'])
@@ -81,47 +114,39 @@ def login():
 
     user = StudentDetails.query.filter_by(email=data['email']).first()
     if user and check_password_hash(user.password, data['password']):
+<<<<<<< HEAD
         session['user_id'] = user.id
         session['user_email'] = user.email
         session['user_first_name'] = user.first_name
 
+=======
+        additional_claims = {
+            "role": "student",
+            "email": user.email,
+            "first_name": user.first_name,
+        }
+        access_token = create_access_token(
+            identity=str(user.id), additional_claims=additional_claims
+        )
+        refresh_token = create_refresh_token(
+            identity=str(user.id), additional_claims=additional_claims
+        )
+>>>>>>> devin/1772022978-jwt-authentication
 
-        return jsonify({
+        response = jsonify({
             'success': True,
             'message': 'Login successful!',
             'redirect': url_for('student.dashboard'),
-        }), 200
+        })
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response, 200
     else:
         return jsonify({'success': False, 'message': 'Invalid email or password!'}), 401
 
 
-# @auth_bp.route('/admin_login', methods=['POST'])
-# @limiter.limit("5 per minute")
-# def admin_login():
-#     data = request.json
-#     if not data:
-#         return jsonify({'success': False, 'message': 'No data provided'}), 400
-
-#     # Server-side validation
-#     is_valid, errors = validate_admin_login(data)
-#     if not is_valid:
-#         return jsonify({'success': False, 'message': '; '.join(errors)}), 400
-
-#     # Query admin by username only, then verify password hash
-#     admin = Admin.query.filter_by(username=data['username']).first()
-#     if admin and check_password_hash(admin.password, data['password']):
-#         session['admin_id'] = admin.id
-#         return jsonify({
-#             'success': True,
-#             'message': 'Admin login successful!',
-#             'redirect': url_for('admin.admin_dashboard'),
-#         }), 200
-#     else:
-#         return jsonify({'success': False, 'message': 'Invalid username or password!'}), 401
-
-
 @auth_bp.route('/admin_login', methods=['POST'])
-@limiter.limit("5 per minute") 
+@limiter.limit("5 per minute")
 def admin_login():
     data = request.json
     username = data.get('username', '').strip()
@@ -129,32 +154,81 @@ def admin_login():
 
     admin = Admin.query.filter_by(username=username).first()
     if admin and check_password_hash(admin.password, password):
-        session['admin_id'] = admin.id
-        return jsonify({
+        additional_claims = {
+            "role": "admin",
+        }
+        access_token = create_access_token(
+            identity=str(admin.id), additional_claims=additional_claims
+        )
+        refresh_token = create_refresh_token(
+            identity=str(admin.id), additional_claims=additional_claims
+        )
+
+        response = jsonify({
             'success': True,
             'message': 'Admin login successful!',
             'redirect': url_for('admin.admin_dashboard'),
-        }), 200
+        })
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+        return response, 200
     else:
         return jsonify({'success': False, 'message': 'Invalid username or password!'}), 401
+
 
 @auth_bp.route('/admin', methods=['GET'])
 def admin_login_page():
     return render_template('adminlogin.html')
 
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required(optional=True)
 def logout():
-    session.clear()
-    return redirect(url_for('auth.home'))
+    """Revoke the current access token and clear JWT cookies."""
+    token = get_jwt()
+    if token:
+        from app import BLOCKLIST
+        BLOCKLIST.add(token["jti"])
+    response = jsonify({"message": "Logged out"})
+    unset_jwt_cookies(response)
+    return response
 
 
-@auth_bp.route('/admin_logout')
+@auth_bp.route('/admin_logout', methods=['POST'])
+@jwt_required(optional=True)
 def admin_logout():
-    session.pop('admin_id', None)
-    return redirect(url_for('auth.home'))
-@auth_bp.route("/api/v1/session/check")  
-def session_check():  
-    if "user_id" not in session and "admin_id" not in session and "firm_admin_id" not in session:  
-        return jsonify({"valid": False}), 401  
+    """Revoke the current access token and clear JWT cookies."""
+    token = get_jwt()
+    if token:
+        from app import BLOCKLIST
+        BLOCKLIST.add(token["jti"])
+    response = jsonify({"message": "Logged out"})
+    unset_jwt_cookies(response)
+    return response
+
+
+@auth_bp.route('/api/v1/token/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    """Issue a new access token using a valid refresh token."""
+    identity = get_jwt_identity()
+    claims = get_jwt()
+    additional_claims = {
+        k: v for k, v in claims.items()
+        if k in ("role", "email", "first_name")
+    }
+    new_access_token = create_access_token(
+        identity=identity, additional_claims=additional_claims
+    )
+    response = jsonify({"refreshed": True})
+    set_access_cookies(response, new_access_token)
+    return response
+
+
+@auth_bp.route("/api/v1/session/check")
+@jwt_required(optional=True)
+def session_check():
+    identity = get_jwt_identity()
+    if not identity:
+        return jsonify({"valid": False}), 401
     return jsonify({"valid": True}), 200
