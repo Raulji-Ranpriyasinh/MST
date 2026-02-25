@@ -4,7 +4,6 @@ import os
 
 from flask import Flask
 from flask import request as flask_request  
-
 from config import Config
 from extensions import db, limiter, socketio
 

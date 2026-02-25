@@ -3,7 +3,6 @@
 from datetime import timedelta
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
-from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter
@@ -61,11 +60,6 @@ def register():
     session['user_email'] = new_user.email
     session['user_first_name'] = new_user.first_name
 
-    # Generate JWT token
-    access_token = create_access_token(
-        identity=new_user.id, expires_delta=timedelta(hours=2)
-    )
-
     return jsonify({
         'success': True,
         'message': 'Registered and logged in successfully!',
@@ -91,10 +85,6 @@ def login():
         session['user_email'] = user.email
         session['user_first_name'] = user.first_name
 
-        # Generate JWT token
-        access_token = create_access_token(
-            identity=user.id, expires_delta=timedelta(hours=2)
-        )
 
         return jsonify({
             'success': True,
