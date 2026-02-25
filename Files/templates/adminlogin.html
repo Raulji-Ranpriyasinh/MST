@@ -75,6 +75,7 @@
     </form>
 </div>
 
+<script src="/static/js/jwt_helpers.js"></script>
 <script>
     // ================= Admin Login =================
     document.getElementById('adminLoginForm').addEventListener('submit', async function (e) {
@@ -84,7 +85,7 @@
         const password = this.password.value;
 
         try {  
-            const res = await fetch('/admin_login', {  
+            const res = await authFetch('/admin_login', {  
                 method: 'POST',  
                 headers: { 'Content-Type': 'application/json' },  
                 body: JSON.stringify({ username, password })  

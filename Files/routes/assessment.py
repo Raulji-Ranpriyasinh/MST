@@ -1,6 +1,7 @@
 """Assessment routes: career questions, aptitude questions, response submission."""
 
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from extensions import db
 from models.assessment import (
@@ -16,12 +17,17 @@ assessment_bp = Blueprint('assessment', __name__)
 
 
 @assessment_bp.route('/career_assessment')
+@jwt_required(optional=True)
 def career_assessment():
-    if 'user_id' not in session:
+    identity = get_jwt_identity()
+    if not identity:
         return redirect(url_for('auth.home'))
-    user_id = session.get('user_id')
-    user_email = session.get('user_email')
-    user_first_name = session.get('user_first_name')
+    claims = get_jwt()
+    if claims.get("role") != "student":
+        return redirect(url_for('auth.home'))
+    user_id = int(identity)
+    user_email = claims.get("email", "")
+    user_first_name = claims.get("first_name", "")
     return render_template(
         'career_assessment.html',
         email=user_email,
@@ -31,12 +37,17 @@ def career_assessment():
 
 
 @assessment_bp.route('/aptitude_questionnaire')
+@jwt_required(optional=True)
 def aptitude_questionnaire():
-    if 'user_id' not in session:
+    identity = get_jwt_identity()
+    if not identity:
         return redirect(url_for('auth.home'))
-    user_id = session.get('user_id')
-    user_email = session.get('user_email')
-    user_first_name = session.get('user_first_name')
+    claims = get_jwt()
+    if claims.get("role") != "student":
+        return redirect(url_for('auth.home'))
+    user_id = int(identity)
+    user_email = claims.get("email", "")
+    user_first_name = claims.get("first_name", "")
     return render_template(
         'aptitude_questionnaire.html',
         email=user_email,
@@ -46,11 +57,13 @@ def aptitude_questionnaire():
 
 
 @assessment_bp.route('/career_questions', methods=['GET'])
+@jwt_required()
 def career_questions():
-    if 'user_id' not in session:
+    claims = get_jwt()
+    if claims.get("role") != "student":
         return jsonify({'success': False, 'message': 'User not logged in'}), 401
 
-    student_id = session.get('user_id')
+    student_id = int(get_jwt_identity())
 
     # Get last attempted question from ExamProcess table
     exam_progress = ExamProcess.query.filter_by(student_id=student_id).first()
@@ -74,14 +87,16 @@ def career_questions():
 
 
 @assessment_bp.route('/submit_response', methods=['POST'])
+@jwt_required()
 def submit_response():
-    if 'user_id' not in session:
+    claims = get_jwt()
+    if claims.get("role") != "student":
         return jsonify({'success': False, 'message': 'User not logged in'}), 401
 
     data = request.json
-    student_id = session.get('user_id')
-    first_name = session.get('user_first_name')
-    email = session.get('user_email')
+    student_id = int(get_jwt_identity())
+    first_name = claims.get("first_name", "")
+    email = claims.get("email", "")
 
     question = CareerQuestion.query.filter_by(
         question_number=data.get('question_id')
@@ -179,12 +194,14 @@ def aptitudegetquestion():
 
 
 @assessment_bp.route('/submit_category_responses', methods=['POST'])
+@jwt_required()
 def submit_category_responses():
-    if 'user_id' not in session:
+    claims = get_jwt()
+    if claims.get("role") != "student":
         return jsonify({"success": False, "message": "Not logged in"}), 401
 
     data = request.get_json()
-    student_id = session['user_id']
+    student_id = int(get_jwt_identity())
     category = data.get('category')
     responses = data.get('responses')
 
@@ -245,12 +262,14 @@ def submit_category_responses():
 
 
 @assessment_bp.route('/aptitudetextgetquestion', methods=['GET'])
+@jwt_required()
 def aptitudetextgetquestion():
     try:
-        if 'user_id' not in session:
+        claims = get_jwt()
+        if claims.get("role") != "student":
             return jsonify({'error': 'User not logged in'}), 401
 
-        student_id = session['user_id']
+        student_id = int(get_jwt_identity())
 
         categories = db.session.query(
             AptitudeTextQuestions.aptitudecategory
@@ -289,11 +308,13 @@ def aptitudetextgetquestion():
 
 
 @assessment_bp.route('/get_last_category', methods=['GET'])
+@jwt_required()
 def get_last_category():
-    if 'user_id' not in session:
+    claims = get_jwt()
+    if claims.get("role") != "student":
         return jsonify({'success': False, 'message': 'User not logged in'}), 401
 
-    student_id = session['user_id']
+    student_id = int(get_jwt_identity())
     track = Trackaptitude.query.filter_by(student_id=student_id).first()
 
     if track:
