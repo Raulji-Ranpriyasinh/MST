@@ -1,8 +1,5 @@
 """Authentication routes: login, register, logout for students and admin."""
 
-from datetime import timedelta
-
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import (
     create_access_token,
@@ -66,12 +63,6 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    # Set session
-    session['user_id'] = new_user.id
-    session['user_email'] = new_user.email
-    session['user_first_name'] = new_user.first_name
-
-    return jsonify({
     # Generate JWT tokens with custom claims
     additional_claims = {
         "role": "student",
@@ -108,12 +99,6 @@ def login():
 
     user = StudentDetails.query.filter_by(email=data['email']).first()
     if user and check_password_hash(user.password, data['password']):
-<<<<<<< HEAD
-        session['user_id'] = user.id
-        session['user_email'] = user.email
-        session['user_first_name'] = user.first_name
-
-=======
         additional_claims = {
             "role": "student",
             "email": user.email,
@@ -125,7 +110,6 @@ def login():
         refresh_token = create_refresh_token(
             identity=str(user.id), additional_claims=additional_claims
         )
->>>>>>> devin/1772022978-jwt-authentication
 
         response = jsonify({
             'success': True,
