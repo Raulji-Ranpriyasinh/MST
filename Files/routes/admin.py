@@ -41,6 +41,9 @@ def admin_dashboard():
 
     students = StudentDetails.query.all()
 
+    # Fetch total question count once — avoid N+1 query inside the loop
+    total_career_questions = CareerQuestion.query.count()
+
     students_with_tests = []
     for student in students:
         test_status = TestStatus.query.filter_by(user_id=student.id).first()
@@ -49,7 +52,6 @@ def admin_dashboard():
         career_test_completed = False
         aptitude_test_completed = False
 
-        total_career_questions = CareerQuestion.query.count()
         if exam_progress and exam_progress.last_attempted_question_id >= total_career_questions:
             career_test_completed = True
         elif test_status and test_status.career_test_completed:
