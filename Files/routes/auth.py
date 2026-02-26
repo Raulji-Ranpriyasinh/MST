@@ -1,10 +1,8 @@
 """Authentication routes: login, register, logout for students and admin."""
 
-<<<<<<< HEAD
 from datetime import timedelta
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
-=======
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import (
     create_access_token,
@@ -16,7 +14,6 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies,
 )
->>>>>>> devin/1772022978-jwt-authentication
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter
@@ -69,14 +66,12 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-<<<<<<< HEAD
     # Set session
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
     session['user_first_name'] = new_user.first_name
 
     return jsonify({
-=======
     # Generate JWT tokens with custom claims
     additional_claims = {
         "role": "student",
@@ -91,7 +86,6 @@ def register():
     )
 
     response = jsonify({
->>>>>>> devin/1772022978-jwt-authentication
         'success': True,
         'message': 'Registered and logged in successfully!',
     })
