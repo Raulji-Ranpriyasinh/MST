@@ -1,3 +1,14 @@
+"""Server-side validation schemas.
+
+Password validation split:
+- Frontend validation (JavaScript) = UX convenience and immediate feedback only.
+  The confirm-password match check is handled client-side because the backend
+  receives only one password field.
+- Backend validation (this module) = security enforcement. These checks MUST
+  remain even when equivalent client-side validation exists, because any
+  JavaScript check can be bypassed via DevTools or direct API calls.
+"""
+
 import re
 
 
@@ -28,7 +39,8 @@ def validate_registration(data):
     if not re.match(r'^\d{10}$', mobile):
         errors.append('Mobile number must be exactly 10 digits.')
 
-    # Password: at least 8 characters
+    # Password: at least 8 characters (security enforcement — never remove even
+    # when client-side validation exists, as JS checks can be bypassed via DevTools)
     password = data.get('password', '')
     if len(password) < 8:
         errors.append('Password must be at least 8 characters.')

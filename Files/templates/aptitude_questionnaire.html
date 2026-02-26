@@ -1269,13 +1269,14 @@ function submitCategoryResponses(category) {
     .then(response => response.json())
     .then(data => {
         console.log('✅ Backend responded:', data);
-        console.log('👥 Sent payload:', {
-            category: category,
-            responses: categoryResponses
-        });
+        // Trust backend completion flag instead of local JS count
         if (!data.success) {
             alert("Error saving responses: " + data.message);
         }
+        if (data.complete === false) {
+            console.warn(`⚠️ Category ${category} incomplete: answered ${data.answered}/${data.expected}`);
+        }
+        return data;
     })
     .catch(error => console.error("Error submitting category responses:", error));
 }
@@ -1515,7 +1516,6 @@ function submitCategoryResponses(category) {
     // Collect all responses for the category (even unanswered)
     categoryQuestions.forEach(q => {
         const selected = userResponses.hasOwnProperty(q.id) ? userResponses[q.id] : "0";
-// null if not answered
         categoryResponses[q.id] = selected;
     });
 
@@ -1530,16 +1530,15 @@ function submitCategoryResponses(category) {
     })
     .then(response => response.json())
     .then(data => {
-  console.log('✅ Backend responded:', data);
-  console.log('👥 Sent payload:', {
-    category: category,
-    responses: categoryResponses
-  });
-  if (!data.success) {
-    alert("Error saving responses: " + data.message);
-  }
-})
-
+        console.log('✅ Backend responded:', data);
+        // Trust backend completion flag instead of local JS count
+        if (!data.success) {
+            alert("Error saving responses: " + data.message);
+        }
+        if (data.complete === false) {
+            console.warn(`⚠️ Category ${category} incomplete: answered ${data.answered}/${data.expected}`);
+        }
+    })
     .catch(error => console.error("Error submitting category responses:", error));
 }
 

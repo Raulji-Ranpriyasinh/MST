@@ -79,10 +79,13 @@ def career_questions():
     if not question:
         return jsonify({'success': False, 'message': 'No more questions available'}), 404
 
+    total_questions = CareerQuestion.query.count()
+
     return jsonify({
         'success': True,
         'question_number': question.question_number,
         'question_text': question.question,
+        'total_questions': total_questions,
     })
 
 
@@ -98,11 +101,21 @@ def submit_response():
     first_name = claims.get("first_name", "")
     email = claims.get("email", "")
 
+    question_id = data.get('question_id')
+
     question = CareerQuestion.query.filter_by(
-        question_number=data.get('question_id')
+        question_number=question_id
     ).first()
     if not question:
         return jsonify({'success': False, 'message': 'Invalid question ID'}), 400
+
+    # Deduplication: prevent duplicate responses for the same question
+    existing = StudentCareerResponse.query.filter_by(
+        student_id=student_id,
+        question_id=question_id,
+    ).first()
+    if existing:
+        return jsonify({'success': True, 'message': 'Already recorded'}), 200
 
     # Save response
     new_response = StudentCareerResponse(
@@ -206,6 +219,12 @@ def submit_category_responses():
     responses = data.get('responses')
 
     try:
+        # Count expected questions for this category from the DB
+        expected_count = AptitudeAllQuestions.query.filter_by(
+            category=category
+        ).count()
+
+        answered_count = 0
         for question_id_str, selected_option in responses.items():
             question_id = int(question_id_str)
             question = AptitudeAllQuestions.query.filter_by(id=question_id).first()
@@ -216,6 +235,7 @@ def submit_category_responses():
                 is_correct = 0
             else:
                 is_correct = 1 if selected_option == question.correct_option else 0
+                answered_count += 1
 
             existing_response = AptitudeImgResponse.query.filter_by(
                 student_id=student_id, question_id=question_id
@@ -234,6 +254,9 @@ def submit_category_responses():
                 )
                 db.session.add(new_response)
 
+        # Determine if category is complete (all expected questions answered)
+        is_complete = answered_count >= expected_count
+
         # Update Trackaptitude
         track = Trackaptitude.query.filter_by(student_id=student_id).first()
         if not track:
@@ -251,7 +274,12 @@ def submit_category_responses():
             test_status.aptitude_test_completed = True
 
         db.session.commit()
-        return jsonify({"success": True})
+        return jsonify({
+            "success": True,
+            "complete": is_complete,
+            "answered": answered_count,
+            "expected": expected_count,
+        })
 
     except Exception as e:
         db.session.rollback()

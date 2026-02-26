@@ -887,6 +887,7 @@
                     return;
                 }
 
+                // Single API call — backend returns pre-sorted, display-ready data
                 fetch(`/get_career_scores/${studentId}`)
                     .then(response => response.json())
                     .then(data => {
@@ -895,12 +896,10 @@
                             return;
                         }
 
+                        // Use backend sort order directly — no client-side sorting
                         let subjects = data.subjects;
-                        subjects.sort((a, b) => b.score - a.score);
 
-                        // Optional: if you re-enable the canvas charts, update their colors too
                         tableData(subjects);
-                        // loadOverallOnlyChart(subjects);
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -928,27 +927,22 @@
 
                     const studentId = getStudentIdFromUrl();
                     console.log(studentId);
-                    //const studentId = document.getElementById("student_id").value;
                     if (!studentId) {
                         alert("Please enter a student ID.");
                         return;
                     }
 
-                    //document.getElementById("student_id").style.display = "none";
-
+                    // Single API call — backend returns pre-sorted, display-ready data
                     fetch(`/get_career_scores/${studentId}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.error) {
                                 alert(data.error);
-                                //document.getElementById("student_id").style.display = "block";
                                 return;
                             }
 
+                            // Use backend sort order directly — no client-side sorting
                             let subjects = data.subjects;
-
-                            // Sort by interest score
-                            subjects.sort((a, b) => b.score - a.score);
 
                             const labels = subjects.map(s => s.name);
                             const interestScores = subjects.map(s => s.score);
@@ -1041,40 +1035,19 @@
                                 },
                                 plugins: [ChartDataLabels]
                             });
+                            // Render overall chart using same data — no duplicate API call
+                            loadOverallOnlyChart(subjects);
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            //document.getElementById("student_id").style.display = "block";
                         });
-                    loadOverallOnlyChart()
 
                 }
 
 
-                function loadOverallOnlyChart() {
-                    const studentId = getStudentIdFromUrl();
-                    //const studentId = document.getElementById("student_id").value;
-                    if (!studentId) {
-                        alert("Please enter a student ID.");
-                        return;
-                    }
-
-                    //document.getElementById("student_id").style.display = "none";
-
-                    fetch(`/get_career_scores/${studentId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.error) {
-                                alert(data.error);
-                                //document.getElementById("student_id").style.display = "block";
-                                return;
-                            }
-
-                            let subjects = data.subjects;
-
-                            // Sort subjects by overall match score
-                            //subjects.sort((a, b) => b.overall_match_score - a.overall_match_score);
-                            subjects.sort((a, b) => b.score - a.score);
+                // Accepts pre-fetched subjects from loadData — no separate API call needed
+                function loadOverallOnlyChart(subjects) {
+                            // Use backend sort order directly — no client-side sorting
                             const labels = subjects.map(s => s.name);
                             const overallScores = subjects.map(s => s.overall_match_score);
                             const overallColors = subjects.map((_, i) => {
@@ -1118,12 +1091,12 @@
                                             },
                                             title: { display: true, text: 'Overall Match (%)' },
                                             grid: {
-                                                display: false // Optional: hide grid lines if you want a cleaner look
+                                                display: false
                                             }
                                         },
                                         y: {
                                             title: {
-                                                title: { display: true, text: 'Career Fields' },  // Hide the "Career Fields" title
+                                                title: { display: true, text: 'Career Fields' },
                                             },
                                             ticks: {
                                                 display: false,
@@ -1132,10 +1105,9 @@
                                                 autoSkip: false,
                                                 font: { size: 10 },
                                                 color: 'white'
-
                                             },
                                             grid: {
-                                                display: true // Optional: hide grid lines if you want a cleaner look
+                                                display: true
                                             }
                                         }
                                     },
@@ -1152,23 +1124,14 @@
                                             anchor: 'centre',
                                             align: 'centre',
                                             color: 'black',
-
                                             font: { size: 5 },
                                             formatter: value => value.toFixed(1) + '%'
-
                                         }
                                     }
-                                }
-                                ,
+                                },
                                 plugins: [ChartDataLabels]
                             });
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            //document.getElementById("student_id").style.display = "block";
-                        });
                 }
-                console.log(studentId);
 
 
             </script>

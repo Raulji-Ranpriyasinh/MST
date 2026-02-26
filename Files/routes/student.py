@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required, verify_jwt_in_request
 
 from extensions import db
+from models.assessment import CareerQuestion
 from models.student import ExamProcess, StudentDetails, TestStatus
 from services.scoring import CATEGORY_MAPPING, get_aptitude_results, get_aptitude_scores
 
@@ -77,7 +78,8 @@ def programmes():
     exam_progress = ExamProcess.query.filter_by(student_id=user_id).first()
     career_test_completed = False
 
-    if exam_progress and exam_progress.last_attempted_question_id >= 300:
+    total_career_questions = CareerQuestion.query.count()
+    if exam_progress and exam_progress.last_attempted_question_id >= total_career_questions:
         career_test_completed = True
     elif test_status:
         career_test_completed = test_status.career_test_completed

@@ -6,9 +6,9 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from extensions import db, socketio
+from models.assessment import CareerQuestion, StudentCareerResponse
 from models.student import ExamProcess, StudentDetails, TestStatus
 from services.scoring import get_career_scores, load_mappings
-from models.assessment import StudentCareerResponse
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -49,7 +49,8 @@ def admin_dashboard():
         career_test_completed = False
         aptitude_test_completed = False
 
-        if exam_progress and exam_progress.last_attempted_question_id >= 300:
+        total_career_questions = CareerQuestion.query.count()
+        if exam_progress and exam_progress.last_attempted_question_id >= total_career_questions:
             career_test_completed = True
         elif test_status and test_status.career_test_completed:
             career_test_completed = True
