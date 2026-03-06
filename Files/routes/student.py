@@ -148,6 +148,12 @@ def get_results():
     if not student_id:
         return jsonify({"error": "Student ID is required"}), 400
 
+    # Ensure student_id is an integer for ownership comparison
+    try:
+        student_id = int(student_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid Student ID"}), 400
+
     # Authorization check
     if not _check_ownership(student_id):
         return jsonify({'error': 'Forbidden'}), 403
@@ -161,6 +167,12 @@ def get_results():
 def get_student_dataa():
     data = request.json
     student_id = data.get('student_id')
+
+    # Ensure student_id is an integer for ownership comparison
+    try:
+        student_id = int(student_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid Student ID"}), 400
 
     # Authorization check
     if not _check_ownership(student_id):
