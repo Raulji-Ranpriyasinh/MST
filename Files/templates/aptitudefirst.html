@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="/static/js/jwt_helpers.js"></script>
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Edgepsych Aptitude-Report</title>
 </head>
@@ -454,10 +455,10 @@
                 return;
             }
             console.log("Extracted Student ID:", student_id);
-            fetch("/get_results", {
+            authFetch("/get_results", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ student_id: student_id })
+                body: JSON.stringify({ student_id: parseInt(student_id) })
             })
                 .then(response => response.json())
                 .then(data => {

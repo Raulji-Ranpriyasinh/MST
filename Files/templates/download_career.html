@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+    <script src="/static/js/jwt_helpers.js"></script>
 
 
     <style>
@@ -825,8 +826,10 @@
             let overallChart = null;
 
             function getStudentIdFromUrl() {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get("student_id");
+                const path = window.location.pathname;
+                const parts = path.split('/');
+                const id = parts[parts.length - 1];
+                return isNaN(id) ? null : parseInt(id);
             }
 
             function tableData(subjects) {
@@ -2776,7 +2779,7 @@ be required in these careers. Tick to see how well you match these.
             }
 
             // Fetch student data immediately
-            fetch("/get_student_dataa", {
+            authFetch("/get_student_dataa", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ student_id: studentId })
