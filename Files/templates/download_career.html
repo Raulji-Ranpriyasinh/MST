@@ -361,8 +361,36 @@
 
 <body>
 
+    <style>
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #4682B4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 
-
+    <!-- Loading Spinner Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
 
     <script>
         function getStudentIdFromURL() {
@@ -2876,6 +2904,7 @@ be required in these careers. Tick to see how well you match these.
 
 <script>
     function downloadPDF() {
+        document.getElementById('loadingOverlay').classList.add('active');
         // Get student ID from the current page URL
         const studentId = window.location.pathname.split('/').pop();
 
@@ -2901,11 +2930,13 @@ be required in these careers. Tick to see how well you match these.
         .then(blob => {
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = `${studentName}_CareerReport.pdf`; // 👈 Use student name in file name
+            link.download = `${studentName}_CareerReport.pdf`;
             link.click();
+            document.getElementById('loadingOverlay').classList.remove('active');
         })
         .catch(err => {
             console.error("PDF download failed:", err);
+            document.getElementById('loadingOverlay').classList.remove('active');
         });
     }
 </script>

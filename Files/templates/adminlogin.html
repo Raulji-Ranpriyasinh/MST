@@ -60,9 +60,67 @@
             border-color: #E8F0FE;
             box-shadow: none;
         }
+
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #015fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                width: 90%;
+                padding: 20px 16px;
+            }
+            .container img {
+                width: 180px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            input {
+                font-size: 14px;
+                padding: 10px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+        @media (max-width: 768px) and (min-width: 481px) {
+            .container {
+                width: 80%;
+                max-width: 450px;
+            }
+        }
     </style>
 </head>
 <body>
+
+<!-- Loading Spinner Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
 
 <div class="container">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" width="250" />
@@ -85,6 +143,8 @@
         const username = this.username.value.trim();
         const password = this.password.value;
 
+        document.getElementById('loadingOverlay').classList.add('active');
+
         try {  
             const res = await authFetch('/admin_login', {  
                 method: 'POST',  
@@ -95,6 +155,7 @@
             // NEW: detect rate limit  
             if (res.status === 429) {  
                 showToast('Too many attempts. Please wait 1 minute.');  
+                document.getElementById('loadingOverlay').classList.remove('active');
                 return;  
             }  
         
@@ -103,10 +164,12 @@
                 window.location.href = '/admin_dashboard';  
             } else {  
                 showToast('Invalid admin credentials', 'error');  
+                document.getElementById('loadingOverlay').classList.remove('active');
             }  
         } catch (err) {  
             console.error('Login error:', err);  
             showToast('Something went wrong. Please try again.', 'error');  
+            document.getElementById('loadingOverlay').classList.remove('active');
         }
     });
 

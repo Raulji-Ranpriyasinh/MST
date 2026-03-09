@@ -174,10 +174,81 @@
     background-color: #e74c3c;
 }
 
+/* Loading Spinner */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+.loading-overlay.active {
+    display: flex;
+}
+.spinner {
+    width: 48px; height: 48px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #296eff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+    .logo img {
+        height: 30px;
+    }
+    .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    .dropdown-content {
+        min-width: 160px;
+        top: 40px;
+    }
+    .container {
+        padding: 20px 10px;
+    }
+    .question-card {
+        padding: 24px 16px;
+        margin: 30px auto;
+        max-width: 95%;
+    }
+    .card-heading {
+        font-size: 18px;
+    }
+    .question-card .question {
+        font-size: 16px !important;
+    }
+    .button-wrapper {
+        gap: 12px;
+    }
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
     </style>
 </head>
 
 <body>
+
+    <!-- Loading Spinner Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
 
     <!-- Navbar -->
     <div class="navbar">
@@ -236,9 +307,11 @@
         let currentQuestion = null;  // Stores the current question
 
         function loadQuestion() {
+            document.getElementById('loadingOverlay').classList.add('active');
             authFetch('/career_questions')
                 .then(response => response.json())
                 .then(data => {
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     if (data.success) {
                         currentQuestion = data;  // Store the question
                         updateQuestion();
@@ -249,6 +322,7 @@
                     }
                 })
                 .catch(error => {
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     console.error('Error:', error);
                     document.getElementById("question").innerText = "Error fetching questions.";
                 });
@@ -268,6 +342,7 @@
 
             let questionId = currentQuestion.question_number;  // Use question_number instead of id
 
+            document.getElementById('loadingOverlay').classList.add('active');
             authFetch('/submit_response', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -277,6 +352,7 @@
                 })
             }).then(response => response.json())
                 .then(data => {
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     if (data.success) {
                         loadQuestion();  // Load the next question from the API
                     } else {
@@ -284,6 +360,7 @@
                     }
                 })
                 .catch(error => {
+                    document.getElementById('loadingOverlay').classList.remove('active');
                     console.error('Error:', error);
                     document.getElementById("question").innerText = "Error submitting response.";
                 });

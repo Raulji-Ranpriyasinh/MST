@@ -97,12 +97,41 @@
   }
 }
 
+    /* Loading Spinner */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(255,255,255,0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-overlay.active {
+        display: flex;
+    }
+    .spinner {
+        width: 48px; height: 48px;
+        border: 5px solid #e0e0e0;
+        border-top: 5px solid #4682B4;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
     </style>
+
+    <!-- Loading Spinner Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
 
     <div>
         <div class="print-hide" style="display: flex; justify-content: center; margin-top: 20px;">
             <button onclick="downloadPDF()"
-                style="padding: 10px 20px; background: #4682B4; color: white; border: none; cursor: pointer;">
+                style="padding: 10px 20px; background: #4682B4; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 15px;">
                 Download PDF
             </button>
         </div>
@@ -667,37 +696,45 @@
     </script>
 <script>
     async function downloadPDF() {
-        // Get student name from the span element
-        const studentNameEl = document.querySelector('.student_name');
-        let studentName = studentNameEl ? studentNameEl.textContent.trim() : 'MYCAREERCHOICES';
+        document.getElementById('loadingOverlay').classList.add('active');
+        try {
+            // Get student name from the span element
+            const studentNameEl = document.querySelector('.student_name');
+            let studentName = studentNameEl ? studentNameEl.textContent.trim() : 'MYCAREERCHOICES';
 
-        // Sanitize filename: remove spaces/special characters
-        studentName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
+            // Sanitize filename: remove spaces/special characters
+            studentName = studentName.replace(/[^a-zA-Z0-9-_]/g, '_');
 
-        const response = await fetch("http://localhost:3000/generate-pdf", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                url: window.location.href
-            })
-        });
+            const response = await fetch("http://localhost:3000/generate-pdf", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    url: window.location.href
+                })
+            });
 
-        if (!response.ok) {
-            console.error("Failed to generate PDF");
-            return;
+            if (!response.ok) {
+                console.error("Failed to generate PDF");
+                document.getElementById('loadingOverlay').classList.remove('active');
+                return;
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${studentName}_Report.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("PDF download failed:", err);
+        } finally {
+            document.getElementById('loadingOverlay').classList.remove('active');
         }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${studentName}_Report.pdf`; // ✅ dynamic filename
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
     }
 </script>
 
