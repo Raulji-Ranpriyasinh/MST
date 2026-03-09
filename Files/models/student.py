@@ -15,6 +15,11 @@ class StudentDetails(db.Model):
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     can_view_career_result = db.Column(db.Boolean, default=False)
+    firm_id = db.Column(
+        db.Integer,
+        db.ForeignKey("consultancy_firms.id"),
+        nullable=True,
+    )
 
 
 class ExamProcess(db.Model):

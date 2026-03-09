@@ -1,5 +1,6 @@
 from models.admin import Admin
 from models.student import StudentDetails, ExamProcess, TestStatus, Trackaptitude
+from models.firm import ConsultancyFirm, FirmAdmin, CreditTransaction
 from models.assessment import (
     CareerQuestion,
     AptitudeImgQuestions,
@@ -19,6 +20,9 @@ __all__ = [
     'ExamProcess',
     'TestStatus',
     'Trackaptitude',
+    'ConsultancyFirm',
+    'FirmAdmin',
+    'CreditTransaction',
     'CareerQuestion',
     'AptitudeImgQuestions',
     'AptitudeImgResponse',
