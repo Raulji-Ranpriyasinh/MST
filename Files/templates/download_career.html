@@ -944,6 +944,11 @@
                     // Use backend sort order directly — no client-side sorting
                     let subjects = data.subjects;
 
+                    // Populate the interest table and overall chart first
+                    // (these don't depend on the careerChart canvas)
+                    loadOverallOnlyChart(subjects);
+                    tableData(subjects);
+
                             const labels = subjects.map(s => s.name);
                             const interestScores = subjects.map(s => s.score);
 
@@ -954,7 +959,9 @@
                                 return 'rgba(255, 99, 132, 0.2)';
                             });
 
-                            const ctx = document.getElementById('careerChart').getContext('2d');
+                            const careerChartEl = document.getElementById('careerChart');
+                            if (!careerChartEl) { console.warn('careerChart canvas not found, skipping chart'); return; }
+                            const ctx = careerChartEl.getContext('2d');
                             if (interestChart) {
                                 interestChart.destroy();
                             }
@@ -1035,10 +1042,6 @@
                                 },
                                 plugins: [ChartDataLabels]
                             });
-                    // Render overall chart using same data — no duplicate API call
-                    loadOverallOnlyChart(subjects);
-                    // Also populate the interest table
-                    tableData(subjects);
                 }
 
 
@@ -1053,7 +1056,9 @@
                                 return 'rgba(54, 162, 235, 0.2)';
                             });
 
-                            const ctx = document.getElementById('overallcareerChart').getContext('2d');
+                            const overallChartEl = document.getElementById('overallcareerChart');
+                            if (!overallChartEl) { console.warn('overallcareerChart canvas not found, skipping chart'); return; }
+                            const ctx = overallChartEl.getContext('2d');
                             if (overallChart) {
                                 overallChart.destroy();
                             }
