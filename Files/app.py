@@ -52,11 +52,13 @@ def create_app(config_class=Config):
     from routes.student import student_bp
     from routes.assessment import assessment_bp
     from routes.admin import admin_bp
+    from routes.firm import firm_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(student_bp)
     app.register_blueprint(assessment_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(firm_bp)
 
     # Create database tables
     with app.app_context():

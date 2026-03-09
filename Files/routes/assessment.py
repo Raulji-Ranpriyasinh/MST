@@ -1,5 +1,7 @@
 """Assessment routes: career questions, aptitude questions, response submission."""
 
+import logging
+
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
@@ -11,9 +13,45 @@ from models.assessment import (
     CareerQuestion,
     StudentCareerResponse,
 )
-from models.student import ExamProcess, TestStatus, Trackaptitude
+from models.student import ExamProcess, StudentDetails, TestStatus, Trackaptitude
+
+logger = logging.getLogger(__name__)
 
 assessment_bp = Blueprint('assessment', __name__)
+
+
+def _mark_assessment_complete(student_id: int, assessment_type: str) -> None:
+    """Attempt to deduct a credit from the student's firm after assessment completion.
+
+    This is a best-effort operation: if the student has no firm or the credit
+    deduction fails for any reason, the error is logged but the assessment
+    result is **not** rolled back.
+
+    Args:
+        student_id: The ID of the student who completed the assessment.
+        assessment_type: A label such as 'career' or 'aptitude' for logging.
+    """
+    try:
+        student = db.session.get(StudentDetails, student_id)
+        if student is None or student.firm_id is None:
+            return  # student is not linked to any firm -- nothing to deduct
+
+        from services.credits import deduct_credit
+        deduct_credit(
+            student_id=student_id,
+            firm_id=student.firm_id,
+            description=f"{assessment_type.capitalize()} assessment completed",
+        )
+        logger.info(
+            "Credit deducted for student %s, firm %s (%s assessment)",
+            student_id, student.firm_id, assessment_type,
+        )
+    except Exception:
+        # Assessment must NOT fail if credit deduction fails.
+        logger.exception(
+            "Credit deduction failed for student %s (%s assessment) -- ignoring",
+            student_id, assessment_type,
+        )
 
 
 @assessment_bp.route('/career_assessment')
@@ -142,6 +180,12 @@ def submit_response():
         db.session.add(exam_progress)
 
     db.session.commit()
+
+    # Check if the career test is now complete (all questions answered)
+    total_career_questions = CareerQuestion.query.count()
+    if exam_progress.last_attempted_question_id >= total_career_questions:
+        _mark_assessment_complete(student_id, "career")
+
     return jsonify({'success': True, 'message': 'Response saved!'})
 
 
@@ -274,6 +318,10 @@ def submit_category_responses():
             test_status.aptitude_test_completed = True
 
         db.session.commit()
+
+        # Deduct credit after aptitude test completion
+        if track.last_category.upper() == 'SPATIAL':
+            _mark_assessment_complete(student_id, "aptitude")
         return jsonify({
             "success": True,
             "complete": is_complete,
