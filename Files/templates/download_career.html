@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
     <script src="/static/js/jwt_helpers.js"></script>
+    <script src="/static/js/toast.js"></script>
 
 
     <style>
@@ -436,7 +437,7 @@
                             style="display: flex; align-items: center; margin-bottom: 8px; background-color: #EFD8DE;padding-right: 12px; ">
                             <span
                                 style="background-color: #A31C3E; color: white; width: 50px; height: 31px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; margin-right: 10px;">I</span>
-                            The EDGEPSYCH Programe
+                            The EDGEPSYCH Programme
                             <span style="margin-left: auto;">1</span>
                         </div>
                     </a>
@@ -537,7 +538,7 @@
                 <h2 class="title"
                     style="text-align: left; padding-bottom: 10px; font-size: 30px;color: #A31C3E;">
                     The <img src="/static/logopdf.png" alt="EDGEPSYCH" style="height: 1em; vertical-align: middle; margin: 0 0px; position: relative;
-  top: 4px; " /> Programe </h2>
+  top: 4px; " /> Programme </h2>
                 
 
 
@@ -549,7 +550,7 @@
             <!-- <h1 class="main-heading" style="font-size: 20px;">The <span class="highlight">EDGEPSYCH Programme</span>
             </h1> -->
             <p class="description" style="font-size: 10pt;text-align: justify;">
-                The <span class="highlight"> EDGEPSYCH programe</span> has been designed to help you consider and
+                The <span class="highlight"> EDGEPSYCH Programme</span> has been designed to help you consider and
                 explore in greater detail your future career possibilities, as well as A Levels / IB subjects, which
                 will meet the requirements for higher education or other routes into your lifelong career path.
             </p>
@@ -886,7 +887,7 @@
             function loadData() {
                 const studentId = getStudentIdFromUrl();
                 if (!studentId) {
-                    alert("Please enter a student ID.");
+                    showToast("Please enter a student ID.", "warning");
                     return;
                 }
 
@@ -895,7 +896,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.error) {
-                            alert(data.error);
+                            showToast(data.error, "error");
                             return;
                         }
 
@@ -931,7 +932,7 @@
                     const studentId = getStudentIdFromUrl();
                     console.log(studentId);
                     if (!studentId) {
-                        alert("Please enter a student ID.");
+                        showToast("Please enter a student ID.", "warning");
                         return;
                     }
 
@@ -940,7 +941,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.error) {
-                                alert(data.error);
+                                showToast(data.error, "error");
                                 return;
                             }
 
@@ -990,7 +991,7 @@
                                                 callback: value => value + '%',
                                                 font: { size: 10 }
                                             },
-                                            title: { display: true, text: 'Intrest level (%)' },
+                                            title: { display: true, text: 'Interest level (%)' },
                                             grid: {
                                                 display: false // ❌ Hide Y-axis grid
                                             }
@@ -1288,7 +1289,7 @@
         </div>
 
         <!--  page -->
-        <!-- -------------------reeport------------------------------------------ -->
+        <!-- -------------------report------------------------------------------ -->
         <style>
             .field-report ul {
                 list-style: none;
@@ -1320,7 +1321,7 @@
                 const reportContainer = document.getElementById("reportContainer");
                 reportContainer.innerHTML = ""; // Clear previous report
 
-                if (!studentId) return alert("Please enter a student ID.");
+                if (!studentId) { showToast("Please enter a student ID.", "warning"); return; }
 
                 try {
                     // Fetch the report data from your original route
@@ -1698,8 +1699,8 @@ be required in these careers. Tick to see how well you match these.
 
         </script>
         <!-- ////// -->
-        <!-- -------------------reeport------------------------------------------ done-->
-        <!-- page A level Subject Availabilite -->
+        <!-- -------------------report------------------------------------------ done-->
+        <!-- page A level Subject Availability -->
         <div id="page4" class="page">
             <style>
                 #crosstabContainer table,
@@ -2774,7 +2775,7 @@ be required in these careers. Tick to see how well you match these.
             const studentId = getStudentIdFromUrl();
 
             if (!studentId) {
-                alert("Invalid or missing Student ID in URL.");
+                showToast("Invalid or missing Student ID in URL.", "error");
                 return;
             }
 
@@ -2787,7 +2788,7 @@ be required in these careers. Tick to see how well you match these.
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        alert("Student not found!");
+                        showToast("Student not found!", "error");
                         return;
                     }
 
@@ -2922,7 +2923,7 @@ be required in these careers. Tick to see how well you match these.
   
     socket.on('result_access_updated', function(data) {  
         if (!data.can_view) {  
-            alert('Access to your result has been revoked.');  
+            showToast('Access to your result has been revoked.', 'warning');  
             window.location.href = '/programmers';  // redirect back to dashboard  
         }  
     });  

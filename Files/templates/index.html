@@ -130,6 +130,7 @@
   </div>
 
   <script src="/static/js/jwt_helpers.js"></script>
+  <script src="/static/js/toast.js"></script>
   <script>
     if (window.history && window.history.replaceState) {  
     window.history.replaceState(null, "", window.location.href);  
@@ -155,7 +156,7 @@
       const password = document.getElementById("studentPassword").value;
 
       if (!email || !password) {
-        alert("Please fill in both fields.");
+        showToast("Please fill in both fields.", "warning");
         return;
       }
 
@@ -169,7 +170,7 @@
           if (data.success) {
             window.location.href = "/dashboard";
           } else {
-            alert("Invalid credentials");
+            showToast("Invalid credentials", "error");
           }
         })
         .catch(error => console.error("Error:", error));
@@ -183,12 +184,12 @@
       const mobile = document.getElementById("mobile_number").value;
 
       if (password !== confirmPassword) {
-        alert("Passwords do not match.");
+        showToast("Passwords do not match.", "warning");
         return false;
       }
 
       if (mobile.length !== 10) {
-        alert("Mobile number must be exactly 10 digits.");
+        showToast("Mobile number must be exactly 10 digits.", "warning");
         return false;
       }
 
@@ -213,15 +214,15 @@
         .then(response => response.json())
         .then(result => {
           if (result.success) {
-            alert("Registration successful login successful!");
+            showToast("Registration successful! Logging in...", "success");
             window.location.href = "/dashboard";
           } else {
-            alert(result.message || "Registration failed.");
+            showToast(result.message || "Registration failed.", "error");
           }
         })
         .catch(error => {
           console.error("Error:", error);
-          alert("An error occurred.");
+          showToast("An error occurred.", "error");
         });
 
       return false;
