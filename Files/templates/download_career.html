@@ -400,7 +400,7 @@
 
         const student_id = getStudentIdFromURL();
 
-        window.onload = function () {
+        window.onload = async function () {
             if (student_id) {
                 const hiddenInput = document.createElement("input");
                 hiddenInput.type = "hidden";
@@ -408,13 +408,27 @@
                 hiddenInput.value = student_id;
                 document.body.appendChild(hiddenInput);
 
-                // Auto-trigger generation functions
-                loadData();
-                fetchReport();
-                generate();
-                ibgenerate();
-                loadOverallOnlyChart();
-                tableData();
+                // Fetch both endpoints once in parallel (no duplicate API calls)
+                try {
+                    const [scoresRes, reportRes] = await Promise.all([
+                        fetch(`/get_career_scores/${student_id}`).then(r => r.json()),
+                        fetch(`/career_report/${student_id}`).then(r => r.json())
+                    ]);
+
+                    // Render charts and table from career scores (single fetch)
+                    if (scoresRes && !scoresRes.error) {
+                        loadData(scoresRes);
+                    }
+
+                    // Render report, A-level crosstab, and IB crosstab (single fetch)
+                    if (reportRes && reportRes.top_fields) {
+                        fetchReport(reportRes, scoresRes);
+                        generate(reportRes);
+                        ibgenerate(reportRes);
+                    }
+                } catch (error) {
+                    console.error('Error loading career data:', error);
+                }
             }
         };
     </script>
@@ -868,16 +882,9 @@
                 subjects.forEach((subject, index) => {
                     const row = document.createElement("tr");
 
-                    let colorInterest = '#FFC107'; // Baby yellow
-                    let colorMatch = '#FFC107';
-
-                    if (index < 10) {
-                        colorInterest = '#4CAF50'; // Baby green
-                        colorMatch = '#4CAF50';
-                    } else if (index >= subjects.length - 10) {
-                        colorInterest = '#F44336'; // Baby red
-                        colorMatch = '#F44336';
-                    }
+                    // Use server-provided color tier — no client-side index logic
+                    let colorInterest = subject.color || '#FFC107';
+                    let colorMatch = subject.color || '#FFC107';
 
                     // Career Field
                     const nameCell = document.createElement("td");
@@ -912,33 +919,6 @@
                 });
             }
 
-            function loadData() {
-                const studentId = getStudentIdFromUrl();
-                if (!studentId) {
-                    showToast("Please enter a student ID.", "warning");
-                    return;
-                }
-
-                // Single API call — backend returns pre-sorted, display-ready data
-                fetch(`/get_career_scores/${studentId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            showToast(data.error, "error");
-                            return;
-                        }
-
-                        // Use backend sort order directly — no client-side sorting
-                        let subjects = data.subjects;
-
-                        tableData(subjects);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-
-            document.addEventListener("DOMContentLoaded", loadData);
         </script>
 
 
@@ -952,29 +932,17 @@
 
             <script>
 
-                // let interestChart = null;
-                //let overallChart = null;
-                function loadData() {
+                // Accepts pre-fetched career scores data — no API call needed
+                function loadData(data) {
                     console.log("loadData() called");
 
-                    const studentId = getStudentIdFromUrl();
-                    console.log(studentId);
-                    if (!studentId) {
-                        showToast("Please enter a student ID.", "warning");
+                    if (!data || data.error) {
+                        if (data && data.error) showToast(data.error, "error");
                         return;
                     }
 
-                    // Single API call — backend returns pre-sorted, display-ready data
-                    fetch(`/get_career_scores/${studentId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.error) {
-                                showToast(data.error, "error");
-                                return;
-                            }
-
-                            // Use backend sort order directly — no client-side sorting
-                            let subjects = data.subjects;
+                    // Use backend sort order directly — no client-side sorting
+                    let subjects = data.subjects;
 
                             const labels = subjects.map(s => s.name);
                             const interestScores = subjects.map(s => s.score);
@@ -1067,15 +1035,10 @@
                                 },
                                 plugins: [ChartDataLabels]
                             });
-                            // Render overall chart using same data — no duplicate API call
-                            loadOverallOnlyChart(subjects);
-                            // Also populate the interest table
-                            tableData(subjects);
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-
+                    // Render overall chart using same data — no duplicate API call
+                    loadOverallOnlyChart(subjects);
+                    // Also populate the interest table
+                    tableData(subjects);
                 }
 
 
@@ -1343,30 +1306,21 @@
         <!-- ///// -->
         <script>
 
-            async function fetchReport() {
-                const studentId = getStudentIdFromUrl();
-                //const studentId = document.getElementById("student_id").value;
+            // Accepts pre-fetched report and career scores data — no API calls needed
+            function fetchReport(reportData, careerScoresData) {
                 const reportContainer = document.getElementById("reportContainer");
                 reportContainer.innerHTML = ""; // Clear previous report
 
-                if (!studentId) { showToast("Please enter a student ID.", "warning"); return; }
+                if (!reportData || !reportData.top_fields) {
+                    reportContainer.innerHTML = `<p style="color:red;">No report data available.</p>`;
+                    return;
+                }
 
                 try {
-                    // Fetch the report data from your original route
-                    const response = await fetch(`/career_report/${studentId}`);
-                    const data = await response.json();
+                    const data = reportData;
 
-                    if (response.status !== 200) {
-                        reportContainer.innerHTML = `<p style="color:red;">${data.error}</p>`;
-                        return;
-                    }
-
-                    // Fetch career scores (which should include the overall_match_score)
-                    const careerScoreResponse = await fetch(`/get_career_scores/${studentId}`);
-                    const careerScoreData = await careerScoreResponse.json();
-
-                    // Ensure that the response includes overall_match_score for each subject
-                    const overallMatchScores = careerScoreData.subjects;
+                    // Use pre-fetched career scores for overall_match_score
+                    const overallMatchScores = (careerScoresData && careerScoresData.subjects) ? careerScoresData.subjects : [];
 
                     let pageCounter = 6; // Start from Page 6
 
@@ -1852,9 +1806,8 @@ be required in these careers. Tick to see how well you match these.
             </div>
 
             <script>
-                function generate() {
-                    const studentId = getStudentIdFromUrl();
-                    //const studentId = document.getElementById('student_id').value;
+                // Accepts pre-fetched report data — no API call needed
+                function generate(reportData) {
                     const errorEl = document.getElementById('error');
                     const container = document.getElementById('crosstabContainer');
                     const dcontent = document.getElementById('dcontent');
@@ -1862,28 +1815,20 @@ be required in these careers. Tick to see how well you match these.
                     container.innerHTML = '';
                     dcontent.style.display = 'none';
 
-                    if (!studentId) {
-                        errorEl.textContent = 'Please enter a valid student ID.';
+                    if (!reportData || reportData.error) {
+                        if (reportData && reportData.error) errorEl.textContent = reportData.error;
                         return;
                     }
 
-                    fetch(`/career_report/${studentId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.error) {
-                                errorEl.textContent = data.error;
-                                return;
-                            }
+                    const fields = reportData.top_fields;
+                    if (!fields || fields.length === 0) {
+                        errorEl.textContent = 'No data found for this student.';
+                        return;
+                    }
 
-                            const fields = data.top_fields;
-                            if (!fields || fields.length === 0) {
-                                errorEl.textContent = 'No data found for this student.';
-                                return;
-                            }
+                    dcontent.style.display = 'block';
 
-                            dcontent.style.display = 'block';
-
-                            const aLevelSubjects = Object.keys(fields[0].a_level_subjects || {}).filter(k => k !== 'Career Area');
+                    const aLevelSubjects = Object.keys(fields[0].a_level_subjects || {}).filter(k => k !== 'Career Area');
 
                             let table = '<table><thead><tr><th>Career Field</th>';
                             aLevelSubjects.forEach(subj => {
@@ -1937,19 +1882,7 @@ be required in these careers. Tick to see how well you match these.
                           </ul>
                         </div>
                       `;
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            errorEl.textContent = 'Something went wrong while fetching data.';
-                        });
                 }
-                window.onload = function () {
-                    loadData();
-                    fetchReport();
-                    generate();
-                    ibgenerate();
-                };
-
             </script>
         </div>
 
@@ -2233,36 +2166,27 @@ be required in these careers. Tick to see how well you match these.
         </div>
 
         <script>
-            function ibgenerate() {
-                const studentId = getStudentIdFromUrl();
-                //const studentId = document.getElementById('student_id').value;
+            // Accepts pre-fetched report data — no API call needed
+            function ibgenerate(reportData) {
                 const errorEl = document.getElementById('error');
                 const ibContainer = document.getElementById('ibCrosstabContainer');
 
                 errorEl.textContent = '';
                 ibContainer.innerHTML = '';
 
-                if (!studentId) {
-                    errorEl.textContent = 'Please enter a valid student ID.';
+                if (!reportData || reportData.error) {
+                    if (reportData && reportData.error) errorEl.textContent = reportData.error;
                     return;
                 }
 
-                fetch(`/career_report/${studentId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.error) {
-                            errorEl.textContent = data.error;
-                            return;
-                        }
+                const fields = reportData.top_fields;
+                if (!fields || fields.length === 0) {
+                    errorEl.textContent = 'No data found for this student.';
+                    return;
+                }
 
-                        const fields = data.top_fields;
-                        if (!fields || fields.length === 0) {
-                            errorEl.textContent = 'No data found for this student.';
-                            return;
-                        }
-
-                        // === IB Level Table Only ===
-                        const ibSubjects = Object.keys(fields[0].ib_level_subjects || {}).filter(k => k !== 'Career Area');
+                // === IB Level Table Only ===
+                const ibSubjects = Object.keys(fields[0].ib_level_subjects || {}).filter(k => k !== 'Career Area');
                         let ibTable = '<table><thead><tr><th>Career Field</th>';
                         ibSubjects.forEach(subj => {
                             ibTable += `<th class="vertical-header">${subj}</th>`;
@@ -2303,11 +2227,6 @@ be required in these careers. Tick to see how well you match these.
                       </ul>
                   </div>
               `;
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        errorEl.textContent = 'Something went wrong while fetching data.';
-                    });
             }
 
         </script>
@@ -2843,7 +2762,6 @@ be required in these careers. Tick to see how well you match these.
             const id = parts[parts.length - 1];  // Get the last part of the URL
             return isNaN(id) ? null : parseInt(id); // Return the student ID or null if invalid
         }
-        generate()
     </script>
 
 

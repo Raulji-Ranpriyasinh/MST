@@ -62,7 +62,6 @@
     <script>
         window.onload = function () {
             fetchStudentData();
-            fetchStudentScores();
             fetchResults();
         };
     </script>
@@ -443,7 +442,7 @@
                                     let categories = data.map(item => item.category);
                                     let totalQuestions = data.map(item => item.total);
                                     let correctAnswers = data.map(item => item.correct);
-                                    let accuracy = data.map(item => (item.correct / item.total * 100).toFixed(2)); // Accuracy %
+                                    let accuracy = data.map(item => item.accuracy); // Use server-computed accuracy
 
                                     let ctx = document.getElementById("three-resultChart").getContext("2d");
 
@@ -817,7 +816,7 @@
 
         console.log("Fetching student data for ID:", studentId);  // Debugging log
 
-        fetch(`/get_student_data/${studentId}`)  // Updated the API endpoint
+        fetch(`/get_student_data/${studentId}`)  // Single API call for student data + scores
             .then(response => {
                 console.log("Response Status:", response.status);  // Log status code
 
@@ -836,7 +835,8 @@
                     document.getElementById("second_page").style.display = "block";
                     document.getElementById("third_page").style.display = "block";
                     document.getElementById("four_page").style.display = "block";
-                    fetchStudentScores(studentId);  // Fetch scores after fetching the name
+                    // Reuse the same data for scores chart — no duplicate API call
+                    renderScoreChart(data);
                 }
             })
             .catch(error => {
@@ -845,10 +845,8 @@
             });
     }
 
-    function fetchStudentScores(studentId) {
-        fetch(`/get_student_data/${studentId}`)
-            .then(response => response.json())
-            .then(data => {
+    // Accepts pre-fetched data from fetchStudentData — no duplicate /get_student_data call
+    function renderScoreChart(data) {
                 if (data.error) {
                     showToast(data.error, "error");
                     return;
@@ -902,8 +900,6 @@
                         }
                     });
                 }, 300); // Delay to ensure visibility before rendering
-            })
-            .catch(error => console.error("Error:", error));
     }
 
 

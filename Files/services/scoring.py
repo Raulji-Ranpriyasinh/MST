@@ -131,6 +131,9 @@ def get_aptitude_results(student_id):
             "category": CATEGORY_MAPPING.get(r[0], r[0]),
             "total": r[1],
             "correct": r[2] if r[2] is not None else 0,
+            "accuracy": round((r[2] if r[2] is not None else 0) / r[1] * 100, 2)
+            if r[1] > 0
+            else 0,
         }
         for r in results
     ]
@@ -228,6 +231,17 @@ def get_career_scores(student_id):
             )
 
     subjects_list.sort(key=lambda x: x["score"], reverse=True)
+
+    # Assign color tiers based on sorted position:
+    # Top 10 = green (high), Bottom 10 = red (low), Middle = yellow (moderate)
+    total = len(subjects_list)
+    for idx, subject in enumerate(subjects_list):
+        if idx < 10:
+            subject["color"] = "#4CAF50"  # Green — high interest
+        elif idx >= total - 10:
+            subject["color"] = "#F44336"  # Red — low interest
+        else:
+            subject["color"] = "#FFC107"  # Yellow — moderate interest
 
     supporting_subjects_list = [
         {
