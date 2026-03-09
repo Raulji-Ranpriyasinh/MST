@@ -1040,6 +1040,8 @@
                             });
                             // Render overall chart using same data — no duplicate API call
                             loadOverallOnlyChart(subjects);
+                            // Also populate the interest table
+                            tableData(subjects);
                         })
                         .catch(error => {
                             console.error('Error:', error);
@@ -1914,11 +1916,9 @@ be required in these careers. Tick to see how well you match these.
                 }
                 window.onload = function () {
                     loadData();
-                    loadOverallOnlyChart();
                     fetchReport();
                     generate();
                     ibgenerate();
-                    loadOverallOnlyChart()
                 };
 
             </script>
