@@ -1,7 +1,7 @@
 """Credit management service for consultancy firms."""
 
 from extensions import db
-from models.firm import ConsultancyFirm, CreditTransaction
+from models.consultancy import ConsultancyFirm, CreditTransaction
 
 
 def add_credits(firm_id: int, credits: int, description: str = "Manual credit top-up") -> CreditTransaction:
@@ -30,9 +30,8 @@ def add_credits(firm_id: int, credits: int, description: str = "Manual credit to
     transaction = CreditTransaction(
         firm_id=firm.id,
         student_id=None,
-        transaction_type="credit",
-        amount=credits,
-        balance_after=firm.credit_balance,
+        transaction_type="purchase",
+        credits_used=credits,
         description=description,
     )
     db.session.add(transaction)
@@ -61,7 +60,7 @@ def deduct_credit(student_id: int, firm_id: int, description: str = "Assessment 
 
     if firm.credit_balance <= 0:
         raise ValueError(
-            f"Firm '{firm.name}' (id={firm_id}) has insufficient credits "
+            f"Firm '{firm.firm_name}' (id={firm_id}) has insufficient credits "
             f"(balance={firm.credit_balance})."
         )
 
@@ -70,9 +69,8 @@ def deduct_credit(student_id: int, firm_id: int, description: str = "Assessment 
     transaction = CreditTransaction(
         firm_id=firm.id,
         student_id=student_id,
-        transaction_type="debit",
-        amount=1,
-        balance_after=firm.credit_balance,
+        transaction_type="usage",
+        credits_used=1,
         description=description,
     )
     db.session.add(transaction)

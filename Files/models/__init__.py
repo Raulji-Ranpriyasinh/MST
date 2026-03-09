@@ -1,6 +1,6 @@
 from models.admin import Admin
 from models.student import StudentDetails, ExamProcess, TestStatus, Trackaptitude
-from models.firm import ConsultancyFirm, FirmAdmin, CreditTransaction
+from models.consultancy import ConsultancyFirm, FirmAdmin, CreditTransaction
 from models.assessment import (
     CareerQuestion,
     AptitudeImgQuestions,
@@ -13,7 +13,6 @@ from models.assessment import (
     Subject,
     SupportingSubject,
 )
-from models.consultancy import ConsultancyFirm, FirmAdmin, CreditTransaction
 
 __all__ = [
     'Admin',
@@ -34,7 +33,4 @@ __all__ = [
     'QuestionSupportingSubject',
     'Subject',
     'SupportingSubject',
-    'ConsultancyFirm',
-    'FirmAdmin',
-    'CreditTransaction',
 ]
