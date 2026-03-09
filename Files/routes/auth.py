@@ -15,6 +15,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter
 from models.admin import Admin
+from models.consultancy import ConsultancyFirm
 from models.student import StudentDetails
 from schemas.validation import validate_admin_login, validate_login, validate_registration
 
@@ -43,6 +44,15 @@ def register():
     if existing_user:
         return jsonify({'success': False, 'message': 'Email already registered!'}), 400
 
+    # Validate optional firm_id
+    firm_id = data.get('firm_id')
+    if firm_id is not None:
+        firm = db.session.get(ConsultancyFirm, firm_id)
+        if firm is None:
+            return jsonify({'success': False, 'message': 'Firm not found'}), 400
+        if not firm.is_active:
+            return jsonify({'success': False, 'message': 'Firm is not active'}), 400
+
     # Hash password
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
 
@@ -58,6 +68,7 @@ def register():
         grade=data['grade'],
         referral_source=data.get('referral_source', ''),
         password=hashed_password,
+        firm_id=firm_id,
     )
 
     db.session.add(new_user)

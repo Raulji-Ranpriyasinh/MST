@@ -7,6 +7,7 @@ from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from extensions import db, socketio
 from models.assessment import CareerQuestion, StudentCareerResponse
+from models.consultancy import ConsultancyFirm, CreditTransaction
 from models.student import ExamProcess, StudentDetails, TestStatus
 from services.scoring import get_career_scores, load_mappings
 
@@ -224,6 +225,125 @@ def career_report(student_id):
                 break
 
     return jsonify({"student_id": student_id, "top_fields": top_subjects})
+
+
+# ---------------------------------------------------------------------------
+# Phase 7 – Admin Firm Management
+# ---------------------------------------------------------------------------
+
+@admin_bp.route('/admin/firms', methods=['GET'])
+@jwt_required()
+def list_firms():
+    """Return a list of all consultancy firms."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    firms = ConsultancyFirm.query.order_by(ConsultancyFirm.id).all()
+    firms_list = [
+        {
+            "id": f.id,
+            "firm_name": f.firm_name,
+            "contact_email": f.contact_email,
+            "contact_phone": f.contact_phone,
+            "credit_balance": f.credit_balance,
+            "price_per_assessment": float(f.price_per_assessment),
+            "is_active": f.is_active,
+            "created_at": f.created_at.isoformat() if f.created_at else None,
+        }
+        for f in firms
+    ]
+    return jsonify({"success": True, "firms": firms_list})
+
+
+@admin_bp.route('/admin/firms', methods=['POST'])
+@jwt_required()
+def create_firm():
+    """Create a new consultancy firm."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "No data provided"}), 400
+
+    firm_name = (data.get("firm_name") or "").strip()
+    contact_email = (data.get("contact_email") or "").strip()
+    contact_phone = (data.get("contact_phone") or "").strip() or None
+    price_per_assessment = data.get("price_per_assessment", 0.00)
+
+    if not firm_name or not contact_email:
+        return jsonify({"success": False, "message": "firm_name and contact_email are required"}), 400
+
+    # Check for duplicate firm name or email
+    existing = ConsultancyFirm.query.filter(
+        db.or_(
+            ConsultancyFirm.firm_name == firm_name,
+            ConsultancyFirm.contact_email == contact_email,
+        )
+    ).first()
+    if existing:
+        return jsonify({"success": False, "message": "Firm name or contact email already exists"}), 400
+
+    firm = ConsultancyFirm(
+        firm_name=firm_name,
+        contact_email=contact_email,
+        contact_phone=contact_phone,
+        price_per_assessment=price_per_assessment,
+    )
+    db.session.add(firm)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Firm created successfully",
+        "firm": {
+            "id": firm.id,
+            "firm_name": firm.firm_name,
+            "contact_email": firm.contact_email,
+            "contact_phone": firm.contact_phone,
+            "credit_balance": firm.credit_balance,
+            "price_per_assessment": float(firm.price_per_assessment),
+            "is_active": firm.is_active,
+            "created_at": firm.created_at.isoformat() if firm.created_at else None,
+        },
+    }), 201
+
+
+@admin_bp.route('/admin/firms/<int:firm_id>/credits', methods=['POST'])
+@jwt_required()
+def add_firm_credits(firm_id):
+    """Admin adds credits to a firm's balance."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "No data provided"}), 400
+
+    credits = data.get("credits")
+    if credits is None or not isinstance(credits, int) or credits <= 0:
+        return jsonify({"success": False, "message": "credits must be a positive integer"}), 400
+
+    firm = db.session.get(ConsultancyFirm, firm_id)
+    if firm is None:
+        return jsonify({"success": False, "message": "Firm not found"}), 404
+
+    firm.credit_balance += credits
+
+    transaction = CreditTransaction(
+        firm_id=firm.id,
+        credits_used=credits,
+        transaction_type='purchase',
+        description=data.get("description", f"Admin added {credits} credits"),
+    )
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"{credits} credits added",
+        "credit_balance": firm.credit_balance,
+    })
 
 
 @admin_bp.route('/toggle_career_access/<int:student_id>', methods=['POST'])
