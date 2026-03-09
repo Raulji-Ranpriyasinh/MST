@@ -12,6 +12,7 @@ from models.assessment import (
     Subject,
     SupportingSubject,
 )
+from models.consultancy import ConsultancyFirm, FirmAdmin, CreditTransaction
 
 __all__ = [
     'Admin',
@@ -29,4 +30,7 @@ __all__ = [
     'QuestionSupportingSubject',
     'Subject',
     'SupportingSubject',
+    'ConsultancyFirm',
+    'FirmAdmin',
+    'CreditTransaction',
 ]
