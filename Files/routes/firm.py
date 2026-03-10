@@ -2,7 +2,7 @@
 
 import logging
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -21,7 +21,30 @@ from models.student import StudentDetails
 
 logger = logging.getLogger(__name__)
 
-firm_bp = Blueprint("firm", __name__, url_prefix="/api/v1/firm")
+firm_bp = Blueprint("firm", __name__)
+
+
+# ---------------------------------------------------------------------------
+# Page routes (HTML templates)
+# ---------------------------------------------------------------------------
+
+@firm_bp.route("/firm")
+def firm_login_page():
+    """Render the firm login page."""
+    return render_template("firm_login.html")
+
+
+@firm_bp.route("/firm/dashboard")
+@jwt_required(optional=True)
+def firm_dashboard_page():
+    """Render the firm dashboard page (client-side rendered)."""
+    identity = get_jwt_identity()
+    if not identity:
+        return redirect(url_for("firm.firm_login_page"))
+    claims = get_jwt()
+    if claims.get("role") != "firm_admin":
+        return redirect(url_for("firm.firm_login_page"))
+    return render_template("firm_dashboard.html")
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +66,7 @@ def _get_firm_admin():
 # Phase 4 - Firm Authentication
 # ---------------------------------------------------------------------------
 
-@firm_bp.route("/login", methods=["POST"])
+@firm_bp.route("/api/v1/firm/login", methods=["POST"])
 @limiter.limit("5 per minute")
 def firm_login():
     """Authenticate a firm admin with email and password, set session cookies."""
@@ -84,7 +107,7 @@ def firm_login():
     return response, 200
 
 
-@firm_bp.route("/logout", methods=["GET"])
+@firm_bp.route("/api/v1/firm/logout", methods=["GET"])
 @jwt_required(optional=True)
 def firm_logout():
     """Clear session / JWT cookies for the firm admin."""
@@ -101,7 +124,7 @@ def firm_logout():
 # Phase 5 - Firm Dashboard APIs
 # ---------------------------------------------------------------------------
 
-@firm_bp.route("/dashboard-data", methods=["GET"])
+@firm_bp.route("/api/v1/firm/dashboard-data", methods=["GET"])
 @jwt_required()
 def firm_dashboard_data():
     """Return high-level dashboard data for the authenticated firm."""
@@ -138,7 +161,7 @@ def firm_dashboard_data():
     })
 
 
-@firm_bp.route("/credits/transactions", methods=["GET"])
+@firm_bp.route("/api/v1/firm/credits/transactions", methods=["GET"])
 @jwt_required()
 def firm_credit_transactions():
     """Return the last 100 credit transactions for the authenticated firm."""

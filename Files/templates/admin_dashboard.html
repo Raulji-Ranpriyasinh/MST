@@ -335,6 +335,177 @@
       gap: 10px;
     }
   }
+
+  /* ===== Admin Tabs ===== */
+  .admin-tab-bar {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin: 20px auto 0;
+    width: 90%;
+  }
+  .admin-tab-btn {
+    padding: 12px 28px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .admin-tab-btn:hover {
+    color: #0864ed;
+  }
+  .admin-tab-btn.active {
+    color: #0864ed;
+    border-bottom-color: #0864ed;
+  }
+  .admin-tab-content {
+    display: none;
+  }
+  .admin-tab-content.active {
+    display: block;
+  }
+
+  /* ===== Firm Management Styles ===== */
+  .firm-container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  .firm-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .firm-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+  .firm-btn-primary {
+    background-color: #0864ed;
+    color: white;
+  }
+  .firm-btn-primary:hover {
+    background-color: #0550c8;
+  }
+  .firm-btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+  .firm-btn-success:hover {
+    background-color: #218838;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal-box {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .modal-box h3 {
+    margin-top: 0;
+    color: #001e4d;
+    font-size: 20px;
+  }
+  .modal-box input {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+  }
+  .modal-box textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 60px;
+  }
+  .modal-box label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    display: block;
+    margin-top: 8px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: flex-end;
+  }
+  .modal-actions button {
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    border: none;
+  }
+  .modal-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+  .modal-cancel:hover {
+    background-color: #ccc;
+  }
+  .modal-submit {
+    background-color: #0864ed;
+    color: white;
+  }
+  .modal-submit:hover {
+    background-color: #0550c8;
+  }
+  .firm-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .firm-badge-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  .firm-badge-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
   </style>
 
 
@@ -365,6 +536,14 @@
 
     </div>
 
+    <!-- Admin Tabs -->
+    <div class="admin-tab-bar">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('students', this)">Students</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('firms', this)">Firm Management</button>
+    </div>
+
+    <!-- Students Tab Content -->
+    <div class="admin-tab-content active" id="admin-tab-students">
 
     <div style="margin: 20px auto; text-align: center;">
         <input type="text" id="searchFirstName" placeholder="Search by First Name" onkeyup="filterTable()"
@@ -505,6 +684,70 @@
             </tbody>
         </table>
         <div class="pagination-controls" id="paginationControls"></div>
+    </div>
+
+    </div><!-- end admin-tab-students -->
+
+    <!-- Firms Tab Content -->
+    <div class="admin-tab-content" id="admin-tab-firms">
+        <div class="firm-container">
+            <div class="firm-actions">
+                <button class="firm-btn firm-btn-primary" onclick="openAddFirmModal()">+ Add New Firm</button>
+            </div>
+            <table id="firmsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Firm Name</th>
+                        <th>Contact Email</th>
+                        <th>Phone</th>
+                        <th>Credit Balance</th>
+                        <th>Price/Assessment</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="firmsBody">
+                </tbody>
+            </table>
+            <div style="text-align:center; padding:30px; color:#999; font-size:15px;" id="noFirms">Loading firms...</div>
+        </div>
+    </div><!-- end admin-tab-firms -->
+
+    <!-- Add Firm Modal -->
+    <div class="modal-overlay" id="addFirmModal">
+        <div class="modal-box">
+            <h3>Add New Firm</h3>
+            <label>Firm Name *</label>
+            <input type="text" id="newFirmName" placeholder="Enter firm name" />
+            <label>Contact Email *</label>
+            <input type="email" id="newFirmEmail" placeholder="Enter contact email" />
+            <label>Contact Phone</label>
+            <input type="text" id="newFirmPhone" placeholder="Enter phone number (optional)" />
+            <label>Price per Assessment</label>
+            <input type="number" id="newFirmPrice" placeholder="0.00" step="0.01" min="0" value="0" />
+            <div class="modal-actions">
+                <button class="modal-cancel" onclick="closeAddFirmModal()">Cancel</button>
+                <button class="modal-submit" onclick="submitAddFirm()">Create Firm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Credits Modal -->
+    <div class="modal-overlay" id="addCreditsModal">
+        <div class="modal-box">
+            <h3>Add Credits to <span id="creditsFirmName"></span></h3>
+            <input type="hidden" id="creditsFirmId" />
+            <label>Number of Credits *</label>
+            <input type="number" id="creditsAmount" placeholder="Enter credits to add" min="1" />
+            <label>Description</label>
+            <textarea id="creditsDescription" placeholder="Optional description"></textarea>
+            <div class="modal-actions">
+                <button class="modal-cancel" onclick="closeAddCreditsModal()">Cancel</button>
+                <button class="modal-submit" onclick="submitAddCredits()">Add Credits</button>
+            </div>
+        </div>
     </div>
 
     <script src="/static/js/jwt_helpers.js"></script>
@@ -665,6 +908,181 @@
         });
 
     </script>
+<script>
+    // ===== Admin Tab Switching =====
+    function switchAdminTab(tabName, btn) {
+        document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('admin-tab-' + tabName).classList.add('active');
+        if (tabName === 'firms') {
+            loadFirms();
+        }
+    }
+
+    // ===== Firm Management =====
+    let firmsLoaded = false;
+
+    async function loadFirms() {
+        if (firmsLoaded) return;
+        try {
+            const res = await authFetch('/admin/firms');
+            const data = await res.json();
+            if (!data.success) {
+                showToast(data.message || 'Failed to load firms', 'error');
+                return;
+            }
+            renderFirmsTable(data.firms);
+            firmsLoaded = true;
+        } catch (err) {
+            console.error('Load firms error:', err);
+            showToast('Failed to load firms.', 'error');
+        }
+    }
+
+    function renderFirmsTable(firms) {
+        const tbody = document.getElementById('firmsBody');
+        const noFirms = document.getElementById('noFirms');
+        tbody.innerHTML = '';
+
+        if (firms.length === 0) {
+            document.getElementById('firmsTable').style.display = 'none';
+            noFirms.textContent = 'No firms created yet.';
+            noFirms.style.display = 'block';
+            return;
+        }
+
+        document.getElementById('firmsTable').style.display = '';
+        noFirms.style.display = 'none';
+
+        firms.forEach(f => {
+            const row = document.createElement('tr');
+            const statusBadge = f.is_active
+                ? '<span class="firm-badge firm-badge-active">Active</span>'
+                : '<span class="firm-badge firm-badge-inactive">Inactive</span>';
+            const dateStr = f.created_at ? new Date(f.created_at).toLocaleDateString() : '--';
+            row.innerHTML = `
+                <td>${f.id}</td>
+                <td>${escapeHtmlAdmin(f.firm_name)}</td>
+                <td>${escapeHtmlAdmin(f.contact_email)}</td>
+                <td>${escapeHtmlAdmin(f.contact_phone || '--')}</td>
+                <td>${f.credit_balance}</td>
+                <td>${parseFloat(f.price_per_assessment).toFixed(2)}</td>
+                <td>${statusBadge}</td>
+                <td>${dateStr}</td>
+                <td>
+                    <button class="firm-btn firm-btn-success" style="padding:5px 12px; font-size:12px;" onclick="openAddCreditsModal(${f.id}, '${escapeHtmlAdmin(f.firm_name)}')">+ Credits</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function escapeHtmlAdmin(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    // Add Firm Modal
+    function openAddFirmModal() {
+        document.getElementById('addFirmModal').classList.add('active');
+        document.getElementById('newFirmName').value = '';
+        document.getElementById('newFirmEmail').value = '';
+        document.getElementById('newFirmPhone').value = '';
+        document.getElementById('newFirmPrice').value = '0';
+    }
+
+    function closeAddFirmModal() {
+        document.getElementById('addFirmModal').classList.remove('active');
+    }
+
+    async function submitAddFirm() {
+        const firm_name = document.getElementById('newFirmName').value.trim();
+        const contact_email = document.getElementById('newFirmEmail').value.trim();
+        const contact_phone = document.getElementById('newFirmPhone').value.trim();
+        const price_per_assessment = parseFloat(document.getElementById('newFirmPrice').value) || 0;
+
+        if (!firm_name || !contact_email) {
+            showToast('Firm name and contact email are required.', 'warning');
+            return;
+        }
+
+        document.getElementById('loadingOverlay').classList.add('active');
+
+        try {
+            const res = await authFetch('/admin/firms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firm_name, contact_email, contact_phone, price_per_assessment })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Firm created successfully!', 'success');
+                closeAddFirmModal();
+                firmsLoaded = false;
+                loadFirms();
+            } else {
+                showToast(data.message || 'Failed to create firm', 'error');
+            }
+        } catch (err) {
+            console.error('Add firm error:', err);
+            showToast('Something went wrong.', 'error');
+        }
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Add Credits Modal
+    function openAddCreditsModal(firmId, firmName) {
+        document.getElementById('addCreditsModal').classList.add('active');
+        document.getElementById('creditsFirmId').value = firmId;
+        document.getElementById('creditsFirmName').textContent = firmName;
+        document.getElementById('creditsAmount').value = '';
+        document.getElementById('creditsDescription').value = '';
+    }
+
+    function closeAddCreditsModal() {
+        document.getElementById('addCreditsModal').classList.remove('active');
+    }
+
+    async function submitAddCredits() {
+        const firmId = document.getElementById('creditsFirmId').value;
+        const credits = parseInt(document.getElementById('creditsAmount').value);
+        const description = document.getElementById('creditsDescription').value.trim();
+
+        if (!credits || credits <= 0) {
+            showToast('Please enter a valid number of credits.', 'warning');
+            return;
+        }
+
+        document.getElementById('loadingOverlay').classList.add('active');
+
+        try {
+            const body = { credits };
+            if (description) body.description = description;
+
+            const res = await authFetch(`/admin/firms/${firmId}/credits`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`${credits} credits added successfully!`, 'success');
+                closeAddCreditsModal();
+                firmsLoaded = false;
+                loadFirms();
+            } else {
+                showToast(data.message || 'Failed to add credits', 'error');
+            }
+        } catch (err) {
+            console.error('Add credits error:', err);
+            showToast('Something went wrong.', 'error');
+        }
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+</script>
 <script>
 document.querySelectorAll(".career-toggle-checkbox").forEach(checkbox => {
     checkbox.addEventListener("change", function () {

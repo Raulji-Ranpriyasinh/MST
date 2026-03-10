@@ -221,3 +221,14 @@ def session_check():
     if not identity:
         return jsonify({"valid": False}), 401
     return jsonify({"valid": True}), 200
+
+
+@auth_bp.route('/api/v1/firms/active', methods=['GET'])
+def list_active_firms():
+    """Return a list of active consultancy firms for the registration dropdown."""
+    firms = ConsultancyFirm.query.filter_by(is_active=True).order_by(ConsultancyFirm.firm_name).all()
+    firms_list = [
+        {"id": f.id, "firm_name": f.firm_name}
+        for f in firms
+    ]
+    return jsonify({"success": True, "firms": firms_list})

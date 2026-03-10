@@ -184,12 +184,19 @@
           <option value="Advertisements">Advertisements</option>
         </select>
 
+        <select id="firm_id">
+          <option value="">Consultancy Firm (Optional)</option>
+        </select>
+
         <input type="password" id="password" placeholder="Password *" required />
         <input type="password" id="confirmPassword" placeholder="Confirm Password *" required />
 
         <button class="register" type="submit">Register</button>
         <span class="toggle-link" onclick="toggleForms()">Already registered? Login here</span>
       </form>
+    </div>
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+      <a href="/firm" style="color: #007bff; text-decoration: none; font-size: 14px;">Firm Login &rarr;</a>
     </div>
   </div>
 
@@ -263,6 +270,7 @@
         return false;
       }
 
+      const firmSelect = document.getElementById("firm_id").value;
       const data = {
         first_name: document.getElementById("first_name").value.trim(),
         last_name: document.getElementById("last_name").value.trim(),
@@ -275,6 +283,9 @@
         referral_source: document.getElementById("referral_source").value,
         password: password
       };
+      if (firmSelect) {
+        data.firm_id = parseInt(firmSelect);
+      }
 
       document.getElementById('loadingOverlay').classList.add('active');
 
@@ -318,6 +329,25 @@ function formatNameField(id) {
   });
 }
 
+
+    // Load active firms for dropdown
+    (async function loadFirmsDropdown() {
+      try {
+        const res = await fetch('/api/v1/firms/active');
+        const data = await res.json();
+        if (data.success && data.firms.length > 0) {
+          const select = document.getElementById('firm_id');
+          data.firms.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = f.firm_name;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load firms:', err);
+      }
+    })();
 
     formatNameField("first_name");
     formatNameField("last_name");
