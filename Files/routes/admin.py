@@ -4,11 +4,13 @@ import json
 
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from werkzeug.security import generate_password_hash
 
 from extensions import db, socketio
 from models.assessment import CareerQuestion, StudentCareerResponse
-from models.consultancy import ConsultancyFirm, CreditTransaction
+from models.consultancy import ConsultancyFirm, CreditTransaction, FirmAdmin
 from models.student import ExamProcess, StudentDetails, TestStatus
+from schemas.validation import validate_firm_creation
 from services.scoring import get_career_scores, load_mappings
 
 admin_bp = Blueprint('admin', __name__)
@@ -239,8 +241,11 @@ def list_firms():
         return jsonify({'error': 'Forbidden'}), 403
 
     firms = ConsultancyFirm.query.order_by(ConsultancyFirm.id).all()
-    firms_list = [
-        {
+    firms_list = []
+    for f in firms:
+        # Fetch the first admin for this firm (if any)
+        admin = FirmAdmin.query.filter_by(firm_id=f.id).first()
+        firms_list.append({
             "id": f.id,
             "firm_name": f.firm_name,
             "contact_email": f.contact_email,
@@ -249,16 +254,16 @@ def list_firms():
             "price_per_assessment": float(f.price_per_assessment),
             "is_active": f.is_active,
             "created_at": f.created_at.isoformat() if f.created_at else None,
-        }
-        for f in firms
-    ]
+            "admin_username": admin.username if admin else None,
+            "admin_email": admin.email if admin else None,
+        })
     return jsonify({"success": True, "firms": firms_list})
 
 
 @admin_bp.route('/admin/firms', methods=['POST'])
 @jwt_required()
 def create_firm():
-    """Create a new consultancy firm."""
+    """Create a new consultancy firm together with its first admin account."""
     if not _is_admin():
         return jsonify({'error': 'Forbidden'}), 403
 
@@ -266,24 +271,41 @@ def create_firm():
     if not data:
         return jsonify({"success": False, "message": "No data provided"}), 400
 
-    firm_name = (data.get("firm_name") or "").strip()
-    contact_email = (data.get("contact_email") or "").strip()
+    # Validate all fields (firm + admin credentials)
+    is_valid, errors = validate_firm_creation(data)
+    if not is_valid:
+        return jsonify({"success": False, "message": "; ".join(errors)}), 400
+
+    firm_name = data["firm_name"].strip()
+    contact_email = data["contact_email"].strip()
     contact_phone = (data.get("contact_phone") or "").strip() or None
     price_per_assessment = data.get("price_per_assessment", 0.00)
 
-    if not firm_name or not contact_email:
-        return jsonify({"success": False, "message": "firm_name and contact_email are required"}), 400
+    admin_username = data["admin_username"].strip()
+    admin_email = data["admin_email"].strip()
+    admin_password = data["admin_password"]
 
-    # Check for duplicate firm name or email
-    existing = ConsultancyFirm.query.filter(
+    # Check for duplicate firm name or contact email
+    existing_firm = ConsultancyFirm.query.filter(
         db.or_(
             ConsultancyFirm.firm_name == firm_name,
             ConsultancyFirm.contact_email == contact_email,
         )
     ).first()
-    if existing:
+    if existing_firm:
         return jsonify({"success": False, "message": "Firm name or contact email already exists"}), 400
 
+    # Check for duplicate admin username or email
+    existing_admin = FirmAdmin.query.filter(
+        db.or_(
+            FirmAdmin.username == admin_username,
+            FirmAdmin.email == admin_email,
+        )
+    ).first()
+    if existing_admin:
+        return jsonify({"success": False, "message": "Admin username or email already exists"}), 400
+
+    # Create firm
     firm = ConsultancyFirm(
         firm_name=firm_name,
         contact_email=contact_email,
@@ -291,11 +313,22 @@ def create_firm():
         price_per_assessment=price_per_assessment,
     )
     db.session.add(firm)
+    db.session.flush()  # get firm.id before committing
+
+    # Create firm admin with hashed password
+    hashed_password = generate_password_hash(admin_password, method='pbkdf2:sha256')
+    firm_admin = FirmAdmin(
+        firm_id=firm.id,
+        username=admin_username,
+        email=admin_email,
+        password=hashed_password,
+    )
+    db.session.add(firm_admin)
     db.session.commit()
 
     return jsonify({
         "success": True,
-        "message": "Firm created successfully",
+        "message": "Firm and admin account created successfully",
         "firm": {
             "id": firm.id,
             "firm_name": firm.firm_name,
@@ -305,6 +338,8 @@ def create_firm():
             "price_per_assessment": float(firm.price_per_assessment),
             "is_active": firm.is_active,
             "created_at": firm.created_at.isoformat() if firm.created_at else None,
+            "admin_username": firm_admin.username,
+            "admin_email": firm_admin.email,
         },
     }), 201
 

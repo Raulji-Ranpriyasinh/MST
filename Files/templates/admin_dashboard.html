@@ -506,6 +506,80 @@
     background-color: #f8d7da;
     color: #721c24;
   }
+
+  /* ===== Password Strength Meter ===== */
+  .password-strength-container {
+    margin: 6px 0 4px;
+  }
+  .password-strength-bar {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #e0e0e0;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .password-strength-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+  }
+  .password-strength-text {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .strength-weak { color: #dc3545; }
+  .strength-fair { color: #fd7e14; }
+  .strength-good { color: #ffc107; }
+  .strength-strong { color: #28a745; }
+  .modal-section-divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 16px 0 12px;
+  }
+  .modal-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #001e4d;
+    margin: 0 0 4px;
+  }
+  .password-requirements {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0 6px;
+    line-height: 1.5;
+  }
+  .password-requirements span.met {
+    color: #28a745;
+  }
+  .password-requirements span.unmet {
+    color: #ccc;
+  }
+  .password-match-msg {
+    font-size: 12px;
+    margin: 2px 0 0;
+  }
+  .password-match-msg.match { color: #28a745; }
+  .password-match-msg.no-match { color: #dc3545; }
+  .input-wrapper {
+    position: relative;
+  }
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+    padding: 4px;
+    line-height: 1;
+  }
+  .toggle-password-btn:hover {
+    color: #333;
+  }
   </style>
 
 
@@ -704,6 +778,8 @@
                         <th>Credit Balance</th>
                         <th>Price/Assessment</th>
                         <th>Status</th>
+                        <th>Admin Username</th>
+                        <th>Admin Email</th>
                         <th>Created</th>
                         <th>Actions</th>
                     </tr>
@@ -719,6 +795,9 @@
     <div class="modal-overlay" id="addFirmModal">
         <div class="modal-box">
             <h3>Add New Firm</h3>
+
+            <!-- Firm Details Section -->
+            <p class="modal-section-title">Firm Details</p>
             <label>Firm Name *</label>
             <input type="text" id="newFirmName" placeholder="Enter firm name" />
             <label>Contact Email *</label>
@@ -727,6 +806,39 @@
             <input type="text" id="newFirmPhone" placeholder="Enter phone number (optional)" />
             <label>Price per Assessment</label>
             <input type="number" id="newFirmPrice" placeholder="0.00" step="0.01" min="0" value="0" />
+
+            <!-- Admin Credentials Section -->
+            <hr class="modal-section-divider" />
+            <p class="modal-section-title">Admin Login Credentials</p>
+            <label>Admin Username *</label>
+            <input type="text" id="newAdminUsername" placeholder="e.g. john.doe" autocomplete="off" />
+            <label>Admin Email *</label>
+            <input type="email" id="newAdminEmail" placeholder="admin@firm.com" autocomplete="off" />
+            <label>Admin Password *</label>
+            <div class="input-wrapper">
+                <input type="password" id="newAdminPassword" placeholder="Min 8 chars, upper, lower, digit, special" autocomplete="new-password" oninput="updatePasswordStrength()" />
+                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newAdminPassword', this)" title="Show password">&#128065;</button>
+            </div>
+            <div class="password-strength-container" id="passwordStrengthContainer" style="display:none;">
+                <div class="password-strength-bar">
+                    <div class="password-strength-fill" id="passwordStrengthFill"></div>
+                </div>
+                <div class="password-strength-text" id="passwordStrengthText"></div>
+            </div>
+            <div class="password-requirements" id="passwordRequirements">
+                <span id="req-length" class="unmet">&#x2022; 8+ characters</span><br/>
+                <span id="req-upper" class="unmet">&#x2022; Uppercase letter</span><br/>
+                <span id="req-lower" class="unmet">&#x2022; Lowercase letter</span><br/>
+                <span id="req-digit" class="unmet">&#x2022; Digit</span><br/>
+                <span id="req-special" class="unmet">&#x2022; Special character</span>
+            </div>
+            <label>Confirm Password *</label>
+            <div class="input-wrapper">
+                <input type="password" id="newAdminConfirmPassword" placeholder="Re-enter password" autocomplete="new-password" oninput="checkPasswordMatch()" />
+                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newAdminConfirmPassword', this)" title="Show password">&#128065;</button>
+            </div>
+            <div class="password-match-msg" id="passwordMatchMsg"></div>
+
             <div class="modal-actions">
                 <button class="modal-cancel" onclick="closeAddFirmModal()">Cancel</button>
                 <button class="modal-submit" onclick="submitAddFirm()">Create Firm</button>
@@ -969,6 +1081,8 @@
                 <td>${f.credit_balance}</td>
                 <td>${parseFloat(f.price_per_assessment).toFixed(2)}</td>
                 <td>${statusBadge}</td>
+                <td>${escapeHtmlAdmin(f.admin_username || '--')}</td>
+                <td>${escapeHtmlAdmin(f.admin_email || '--')}</td>
                 <td>${dateStr}</td>
                 <td>
                     <button class="firm-btn firm-btn-success" style="padding:5px 12px; font-size:12px;" onclick="openAddCreditsModal(${f.id}, '${escapeHtmlAdmin(f.firm_name)}')">+ Credits</button>
@@ -992,6 +1106,16 @@
         document.getElementById('newFirmEmail').value = '';
         document.getElementById('newFirmPhone').value = '';
         document.getElementById('newFirmPrice').value = '0';
+        document.getElementById('newAdminUsername').value = '';
+        document.getElementById('newAdminEmail').value = '';
+        document.getElementById('newAdminPassword').value = '';
+        document.getElementById('newAdminConfirmPassword').value = '';
+        document.getElementById('passwordMatchMsg').textContent = '';
+        document.getElementById('passwordMatchMsg').className = 'password-match-msg';
+        document.getElementById('passwordStrengthContainer').style.display = 'none';
+        ['req-length','req-upper','req-lower','req-digit','req-special'].forEach(function(id) {
+            document.getElementById(id).className = 'unmet';
+        });
     }
 
     function closeAddFirmModal() {
@@ -1003,9 +1127,34 @@
         const contact_email = document.getElementById('newFirmEmail').value.trim();
         const contact_phone = document.getElementById('newFirmPhone').value.trim();
         const price_per_assessment = parseFloat(document.getElementById('newFirmPrice').value) || 0;
+        const admin_username = document.getElementById('newAdminUsername').value.trim();
+        const admin_email = document.getElementById('newAdminEmail').value.trim();
+        const admin_password = document.getElementById('newAdminPassword').value;
+        const admin_confirm = document.getElementById('newAdminConfirmPassword').value;
 
         if (!firm_name || !contact_email) {
             showToast('Firm name and contact email are required.', 'warning');
+            return;
+        }
+        if (!admin_username || !admin_email || !admin_password) {
+            showToast('Admin username, email, and password are required.', 'warning');
+            return;
+        }
+        if (admin_username.length < 3) {
+            showToast('Admin username must be at least 3 characters.', 'warning');
+            return;
+        }
+        if (admin_password.length < 8) {
+            showToast('Admin password must be at least 8 characters.', 'warning');
+            return;
+        }
+        if (admin_password !== admin_confirm) {
+            showToast('Passwords do not match.', 'warning');
+            return;
+        }
+        if (!/[A-Z]/.test(admin_password) || !/[a-z]/.test(admin_password) ||
+            !/[0-9]/.test(admin_password) || !/[!@#$%^&*(),.?\":{}|<>_\-]/.test(admin_password)) {
+            showToast('Password must include uppercase, lowercase, digit, and special character.', 'warning');
             return;
         }
 
@@ -1015,11 +1164,14 @@
             const res = await authFetch('/admin/firms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ firm_name, contact_email, contact_phone, price_per_assessment })
+                body: JSON.stringify({
+                    firm_name, contact_email, contact_phone, price_per_assessment,
+                    admin_username, admin_email, admin_password
+                })
             });
             const data = await res.json();
             if (data.success) {
-                showToast('Firm created successfully!', 'success');
+                showToast('Firm and admin account created successfully!', 'success');
                 closeAddFirmModal();
                 firmsLoaded = false;
                 loadFirms();
@@ -1031,6 +1183,88 @@
             showToast('Something went wrong.', 'error');
         }
         document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // ===== Password Strength & Validation =====
+    function updatePasswordStrength() {
+        var pw = document.getElementById('newAdminPassword').value;
+        var container = document.getElementById('passwordStrengthContainer');
+        var fill = document.getElementById('passwordStrengthFill');
+        var text = document.getElementById('passwordStrengthText');
+
+        if (!pw) {
+            container.style.display = 'none';
+            updateRequirements(pw);
+            checkPasswordMatch();
+            return;
+        }
+        container.style.display = 'block';
+
+        var score = 0;
+        if (pw.length >= 8) score++;
+        if (/[A-Z]/.test(pw)) score++;
+        if (/[a-z]/.test(pw)) score++;
+        if (/[0-9]/.test(pw)) score++;
+        if (/[!@#$%^&*(),.?":{}|<>_\-]/.test(pw)) score++;
+
+        var levels = [
+            { label: 'Weak', color: '#dc3545', width: '20%', cls: 'strength-weak' },
+            { label: 'Weak', color: '#dc3545', width: '25%', cls: 'strength-weak' },
+            { label: 'Fair', color: '#fd7e14', width: '50%', cls: 'strength-fair' },
+            { label: 'Good', color: '#ffc107', width: '70%', cls: 'strength-good' },
+            { label: 'Strong', color: '#28a745', width: '85%', cls: 'strength-strong' },
+            { label: 'Very Strong', color: '#28a745', width: '100%', cls: 'strength-strong' }
+        ];
+        var level = levels[score];
+        fill.style.width = level.width;
+        fill.style.backgroundColor = level.color;
+        text.textContent = level.label;
+        text.className = 'password-strength-text ' + level.cls;
+
+        updateRequirements(pw);
+        checkPasswordMatch();
+    }
+
+    function updateRequirements(pw) {
+        var checks = {
+            'req-length': pw.length >= 8,
+            'req-upper': /[A-Z]/.test(pw),
+            'req-lower': /[a-z]/.test(pw),
+            'req-digit': /[0-9]/.test(pw),
+            'req-special': /[!@#$%^&*(),.?":{}|<>_\-]/.test(pw)
+        };
+        for (var id in checks) {
+            document.getElementById(id).className = checks[id] ? 'met' : 'unmet';
+        }
+    }
+
+    function checkPasswordMatch() {
+        var pw = document.getElementById('newAdminPassword').value;
+        var cpw = document.getElementById('newAdminConfirmPassword').value;
+        var msg = document.getElementById('passwordMatchMsg');
+        if (!cpw) {
+            msg.textContent = '';
+            msg.className = 'password-match-msg';
+            return;
+        }
+        if (pw === cpw) {
+            msg.textContent = 'Passwords match';
+            msg.className = 'password-match-msg match';
+        } else {
+            msg.textContent = 'Passwords do not match';
+            msg.className = 'password-match-msg no-match';
+        }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+        var input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.title = 'Hide password';
+        } else {
+            input.type = 'password';
+            btn.title = 'Show password';
+        }
     }
 
     // Add Credits Modal
