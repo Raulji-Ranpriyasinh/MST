@@ -1,76 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="page-last">
 <head>
   <meta charset="UTF-8" />
   <title>A4 Timeline with Pie Chart</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spartan:wght@400;500;600;700&display=swap">
-  <style>
-    #a4-timeline-container .page {
-      width: 21cm;
-      height: 29.7cm;
-      margin: 20px auto;
-      background-color: #fff;
-      padding: 2cm;
-      box-sizing: border-box;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      font-family: 'Spartan', Arial, sans-serif;
-    }
-
-    #a4-timeline-container table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    #a4-timeline-container th,
-    #a4-timeline-container td {
-      border: none;
-      padding: 6px 0; /* Adjusted for dot centering */
-      line-height: 1; /* Tightened for precise alignment */
-      vertical-align: middle;
-    }
-
-    #a4-timeline-container tr:not(:first-child) td {
-      background: linear-gradient(to right, #000 0%, #000 100%);
-      background-size: 100% 2px;
-      background-position: center center;
-      background-repeat: no-repeat;
-    }
-
-    #a4-timeline-container .label-section {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 30px;
-    }
-
-    #a4-timeline-container .label-section > div {
-      text-align: left;
-      padding-right: 20px;
-      min-width: 45%;
-    }
-
-    #a4-timeline-container hr {
-      border: none;
-      border-top: 2px solid #007bff;
-      margin: 30px 0;
-    }
-
-    #a4-timeline-container .pie-chart {
-      align-self: flex-start;
-    }
-
-    #a4-timeline-container .test-labels {
-      font-size: 14px;
-      font-weight: bold;
-      line-height: 1.6;
-      margin-top: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
   <div id="a4-timeline-container">

@@ -1,0 +1,2569 @@
+/* ==========================================================================
+   Edgepsych - Consolidated Stylesheet
+   ==========================================================================
+   Table of Contents:
+   1. Common / Shared Styles
+      1.1 Loading Spinner Overlay
+      1.2 Keyframes
+   2. Auth Pages (Login / Register / Forgot / Reset Password)
+      2.1 Auth Base Layout
+      2.2 Auth Form Elements
+      2.3 Auth Links
+      2.4 Auth Messages
+      2.5 Auth Mobile Responsiveness
+   3. Navbar & Dropdown (Dashboard Pages)
+      3.1 Navbar
+      3.2 Logo
+      3.3 Profile Button & Dropdown
+      3.4 Nav Images
+   4. Dashboard Container & Layout
+   5. Student Dashboard (dashboard.html)
+      5.1 Grid & Cards
+      5.2 Dashboard Heading
+      5.3 Dashboard Mobile Responsiveness
+   6. Programmes Page (programmers.html)
+      6.1 Grid & Cards
+      6.2 Status & Buttons
+      6.3 Programmes Mobile Responsiveness
+   7. Career Assessment (career_assessment.html)
+      7.1 Question Card
+      7.2 Career Buttons
+      7.3 Career Mobile Responsiveness
+   8. Aptitude Questionnaire (aptitude_questionnaire.html)
+      8.1 Question Section & Container
+      8.2 Options
+      8.3 Timer & Progress Bar
+      8.4 Navigation Buttons
+      8.5 Category & Tile Styles
+      8.6 Aptitude Mobile Responsiveness
+   9. Admin Dashboard (admin_dashboard.html)
+      9.1 Admin Tables
+      9.2 Admin Buttons & Badges
+      9.3 Toggle Switch
+      9.4 Pagination
+      9.5 Admin Tabs
+      9.6 Firm Management
+      9.7 Modals
+      9.8 Password Strength
+      9.9 Admin Mobile Responsiveness
+   10. Firm Dashboard (firm_dashboard.html)
+      10.1 Stats Cards
+      10.2 Tabs
+      10.3 Firm Tables
+      10.4 Badges
+      10.5 Toggle Switch
+      10.6 Download Buttons
+      10.7 Pagination
+      10.8 Search Bar
+      10.9 Firm Dashboard Mobile Responsiveness
+   11. PDF Report Pages
+      11.1 Report Page Base
+      11.2 Aptitude Report (aptitudefirst.html)
+      11.3 Print Styles
+   12. Demo / Timeline Pages
+      12.1 First Demo (firstdemo.html)
+      12.2 Last Demo (lastdemo.html)
+      12.3 Last / Timeline (last.html)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. COMMON / SHARED STYLES
+   ========================================================================== */
+
+/* 1.1 Loading Spinner Overlay
+   ========================================================================== */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #015fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Page-specific spinner colors */
+.page-admin-dashboard .spinner {
+    border-top-color: #0864ed;
+}
+
+.page-dashboard .spinner,
+.page-career-assessment .spinner,
+.page-programmes .spinner {
+    border-top-color: #296eff;
+}
+
+.page-firm-dashboard .spinner {
+    border-top-color: var(--color-primary, #0864ed);
+}
+
+.page-aptitude-report .spinner {
+    border-top-color: #4682B4;
+}
+
+/* 1.2 Keyframes
+   ========================================================================== */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   2. AUTH PAGES (Login / Register / Forgot / Reset Password)
+   ========================================================================== */
+
+/* 2.1 Auth Base Layout
+   ========================================================================== */
+.page-index body,
+.page-admin-login body,
+.page-firm-login body,
+.page-forgot-password body,
+.page-reset-password body {
+    font-family: Arial, sans-serif;
+    background-color: #f8fbfd;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.page-index .container,
+.page-admin-login .container,
+.page-firm-login .container,
+.page-forgot-password .container,
+.page-reset-password .container {
+    width: 400px;
+    background: #fff;
+    padding: 24px 32px;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* Index page has slightly different container */
+.page-index .container {
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+    padding: 24px 32px;
+    margin-top: 30px;
+}
+
+/* Admin login & firm login have bottom padding */
+.page-admin-login .container,
+.page-firm-login .container {
+    padding: 24px 32px 32px;
+}
+
+/* 2.2 Auth Form Elements
+   ========================================================================== */
+.page-index input,
+.page-index select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.page-admin-login input,
+.page-firm-login input,
+.page-forgot-password input,
+.page-reset-password input {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.page-forgot-password input {
+    transition: none;
+}
+
+.page-reset-password input {
+    transition: none;
+}
+
+.page-index button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #015fff, #3b72d0);
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.page-index button:hover {
+    background: linear-gradient(90deg, #0148d4, #305fae);
+}
+
+.page-admin-login button,
+.page-firm-login button,
+.page-forgot-password button,
+.page-reset-password button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #015fff, #3b72d0);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.page-firm-login button:hover,
+.page-forgot-password button:hover,
+.page-reset-password button:hover {
+    background: linear-gradient(90deg, #0148d4, #305fae);
+}
+
+.page-reset-password button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.page-admin-login input:focus,
+.page-admin-login select:focus {
+    outline: none;
+    border-color: #E8F0FE;
+    box-shadow: none;
+}
+
+.page-firm-login input:focus {
+    outline: none;
+    border-color: #E8F0FE;
+    box-shadow: none;
+}
+
+.page-admin-login form {
+    margin-top: 8px;
+}
+
+.page-firm-login form {
+    margin-top: 8px;
+}
+
+/* 2.3 Auth Links
+   ========================================================================== */
+.page-index .toggle-link {
+    display: block;
+    margin-top: 15px;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.page-index .toggle-link:hover {
+    text-decoration: underline;
+}
+
+.page-index .hidden {
+    display: none;
+}
+
+.page-firm-login .back-link,
+.page-forgot-password .back-link,
+.page-reset-password .back-link {
+    display: block;
+    margin-top: 15px;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.page-firm-login .back-link:hover,
+.page-forgot-password .back-link:hover,
+.page-reset-password .back-link:hover {
+    text-decoration: underline;
+}
+
+/* 2.4 Auth Messages
+   ========================================================================== */
+.page-forgot-password h2,
+.page-reset-password h2 {
+    color: #001e4d;
+    margin-bottom: 8px;
+}
+
+.page-forgot-password p.subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.page-forgot-password .msg,
+.page-reset-password .msg {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.page-forgot-password .msg.success,
+.page-reset-password .msg.success {
+    color: #28a745;
+}
+
+.page-forgot-password .msg.error,
+.page-reset-password .msg.error {
+    color: #dc3545;
+}
+
+.page-reset-password .error-banner {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.page-reset-password .password-requirements {
+    text-align: left;
+    font-size: 12px;
+    color: #888;
+    margin: 4px 0 10px;
+    line-height: 1.6;
+}
+
+.page-reset-password .password-requirements span.met {
+    color: #28a745;
+}
+
+.page-reset-password .password-requirements span.unmet {
+    color: #ccc;
+}
+
+/* 2.5 Auth Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 480px) {
+    .page-index .container,
+    .page-admin-login .container,
+    .page-firm-login .container {
+        width: 90%;
+        padding: 20px 16px;
+        margin-top: 20px;
+    }
+
+    .page-index .container img,
+    .page-admin-login .container img,
+    .page-firm-login .container img {
+        width: 180px;
+    }
+
+    .page-index h2,
+    .page-admin-login h2,
+    .page-firm-login h2 {
+        font-size: 20px;
+    }
+
+    .page-index input,
+    .page-index select {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .page-admin-login input,
+    .page-firm-login input {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .page-index button,
+    .page-admin-login button,
+    .page-firm-login button {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .page-forgot-password .container,
+    .page-reset-password .container {
+        width: 90%;
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 768px) and (min-width: 481px) {
+    .page-index .container,
+    .page-admin-login .container,
+    .page-firm-login .container {
+        width: 80%;
+        max-width: 450px;
+    }
+}
+
+
+/* ==========================================================================
+   3. NAVBAR & DROPDOWN (Dashboard Pages)
+   ========================================================================== */
+
+/* 3.1 Navbar
+   ========================================================================== */
+.page-dashboard body,
+.page-career-assessment body,
+.page-aptitude-questionnaire body,
+.page-programmes body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8fbfd;
+}
+
+.page-admin-dashboard body,
+.page-firm-dashboard body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8fbfd;
+}
+
+.page-dashboard .navbar,
+.page-career-assessment .navbar,
+.page-aptitude-questionnaire .navbar,
+.page-programmes .navbar,
+.page-admin-dashboard .navbar,
+.page-firm-dashboard .navbar {
+    padding: 10px;
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    background-image: url('/static/nav-img1.png'), url('/static/nav-img2.png');
+    background-repeat: no-repeat, no-repeat;
+    background-size: contain, contain;
+    background-position: center left, center right;
+}
+
+/* 3.2 Logo
+   ========================================================================== */
+.page-dashboard .logo,
+.page-career-assessment .logo,
+.page-aptitude-questionnaire .logo,
+.page-programmes .logo {
+    font-weight: bold;
+    font-size: 24px;
+    color: #001e4d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-admin-dashboard .logo img,
+.page-firm-dashboard .logo img,
+.page-programmes .logo img {
+    height: 40px;
+}
+
+/* 3.3 Profile Button & Dropdown
+   ========================================================================== */
+.page-dashboard .dropdown,
+.page-career-assessment .dropdown,
+.page-aptitude-questionnaire .dropdown,
+.page-programmes .dropdown {
+    position: relative;
+}
+
+.page-dashboard .profile-btn,
+.page-career-assessment .profile-btn,
+.page-aptitude-questionnaire .profile-btn,
+.page-programmes .profile-btn,
+.page-admin-dashboard .profile-btn {
+    background-color: #296eff;
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-admin-dashboard .profile-btn a {
+    color: white;
+    text-decoration: none;
+    font-weight: 100;
+}
+
+.page-firm-dashboard .profile-btn {
+    background-color: var(--color-primary, #296eff);
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-firm-dashboard .profile-btn:hover {
+    background-color: var(--color-secondary, #1a5ad4);
+}
+
+.page-dashboard .user-icon,
+.page-career-assessment .user-icon,
+.page-aptitude-questionnaire .user-icon,
+.page-programmes .user-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.page-dashboard .dropdown-content,
+.page-career-assessment .dropdown-content,
+.page-aptitude-questionnaire .dropdown-content,
+.page-programmes .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 48px;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.page-dashboard .dropdown-content p,
+.page-career-assessment .dropdown-content p,
+.page-aptitude-questionnaire .dropdown-content p,
+.page-programmes .dropdown-content p {
+    margin: 8px 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.page-dashboard .dropdown-content a,
+.page-career-assessment .dropdown-content a,
+.page-aptitude-questionnaire .dropdown-content a,
+.page-programmes .dropdown-content a {
+    display: block;
+    padding: 10px;
+    color: black;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.page-dashboard .dropdown-content a:hover,
+.page-career-assessment .dropdown-content a:hover,
+.page-aptitude-questionnaire .dropdown-content a:hover,
+.page-programmes .dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* 3.4 Nav Images
+   ========================================================================== */
+.page-dashboard .nav-images,
+.page-career-assessment .nav-images,
+.page-aptitude-questionnaire .nav-images,
+.page-programmes .nav-images {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.page-dashboard .nav-img,
+.page-career-assessment .nav-img,
+.page-aptitude-questionnaire .nav-img,
+.page-programmes .nav-img {
+    height: 40px;
+    width: auto;
+}
+
+
+/* ==========================================================================
+   4. DASHBOARD CONTAINER & LAYOUT
+   ========================================================================== */
+.page-dashboard .container,
+.page-career-assessment .container,
+.page-aptitude-questionnaire .container,
+.page-programmes .container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.page-dashboard .container h2,
+.page-career-assessment .container h2,
+.page-aptitude-questionnaire .container h2,
+.page-programmes .container h2 {
+    font-size: 26px;
+    margin-bottom: 30px;
+    color: #393939;
+}
+
+
+/* ==========================================================================
+   5. STUDENT DASHBOARD (dashboard.html)
+   ========================================================================== */
+
+/* 5.1 Grid & Cards
+   ========================================================================== */
+.page-dashboard .container h3 {
+    font-size: 26px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #015FFF, #3B72D0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-dashboard .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.page-dashboard .card {
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #5A8CE32E;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px 20px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.page-dashboard .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 5.3 Dashboard Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-dashboard .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-dashboard .logo img {
+        height: 30px;
+    }
+
+    .page-dashboard .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .page-dashboard .dropdown-content {
+        min-width: 160px;
+        top: 40px;
+    }
+
+    .page-dashboard .container {
+        padding: 20px 15px;
+    }
+
+    .page-dashboard .container h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .page-dashboard .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .page-dashboard .card {
+        padding: 20px 15px;
+    }
+}
+
+
+/* ==========================================================================
+   6. PROGRAMMES PAGE (programmers.html)
+   ========================================================================== */
+
+/* 6.1 Grid & Cards
+   ========================================================================== */
+.page-programmes .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.page-programmes .card {
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #5A8CE32E;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.page-programmes .card h3 {
+    margin-bottom: 10px;
+}
+
+/* 6.2 Status & Buttons
+   ========================================================================== */
+.page-programmes .status {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.page-programmes .start-btn {
+    padding: 10px 24px;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 10px;
+    font-weight: 600;
+    width: 194px;
+}
+
+.page-programmes .btn-blue {
+    background-color: #296eff;
+    color: white;
+    border: none;
+}
+
+.page-programmes .btn-red {
+    background-color: #dc143c;
+    color: white;
+    border: none;
+}
+
+.page-programmes .start-btn.disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* 6.3 Programmes Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-programmes .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-programmes .logo img {
+        height: 30px;
+    }
+
+    .page-programmes .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .page-programmes .dropdown-content {
+        min-width: 160px;
+        top: 40px;
+    }
+
+    .page-programmes .container {
+        padding: 20px 15px;
+    }
+
+    .page-programmes .container h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .page-programmes .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .page-programmes .card {
+        padding: 20px 15px;
+    }
+
+    .page-programmes .card p br {
+        display: none;
+    }
+
+    .page-programmes .start-btn {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+
+/* ==========================================================================
+   7. CAREER ASSESSMENT (career_assessment.html)
+   ========================================================================== */
+
+/* 7.1 Question Card
+   ========================================================================== */
+.page-career-assessment .question-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 40px 30px;
+    max-width: 600px;
+    margin: 60px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.page-career-assessment .card-heading {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 18px;
+}
+
+.page-career-assessment .button-wrapper {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    position: static;
+    transform: none;
+}
+
+/* 7.2 Career Buttons
+   ========================================================================== */
+.page-career-assessment .btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    box-shadow: none;
+}
+
+.page-career-assessment .btn:hover {
+    opacity: 0.9;
+    transform: scale(1.04);
+}
+
+.page-career-assessment .btn.yes {
+    background-color: #4CAF50;
+}
+
+.page-career-assessment .btn.maybe {
+    background-color: #fade11;
+}
+
+.page-career-assessment .btn.no {
+    background-color: #e74c3c;
+}
+
+/* 7.3 Career Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-career-assessment .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-career-assessment .logo img {
+        height: 30px;
+    }
+
+    .page-career-assessment .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .page-career-assessment .dropdown-content {
+        min-width: 160px;
+        top: 40px;
+    }
+
+    .page-career-assessment .container {
+        padding: 20px 10px;
+    }
+
+    .page-career-assessment .question-card {
+        padding: 24px 16px;
+        margin: 30px auto;
+        max-width: 95%;
+    }
+
+    .page-career-assessment .card-heading {
+        font-size: 18px;
+    }
+
+    .page-career-assessment .question-card .question {
+        font-size: 16px !important;
+    }
+
+    .page-career-assessment .button-wrapper {
+        gap: 12px;
+    }
+
+    .page-career-assessment .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+
+/* ==========================================================================
+   8. APTITUDE QUESTIONNAIRE (aptitude_questionnaire.html)
+   ========================================================================== */
+
+/* 8.1 Question Section & Container
+   ========================================================================== */
+.page-aptitude-questionnaire .question-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.page-aptitude-questionnaire .question-container {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 305px;
+    background: white;
+    width: 504px;
+    text-align: center;
+}
+
+.page-aptitude-questionnaire .question-img {
+    width: 300px;
+    height: 200px;
+    object-fit: contain;
+    margin: 10px auto;
+    display: block;
+}
+
+.page-aptitude-questionnaire #question-text {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 18px;
+    max-width: 90%;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.page-aptitude-questionnaire #question-container {
+    width: 80%;
+    max-width: 600px;
+    padding: 10px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.page-aptitude-questionnaire .question-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 8.2 Options
+   ========================================================================== */
+.page-aptitude-questionnaire .options-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    height: 305px;
+    background: white;
+    width: 504px;
+}
+
+.page-aptitude-questionnaire .options-container > * {
+    width: calc(50% - 10px);
+    display: flex;
+    justify-content: center;
+}
+
+.page-aptitude-questionnaire .option-img {
+    width: 150px;
+    height: 85px;
+    object-fit: contain;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 5px;
+}
+
+.page-aptitude-questionnaire .option-img:hover {
+    transform: scale(1.1);
+}
+
+.page-aptitude-questionnaire .option-img.selected {
+    border: 3px solid green;
+}
+
+.page-aptitude-questionnaire .option-img.enlarge {
+    transform: scale(2.5);
+}
+
+.page-aptitude-questionnaire .option-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+}
+
+.page-aptitude-questionnaire .option-text {
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+    font-size: 18px;
+    width: 150px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.page-aptitude-questionnaire .option-text:hover {
+    transform: scale(1.1);
+}
+
+.page-aptitude-questionnaire .option-text.selected {
+    border: 3px solid green;
+}
+
+.page-aptitude-questionnaire .selected-option {
+    border: 2px solid #007BFF;
+    background-color: #D0E8FF;
+}
+
+/* 8.3 Timer & Progress Bar
+   ========================================================================== */
+.page-aptitude-questionnaire .timer {
+    font-size: 18px;
+    font-weight: bold;
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.page-aptitude-questionnaire .progress-bar-container {
+    width: 80%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin: 20px auto;
+    height: 30px;
+    position: relative;
+    text-align: center;
+    font-weight: bold;
+}
+
+.page-aptitude-questionnaire .progress-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #015FFF, #3B72D0);
+    border-radius: 10px;
+    transition: width 1s linear;
+    line-height: 30px;
+    color: white;
+}
+
+/* 8.4 Navigation Buttons
+   ========================================================================== */
+.page-aptitude-questionnaire .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.page-aptitude-questionnaire .nav-btn {
+    background-color: #008080;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.page-aptitude-questionnaire .nav-btn:hover {
+    background-color: #005f5f;
+}
+
+/* 8.5 Category & Tile Styles
+   ========================================================================== */
+.page-aptitude-questionnaire .category-button {
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: lightgray;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.page-aptitude-questionnaire .category-button:hover {
+    background-color: #ddd;
+}
+
+.page-aptitude-questionnaire .active-category {
+    background-color: #296eff;
+    color: white;
+}
+
+.page-aptitude-questionnaire .completed-category {
+    background-color: #8e8e8e;
+    color: white;
+}
+
+.page-aptitude-questionnaire .tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.page-aptitude-questionnaire #question-tiles-container {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 8px;
+    max-width: 960px;
+    margin: 40px auto;
+    justify-content: center;
+}
+
+.page-aptitude-questionnaire .question-tile {
+    width: 100%;
+    height: 30px;
+    border-radius: 6px;
+    text-align: center;
+    line-height: 30px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    background-color: #f4f4fc;
+    color: #3b2f7b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.page-aptitude-questionnaire .question-tile:hover {
+    background-color: #e3defb;
+    transform: scale(1.05);
+}
+
+.page-aptitude-questionnaire .question-tile.attempted {
+    background-color: #296eff;
+    color: white;
+}
+
+.page-aptitude-questionnaire .question-tile.current {
+    background-color: #2196f3;
+    color: white;
+}
+
+.page-aptitude-questionnaire .question-tile.unattempted {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+/* 8.6 Aptitude Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-aptitude-questionnaire html,
+    .page-aptitude-questionnaire body {
+        overflow-x: hidden;
+    }
+
+    .page-aptitude-questionnaire .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        background-repeat: no-repeat, no-repeat;
+        padding: 10px 15px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .page-aptitude-questionnaire .logo {
+        margin-bottom: 0;
+    }
+
+    .page-aptitude-questionnaire .nav-images {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .page-aptitude-questionnaire .nav-img {
+        height: 30px;
+        width: auto;
+    }
+
+    .page-aptitude-questionnaire .profile-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
+    .page-aptitude-questionnaire .container {
+        padding: 20px 15px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .page-aptitude-questionnaire .question-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .page-aptitude-questionnaire .question-container,
+    .page-aptitude-questionnaire .options-container {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        box-sizing: border-box;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-aptitude-questionnaire .question-img {
+        width: 50%;
+        max-width: 320px;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .page-aptitude-questionnaire .option-img {
+        max-width: 100px;
+        max-height: 70px;
+        object-fit: contain;
+        margin-bottom: 6px;
+    }
+
+    .page-aptitude-questionnaire .option-text {
+        font-size: 14px;
+        text-align: center;
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+
+    .page-aptitude-questionnaire .options-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        box-sizing: border-box;
+        justify-items: center;
+    }
+
+    .page-aptitude-questionnaire .option-item {
+        width: 100%;
+        max-width: 160px;
+        min-height: 160px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+    }
+
+    .page-aptitude-questionnaire .button-container {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .page-aptitude-questionnaire .progress-bar-container {
+        width: 100%;
+        max-width: 95%;
+    }
+
+    .page-aptitude-questionnaire .tiles-grid,
+    .page-aptitude-questionnaire #question-tiles-container {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 100%;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .page-aptitude-questionnaire .question-tile {
+        font-size: 12px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .page-aptitude-questionnaire .dropdown-content {
+        min-width: 160px;
+        top: 40px;
+    }
+
+    .page-aptitude-questionnaire .category-scroll-wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        padding: 5px 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .page-aptitude-questionnaire .category-scroll-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .page-aptitude-questionnaire #category-selection {
+        display: inline-flex;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+}
+
+
+/* ==========================================================================
+   9. ADMIN DASHBOARD (admin_dashboard.html)
+   ========================================================================== */
+
+/* 9.1 Admin Container & Headings
+   ========================================================================== */
+.page-admin-dashboard .container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.page-admin-dashboard h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #001e4d;
+}
+
+.page-admin-dashboard .filters,
+.page-admin-dashboard .search-bar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.page-admin-dashboard .filters select,
+.page-admin-dashboard .search-bar input {
+    padding: 10px;
+    margin: 5px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* 9.1 Admin Tables
+   ========================================================================== */
+.page-admin-dashboard table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.page-admin-dashboard th,
+.page-admin-dashboard td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.page-admin-dashboard th {
+    background-color: #0864ed;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.page-admin-dashboard tr:nth-child(even) td {
+    background-color: #f4f7fb;
+}
+
+.page-admin-dashboard tr:hover td {
+    background-color: #eaf1fb;
+}
+
+.page-admin-dashboard td {
+    font-size: 14px;
+    color: #333;
+    vertical-align: middle;
+}
+
+/* 9.2 Admin Buttons & Badges
+   ========================================================================== */
+.page-admin-dashboard .btn {
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 500;
+    transition: 0.3s;
+    color: white;
+    text-decoration: none;
+}
+
+.page-admin-dashboard .aptitude-btn {
+    background-color: #007bff;
+}
+
+.page-admin-dashboard .career-btn {
+    background-color: #28a745;
+}
+
+.page-admin-dashboard .aptitude-btn:hover,
+.page-admin-dashboard .career-btn:hover {
+    opacity: 0.9;
+}
+
+/* 9.3 Toggle Switch
+   ========================================================================== */
+.page-admin-dashboard .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.page-admin-dashboard .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.page-admin-dashboard .slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.page-admin-dashboard .slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.page-admin-dashboard input:checked + .slider {
+    background-color: #4caf50;
+}
+
+.page-admin-dashboard input:checked + .slider::before {
+    transform: translateX(26px);
+}
+
+.page-admin-dashboard .status-indicator {
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.page-admin-dashboard .status-on {
+    color: green;
+}
+
+.page-admin-dashboard .status-off {
+    color: gray;
+}
+
+/* 9.4 Pagination
+   ========================================================================== */
+.page-admin-dashboard .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 20px auto;
+    flex-wrap: wrap;
+}
+
+.page-admin-dashboard .pagination-controls button {
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    background-color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: 0.2s;
+}
+
+.page-admin-dashboard .pagination-controls button:hover:not(:disabled) {
+    background-color: #0864ed;
+    color: white;
+    border-color: #0864ed;
+}
+
+.page-admin-dashboard .pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-admin-dashboard .pagination-controls button.active-page {
+    background-color: #0864ed;
+    color: white;
+    border-color: #0864ed;
+    font-weight: 600;
+}
+
+.page-admin-dashboard .pagination-controls .rows-per-page {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 16px;
+    font-size: 14px;
+}
+
+.page-admin-dashboard .pagination-controls .rows-per-page select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.page-admin-dashboard .pagination-info {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* 9.5 Admin Tabs
+   ========================================================================== */
+.page-admin-dashboard .admin-tab-bar {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin: 20px auto 0;
+    width: 90%;
+}
+
+.page-admin-dashboard .admin-tab-btn {
+    padding: 12px 28px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.page-admin-dashboard .admin-tab-btn:hover {
+    color: #0864ed;
+}
+
+.page-admin-dashboard .admin-tab-btn.active {
+    color: #0864ed;
+    border-bottom-color: #0864ed;
+}
+
+.page-admin-dashboard .admin-tab-content {
+    display: none;
+}
+
+.page-admin-dashboard .admin-tab-content.active {
+    display: block;
+}
+
+/* 9.6 Firm Management
+   ========================================================================== */
+.page-admin-dashboard .firm-container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.page-admin-dashboard .firm-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.page-admin-dashboard .firm-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.page-admin-dashboard .firm-btn-primary {
+    background-color: #0864ed;
+    color: white;
+}
+
+.page-admin-dashboard .firm-btn-primary:hover {
+    background-color: #0550c8;
+}
+
+.page-admin-dashboard .firm-btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.page-admin-dashboard .firm-btn-success:hover {
+    background-color: #218838;
+}
+
+.page-admin-dashboard .firm-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.page-admin-dashboard .firm-badge-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.page-admin-dashboard .firm-badge-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* 9.7 Modals
+   ========================================================================== */
+.page-admin-dashboard .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+.page-admin-dashboard .modal-overlay.active {
+    display: flex;
+}
+
+.page-admin-dashboard .modal-box {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.page-admin-dashboard .modal-box h3 {
+    margin-top: 0;
+    color: #001e4d;
+    font-size: 20px;
+}
+
+.page-admin-dashboard .modal-box input {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+}
+
+.page-admin-dashboard .modal-box textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.page-admin-dashboard .modal-box label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    display: block;
+    margin-top: 8px;
+}
+
+.page-admin-dashboard .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: flex-end;
+}
+
+.page-admin-dashboard .modal-actions button {
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    border: none;
+}
+
+.page-admin-dashboard .modal-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.page-admin-dashboard .modal-cancel:hover {
+    background-color: #ccc;
+}
+
+.page-admin-dashboard .modal-submit {
+    background-color: #0864ed;
+    color: white;
+}
+
+.page-admin-dashboard .modal-submit:hover {
+    background-color: #0550c8;
+}
+
+.page-admin-dashboard .modal-section-divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 16px 0 12px;
+}
+
+.page-admin-dashboard .modal-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #001e4d;
+    margin: 0 0 4px;
+}
+
+/* 9.8 Password Strength
+   ========================================================================== */
+.page-admin-dashboard .password-strength-container {
+    margin: 6px 0 4px;
+}
+
+.page-admin-dashboard .password-strength-bar {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #e0e0e0;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.page-admin-dashboard .password-strength-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.page-admin-dashboard .password-strength-text {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.page-admin-dashboard .strength-weak {
+    color: #dc3545;
+}
+
+.page-admin-dashboard .strength-fair {
+    color: #fd7e14;
+}
+
+.page-admin-dashboard .strength-good {
+    color: #ffc107;
+}
+
+.page-admin-dashboard .strength-strong {
+    color: #28a745;
+}
+
+.page-admin-dashboard .password-requirements {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0 6px;
+    line-height: 1.5;
+}
+
+.page-admin-dashboard .password-requirements span.met {
+    color: #28a745;
+}
+
+.page-admin-dashboard .password-requirements span.unmet {
+    color: #ccc;
+}
+
+.page-admin-dashboard .password-match-msg {
+    font-size: 12px;
+    margin: 2px 0 0;
+}
+
+.page-admin-dashboard .password-match-msg.match {
+    color: #28a745;
+}
+
+.page-admin-dashboard .password-match-msg.no-match {
+    color: #dc3545;
+}
+
+.page-admin-dashboard .input-wrapper {
+    position: relative;
+}
+
+.page-admin-dashboard .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+    padding: 4px;
+    line-height: 1;
+}
+
+.page-admin-dashboard .toggle-password-btn:hover {
+    color: #333;
+}
+
+/* 9.9 Admin Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-admin-dashboard .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-admin-dashboard .logo img {
+        height: 30px;
+    }
+
+    .page-admin-dashboard .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .page-admin-dashboard div[style*="margin: 20px auto; text-align: center;"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .page-admin-dashboard div[style*="margin: 20px auto; text-align: center."] input {
+        width: 90% !important;
+    }
+
+    .page-admin-dashboard .filters {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .page-admin-dashboard .filters select {
+        width: 90% !important;
+    }
+
+    .page-admin-dashboard .container {
+        width: 100% !important;
+        padding: 10px;
+        overflow-x: auto;
+    }
+
+    .page-admin-dashboard table {
+        min-width: 900px;
+        font-size: 12px;
+    }
+
+    .page-admin-dashboard th,
+    .page-admin-dashboard td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .page-admin-dashboard .btn {
+        font-size: 11px;
+        padding: 4px 7px;
+    }
+
+    .page-admin-dashboard .pagination-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+
+/* ==========================================================================
+   10. FIRM DASHBOARD (firm_dashboard.html)
+   ========================================================================== */
+
+/* 10.1 Stats Cards
+   ========================================================================== */
+.page-firm-dashboard .container {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.page-firm-dashboard h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #001e4d;
+}
+
+.page-firm-dashboard .stats-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.page-firm-dashboard .stat-card {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #5A8CE32E;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 24px 20px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.page-firm-dashboard .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.page-firm-dashboard .stat-card h3 {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.page-firm-dashboard .stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 600;
+    color: #001e4d;
+}
+
+.page-firm-dashboard .stat-card .stat-value.credit-green {
+    color: #28a745;
+}
+
+.page-firm-dashboard .stat-card .stat-value.credit-amber {
+    color: #fd7e14;
+}
+
+.page-firm-dashboard .stat-card .stat-value.credit-red {
+    color: #dc3545;
+}
+
+.page-firm-dashboard .low-credit-banner {
+    display: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.page-firm-dashboard .low-credit-banner.banner-amber {
+    display: block;
+    background: linear-gradient(135deg, #fd7e14, #e8590c);
+}
+
+.page-firm-dashboard .low-credit-banner.banner-red {
+    display: block;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+/* 10.2 Tabs
+   ========================================================================== */
+.page-firm-dashboard .tab-bar {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.page-firm-dashboard .tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.page-firm-dashboard .tab-btn:hover {
+    color: var(--color-primary, #0864ed);
+}
+
+.page-firm-dashboard .tab-btn.active {
+    color: var(--color-primary, #0864ed);
+    border-bottom-color: var(--color-primary, #0864ed);
+}
+
+.page-firm-dashboard .tab-content {
+    display: none;
+}
+
+.page-firm-dashboard .tab-content.active {
+    display: block;
+}
+
+/* 10.3 Firm Tables
+   ========================================================================== */
+.page-firm-dashboard table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.page-firm-dashboard th,
+.page-firm-dashboard td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.page-firm-dashboard th {
+    background-color: var(--color-primary, #0864ed);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+.page-firm-dashboard tr:nth-child(even) td {
+    background-color: #f4f7fb;
+}
+
+.page-firm-dashboard tr:hover td {
+    background-color: #eaf1fb;
+}
+
+.page-firm-dashboard td {
+    font-size: 14px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.page-firm-dashboard .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 15px;
+}
+
+/* 10.4 Badges
+   ========================================================================== */
+.page-firm-dashboard .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.page-firm-dashboard .badge-purchase {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.page-firm-dashboard .badge-usage {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.page-firm-dashboard .badge-refund {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.page-firm-dashboard .badge-adjustment {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.page-firm-dashboard .badge-done {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.page-firm-dashboard .badge-pending {
+    background-color: #e2e3e5;
+    color: #6c757d;
+}
+
+/* 10.5 Toggle Switch
+   ========================================================================== */
+.page-firm-dashboard .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+}
+
+.page-firm-dashboard .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.page-firm-dashboard .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 22px;
+    transition: 0.3s;
+}
+
+.page-firm-dashboard .toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.page-firm-dashboard .toggle-switch input:checked + .toggle-slider {
+    background-color: #28a745;
+}
+
+.page-firm-dashboard .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* 10.6 Download Buttons
+   ========================================================================== */
+.page-firm-dashboard .dl-btn {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    margin: 2px;
+}
+
+.page-firm-dashboard .dl-btn.career {
+    background-color: #0864ed;
+}
+
+.page-firm-dashboard .dl-btn.aptitude {
+    background-color: #6f42c1;
+}
+
+.page-firm-dashboard .dl-btn:disabled,
+.page-firm-dashboard .dl-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* 10.7 Pagination
+   ========================================================================== */
+.page-firm-dashboard .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.page-firm-dashboard .pagination button {
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+}
+
+.page-firm-dashboard .pagination button:hover:not(:disabled) {
+    background-color: #eaf1fb;
+    border-color: var(--color-primary, #0864ed);
+}
+
+.page-firm-dashboard .pagination button.active {
+    background-color: var(--color-primary, #0864ed);
+    color: white;
+    border-color: var(--color-primary, #0864ed);
+}
+
+.page-firm-dashboard .pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-firm-dashboard .pagination .page-info {
+    font-size: 13px;
+    color: #666;
+}
+
+/* 10.8 Search Bar
+   ========================================================================== */
+.page-firm-dashboard .search-bar {
+    margin-bottom: 15px;
+}
+
+.page-firm-dashboard .search-bar input {
+    padding: 10px 14px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* 10.9 Firm Dashboard Mobile Responsiveness
+   ========================================================================== */
+@media (max-width: 768px) {
+    .page-firm-dashboard .navbar {
+        background-size: auto 40px, auto 40px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-firm-dashboard .logo img {
+        height: 30px;
+    }
+
+    .page-firm-dashboard .profile-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .page-firm-dashboard .stats-row {
+        flex-direction: column;
+    }
+
+    .page-firm-dashboard .stat-card {
+        min-width: unset;
+    }
+
+    .page-firm-dashboard .container {
+        width: 100% !important;
+        padding: 10px;
+        overflow-x: auto;
+    }
+
+    .page-firm-dashboard table {
+        min-width: 900px;
+        font-size: 12px;
+    }
+
+    .page-firm-dashboard th,
+    .page-firm-dashboard td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .page-firm-dashboard .tab-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .page-firm-dashboard .search-bar input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+
+/* ==========================================================================
+   11. PDF REPORT PAGES
+   ========================================================================== */
+
+/* 11.1 Report Page Base
+   ========================================================================== */
+.page-aptitude-report body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
+.page-aptitude-report .page {
+    width: 21cm;
+    height: 29.7cm;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #fff;
+    box-sizing: border-box;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+    overflow: hidden;
+    max-height: 297mm;
+    position: relative;
+}
+
+.page-aptitude-report .second-sub-header {
+    text-align: center;
+    color: #800080;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.page-aptitude-report .second-graph-container {
+    width: 100%;
+    height: 300px;
+}
+
+.page-aptitude-report .three-chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 700px;
+}
+
+/* 11.3 Print Styles
+   ========================================================================== */
+@media print {
+    .page-aptitude-report .print-hide,
+    .page-aptitude-report .button-container {
+        display: none !important;
+    }
+
+    .page-aptitude-report body {
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-aptitude-report .page {
+        page-break-after: always;
+        page-break-inside: avoid;
+        break-after: page;
+        break-inside: avoid;
+    }
+
+    .page-aptitude-report img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .page-aptitude-report hr {
+        break-after: avoid;
+    }
+
+    .page-aptitude-report a {
+        text-decoration: none;
+        color: inherit;
+    }
+}
+
+
+/* ==========================================================================
+   12. DEMO / TIMELINE PAGES
+   ========================================================================== */
+
+/* 12.1 First Demo (firstdemo.html)
+   ========================================================================== */
+.page-firstdemo body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.page-firstdemo .page {
+    width: 21cm;
+    height: 29.7cm;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 2cm;
+    box-sizing: border-box;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 12.2 Last Demo (lastdemo.html)
+   ========================================================================== */
+.page-lastdemo .page {
+    width: 21cm;
+    height: 29.7cm;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 2cm;
+    box-sizing: border-box;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 12.3 Last / Timeline (last.html)
+   ========================================================================== */
+#a4-timeline-container .page {
+    width: 21cm;
+    height: 29.7cm;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 2cm;
+    box-sizing: border-box;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Spartan', Arial, sans-serif;
+}
+
+#a4-timeline-container table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+#a4-timeline-container th,
+#a4-timeline-container td {
+    border: none;
+    padding: 6px 0;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+#a4-timeline-container tr:not(:first-child) td {
+    background: linear-gradient(to right, #000 0%, #000 100%);
+    background-size: 100% 2px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+#a4-timeline-container .label-section {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+#a4-timeline-container .label-section > div {
+    text-align: left;
+    padding-right: 20px;
+    min-width: 45%;
+}
+
+#a4-timeline-container hr {
+    border: none;
+    border-top: 2px solid #007bff;
+    margin: 30px 0;
+}
+
+#a4-timeline-container .pie-chart {
+    align-self: flex-start;
+}
+
+#a4-timeline-container .test-labels {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.6;
+    margin-top: 10px;
+}
