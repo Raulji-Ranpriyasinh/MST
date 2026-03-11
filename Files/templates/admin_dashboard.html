@@ -846,6 +846,22 @@
         </div>
     </div>
 
+    <!-- Invite Link Modal -->
+    <div class="modal-overlay" id="inviteLinkModal">
+        <div class="modal-box">
+            <h3>Invite Link Generated</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:12px;">Share this link with students to register under this firm. The link is valid for 30 days.</p>
+            <label>Invite URL</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="inviteLinkUrl" readonly style="flex:1; background:#f4f7fb; cursor:text;" />
+                <button class="firm-btn firm-btn-primary" style="padding:8px 16px; font-size:13px; white-space:nowrap;" onclick="copyInviteLink()">Copy</button>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-cancel" onclick="closeInviteLinkModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Credits Modal -->
     <div class="modal-overlay" id="addCreditsModal">
         <div class="modal-box">
@@ -1086,6 +1102,7 @@
                 <td>${dateStr}</td>
                 <td>
                     <button class="firm-btn firm-btn-success" style="padding:5px 12px; font-size:12px;" onclick="openAddCreditsModal(${f.id}, '${escapeHtmlAdmin(f.firm_name)}')">+ Credits</button>
+                    ${f.is_active ? '<button class="firm-btn firm-btn-primary" style="padding:5px 12px; font-size:12px; margin-left:6px;" onclick="generateInviteLink(' + f.id + ')">Invite Link</button>' : ''}
                 </td>
             `;
             tbody.appendChild(row);
@@ -1265,6 +1282,39 @@
             input.type = 'password';
             btn.title = 'Show password';
         }
+    }
+
+    // Invite Link
+    async function generateInviteLink(firmId) {
+        document.getElementById('loadingOverlay').classList.add('active');
+        try {
+            var res = await authFetch('/admin/firms/' + firmId + '/invite-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            var data = await res.json();
+            if (data.success) {
+                document.getElementById('inviteLinkUrl').value = data.invite_url;
+                document.getElementById('inviteLinkModal').classList.add('active');
+            } else {
+                showToast(data.message || 'Failed to generate invite link', 'error');
+            }
+        } catch (err) {
+            console.error('Invite link error:', err);
+            showToast('Something went wrong.', 'error');
+        }
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    function closeInviteLinkModal() {
+        document.getElementById('inviteLinkModal').classList.remove('active');
+    }
+
+    function copyInviteLink() {
+        var input = document.getElementById('inviteLinkUrl');
+        input.select();
+        document.execCommand('copy');
+        showToast('Invite link copied to clipboard!', 'success');
     }
 
     // Add Credits Modal
