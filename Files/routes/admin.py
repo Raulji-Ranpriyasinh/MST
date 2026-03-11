@@ -4,6 +4,7 @@ import json
 
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
 from extensions import db, socketio
@@ -378,6 +379,45 @@ def add_firm_credits(firm_id):
         "success": True,
         "message": f"{credits} credits added",
         "credit_balance": firm.credit_balance,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Phase 8 – Firm Invite-Link Generation
+# ---------------------------------------------------------------------------
+
+_INVITE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days in seconds
+
+
+def _get_invite_serializer():
+    """Return a URLSafeTimedSerializer using the app's SECRET_KEY."""
+    from flask import current_app
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+
+@admin_bp.route('/admin/firms/<int:firm_id>/invite-link', methods=['POST'])
+@jwt_required()
+def generate_invite_link(firm_id):
+    """Generate a signed invite token for a firm (admin only)."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    firm = db.session.get(ConsultancyFirm, firm_id)
+    if firm is None:
+        return jsonify({'success': False, 'message': 'Firm not found'}), 404
+    if not firm.is_active:
+        return jsonify({'success': False, 'message': 'Firm is not active'}), 400
+
+    serializer = _get_invite_serializer()
+    token = serializer.dumps({'firm_id': firm.id}, salt='firm-invite')
+
+    invite_url = url_for('auth.register_with_firm_token', token=token, _external=True)
+
+    return jsonify({
+        'success': True,
+        'token': token,
+        'invite_url': invite_url,
+        'expires_in_days': 30,
     })
 
 

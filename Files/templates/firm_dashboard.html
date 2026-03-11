@@ -101,13 +101,12 @@
       color: #001e4d;
     }
 
-    .stat-card .stat-value.warning {
-      color: #dc3545;
-    }
+    .stat-card .stat-value.credit-green { color: #28a745; }
+    .stat-card .stat-value.credit-amber { color: #fd7e14; }
+    .stat-card .stat-value.credit-red { color: #dc3545; }
 
     .low-credit-banner {
       display: none;
-      background: linear-gradient(135deg, #dc3545, #c82333);
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
@@ -117,8 +116,14 @@
       font-weight: 500;
     }
 
-    .low-credit-banner.visible {
+    .low-credit-banner.banner-amber {
       display: block;
+      background: linear-gradient(135deg, #fd7e14, #e8590c);
+    }
+
+    .low-credit-banner.banner-red {
+      display: block;
+      background: linear-gradient(135deg, #dc3545, #c82333);
     }
 
     /* Tabs */
@@ -234,6 +239,46 @@
       color: #0c5460;
     }
 
+    .badge-done { background-color: #d4edda; color: #155724; }
+    .badge-pending { background-color: #e2e3e5; color: #6c757d; }
+
+    /* Toggle switch */
+    .toggle-switch { position: relative; display: inline-block; width: 42px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; border-radius: 22px; transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: ""; position: absolute; height: 16px; width: 16px;
+      left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background-color: #28a745; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* Download buttons */
+    .dl-btn {
+      display: inline-block; padding: 4px 10px; font-size: 12px; border: none;
+      border-radius: 4px; cursor: pointer; color: white; text-decoration: none; margin: 2px;
+    }
+    .dl-btn.career { background-color: #0864ed; }
+    .dl-btn.aptitude { background-color: #6f42c1; }
+    .dl-btn:disabled, .dl-btn.disabled { background-color: #ccc; cursor: not-allowed; pointer-events: none; }
+
+    /* Pagination */
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 8px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .pagination button {
+      padding: 6px 14px; border: 1px solid #ccc; background: white;
+      border-radius: 5px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 13px;
+    }
+    .pagination button:hover:not(:disabled) { background-color: #eaf1fb; border-color: #0864ed; }
+    .pagination button.active { background-color: #0864ed; color: white; border-color: #0864ed; }
+    .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination .page-info { font-size: 13px; color: #666; }
+
     /* Loading Spinner Overlay */
     .loading-overlay {
       display: none;
@@ -299,7 +344,7 @@
         overflow-x: auto;
       }
       table {
-        min-width: 600px;
+        min-width: 900px;
         font-size: 12px;
       }
       th, td {
@@ -370,21 +415,26 @@
         <!-- Students Tab -->
         <div class="tab-content active" id="tab-students">
             <div class="search-bar">
-                <input type="text" id="searchStudent" placeholder="Search by name or email..." onkeyup="filterStudents()" />
+                <input type="text" id="searchStudent" placeholder="Search by name or email..." />
             </div>
             <table id="studentsTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
+                        <th>Name</th>
                         <th>Email</th>
+                        <th>Country</th>
+                        <th>Grade</th>
+                        <th>Career</th>
+                        <th>Aptitude</th>
+                        <th>Result Access</th>
+                        <th>Reports</th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
                 </tbody>
             </table>
             <div class="empty-state" id="noStudents" style="display:none;">No students linked to this firm yet.</div>
+            <div class="pagination" id="paginationControls" style="display:none;"></div>
         </div>
 
         <!-- Transactions Tab -->
@@ -410,28 +460,26 @@
     <script src="/static/js/jwt_helpers.js"></script>
     <script src="/static/js/toast.js"></script>
     <script>
+        // ===== State =====
+        let currentPage = 1;
+        let currentSearch = '';
+        let searchTimer = null;
+
         // ===== Tab Switching =====
         function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-
+            document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(tab) { tab.classList.remove('active'); });
             document.getElementById('tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
-
-            if (tabName === 'transactions') {
-                loadTransactions();
-            }
+            if (tabName === 'transactions') loadTransactions();
         }
 
-        // ===== Load Dashboard Data =====
+        // ===== Load Dashboard Data (stats only) =====
         async function loadDashboard() {
             document.getElementById('loadingOverlay').classList.add('active');
             try {
                 const res = await authFetch('/api/v1/firm/dashboard-data');
-                if (res.status === 401 || res.status === 403) {
-                    window.location.href = '/firm';
-                    return;
-                }
+                if (res.status === 401 || res.status === 403) { window.location.href = '/firm'; return; }
                 const data = await res.json();
                 if (!data.success) {
                     showToast(data.message || 'Failed to load dashboard', 'error');
@@ -439,40 +487,29 @@
                     return;
                 }
 
-                // Update stats
                 document.getElementById('firmName').textContent = data.firm_name;
-                document.getElementById('creditBalance').textContent = data.credit_balance;
-                document.getElementById('totalStudents').textContent = data.students.length;
+                document.getElementById('totalStudents').textContent = data.total_students;
                 document.getElementById('firmTitle').textContent = data.firm_name + ' - Dashboard';
 
-                // Low credit warning
-                if (data.low_credit_warning) {
-                    document.getElementById('lowCreditBanner').classList.add('visible');
-                    document.getElementById('creditBalance').classList.add('warning');
-                }
+                // Colour-coded credit balance
+                var creditEl = document.getElementById('creditBalance');
+                var balance = data.credit_balance;
+                creditEl.textContent = balance;
+                creditEl.classList.remove('credit-green', 'credit-amber', 'credit-red');
+                var banner = document.getElementById('lowCreditBanner');
+                banner.classList.remove('banner-red', 'banner-amber');
 
-                // Populate students table
-                const tbody = document.getElementById('studentsBody');
-                tbody.innerHTML = '';
-
-                if (data.students.length === 0) {
-                    document.getElementById('studentsTable').style.display = 'none';
-                    document.getElementById('noStudents').style.display = 'block';
+                if (balance <= 5) {
+                    creditEl.classList.add('credit-red');
+                    banner.classList.add('banner-red');
+                } else if (balance <= 15) {
+                    creditEl.classList.add('credit-amber');
+                    banner.classList.add('banner-amber');
                 } else {
-                    document.getElementById('studentsTable').style.display = '';
-                    document.getElementById('noStudents').style.display = 'none';
-                    data.students.forEach(s => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${s.id}</td>
-                            <td>${escapeHtml(s.first_name)}</td>
-                            <td>${escapeHtml(s.last_name)}</td>
-                            <td>${escapeHtml(s.email)}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
+                    creditEl.classList.add('credit-green');
                 }
 
+                await loadStudents(1);
                 document.getElementById('loadingOverlay').classList.remove('active');
             } catch (err) {
                 console.error('Dashboard error:', err);
@@ -481,48 +518,191 @@
             }
         }
 
+        // ===== Load Students (paginated) =====
+        async function loadStudents(page, search) {
+            if (search !== undefined) currentSearch = search;
+            currentPage = page || 1;
+            var url = '/api/v1/firm/students?page=' + currentPage + '&per_page=25';
+            if (currentSearch) url += '&search=' + encodeURIComponent(currentSearch);
+
+            try {
+                var res = await authFetch(url);
+                if (res.status === 401 || res.status === 403) { window.location.href = '/firm'; return; }
+                var data = await res.json();
+                if (!data.success) { showToast(data.message || 'Failed to load students', 'error'); return; }
+
+                var tbody = document.getElementById('studentsBody');
+                tbody.innerHTML = '';
+
+                if (data.students.length === 0) {
+                    document.getElementById('studentsTable').style.display = 'none';
+                    document.getElementById('noStudents').style.display = 'block';
+                    document.getElementById('paginationControls').style.display = 'none';
+                } else {
+                    document.getElementById('studentsTable').style.display = '';
+                    document.getElementById('noStudents').style.display = 'none';
+
+                    data.students.forEach(function(s) {
+                        var row = document.createElement('tr');
+                        var careerBadge = s.career_test_completed
+                            ? '<span class="badge badge-done">Done</span>'
+                            : '<span class="badge badge-pending">--</span>';
+                        var aptitudeBadge = s.aptitude_test_completed
+                            ? '<span class="badge badge-done">Done</span>'
+                            : '<span class="badge badge-pending">--</span>';
+                        var toggleChecked = s.can_view_career_result ? 'checked' : '';
+                        var careerDl = s.career_test_completed
+                            ? '<a class="dl-btn career" href="/api/v1/firm/students/' + s.id + '/report/career" target="_blank">Career</a>'
+                            : '<span class="dl-btn career disabled">Career</span>';
+                        var aptitudeDl = s.aptitude_test_completed
+                            ? '<a class="dl-btn aptitude" href="/api/v1/firm/students/' + s.id + '/report/aptitude" target="_blank">Aptitude</a>'
+                            : '<span class="dl-btn aptitude disabled">Aptitude</span>';
+                        row.innerHTML =
+                            '<td>' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '</td>' +
+                            '<td>' + escapeHtml(s.email) + '</td>' +
+                            '<td>' + escapeHtml(s.country) + '</td>' +
+                            '<td>' + escapeHtml(s.grade) + '</td>' +
+                            '<td>' + careerBadge + '</td>' +
+                            '<td>' + aptitudeBadge + '</td>' +
+                            '<td><label class="toggle-switch"><input type="checkbox" ' + toggleChecked + ' onchange="toggleResultAccess(' + s.id + ', this.checked)" /><span class="toggle-slider"></span></label></td>' +
+                            '<td>' + careerDl + ' ' + aptitudeDl + '</td>';
+                        tbody.appendChild(row);
+                    });
+                    buildPagination(data.current_page, data.pages, data.total);
+                }
+            } catch (err) {
+                console.error('Students error:', err);
+                showToast('Failed to load students.', 'error');
+            }
+        }
+
+        // ===== Build Pagination =====
+        function buildPagination(current, totalPages, totalItems) {
+            var container = document.getElementById('paginationControls');
+            container.innerHTML = '';
+            if (totalPages <= 1) { container.style.display = 'none'; return; }
+            container.style.display = 'flex';
+
+            var prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Prev';
+            prevBtn.disabled = current <= 1;
+            prevBtn.onclick = function() { loadStudents(current - 1); };
+            container.appendChild(prevBtn);
+
+            var startPage = Math.max(1, current - 3);
+            var endPage = Math.min(totalPages, current + 3);
+
+            if (startPage > 1) {
+                var firstBtn = document.createElement('button');
+                firstBtn.textContent = '1';
+                firstBtn.onclick = function() { loadStudents(1); };
+                container.appendChild(firstBtn);
+                if (startPage > 2) {
+                    var dots = document.createElement('span');
+                    dots.className = 'page-info';
+                    dots.textContent = '...';
+                    container.appendChild(dots);
+                }
+            }
+
+            for (var i = startPage; i <= endPage; i++) {
+                var btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === current) btn.classList.add('active');
+                btn.onclick = (function(p) { return function() { loadStudents(p); }; })(i);
+                container.appendChild(btn);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    var dots2 = document.createElement('span');
+                    dots2.className = 'page-info';
+                    dots2.textContent = '...';
+                    container.appendChild(dots2);
+                }
+                var lastBtn = document.createElement('button');
+                lastBtn.textContent = totalPages;
+                lastBtn.onclick = function() { loadStudents(totalPages); };
+                container.appendChild(lastBtn);
+            }
+
+            var nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = current >= totalPages;
+            nextBtn.onclick = function() { loadStudents(current + 1); };
+            container.appendChild(nextBtn);
+
+            var info = document.createElement('span');
+            info.className = 'page-info';
+            info.textContent = '(' + totalItems + ' total)';
+            container.appendChild(info);
+        }
+
+        // ===== Toggle Result Access =====
+        async function toggleResultAccess(studentId, canView) {
+            try {
+                var res = await authFetch('/api/v1/firm/students/' + studentId + '/toggle-result-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ can_view: canView })
+                });
+                var data = await res.json();
+                if (!data.success) {
+                    showToast(data.message || 'Failed to update access', 'error');
+                    loadStudents(currentPage);
+                } else {
+                    showToast('Result access updated', 'success');
+                }
+            } catch (err) {
+                console.error('Toggle error:', err);
+                showToast('Failed to update access.', 'error');
+                loadStudents(currentPage);
+            }
+        }
+
+        // ===== Search with debounce (300ms) =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('searchStudent');
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() {
+                    loadStudents(1, searchInput.value.trim());
+                }, 300);
+            });
+        });
+
         // ===== Load Transactions =====
         let transactionsLoaded = false;
         async function loadTransactions() {
             if (transactionsLoaded) return;
-
             try {
-                const res = await authFetch('/api/v1/firm/credits/transactions');
-                if (res.status === 401 || res.status === 403) {
-                    window.location.href = '/firm';
-                    return;
-                }
-                const data = await res.json();
-                if (!data.success) {
-                    showToast(data.message || 'Failed to load transactions', 'error');
-                    return;
-                }
+                var res = await authFetch('/api/v1/firm/credits/transactions');
+                if (res.status === 401 || res.status === 403) { window.location.href = '/firm'; return; }
+                var data = await res.json();
+                if (!data.success) { showToast(data.message || 'Failed to load transactions', 'error'); return; }
 
-                const tbody = document.getElementById('transactionsBody');
+                var tbody = document.getElementById('transactionsBody');
                 tbody.innerHTML = '';
-
                 if (data.transactions.length === 0) {
                     document.getElementById('transactionsTable').style.display = 'none';
                     document.getElementById('noTransactions').style.display = 'block';
                 } else {
                     document.getElementById('transactionsTable').style.display = '';
                     document.getElementById('noTransactions').style.display = 'none';
-                    data.transactions.forEach(t => {
-                        const row = document.createElement('tr');
-                        const badgeClass = 'badge-' + (t.transaction_type || 'usage');
-                        const dateStr = t.created_at ? new Date(t.created_at).toLocaleString() : '--';
-                        row.innerHTML = `
-                            <td>${t.id}</td>
-                            <td>${t.student_id || '--'}</td>
-                            <td>${t.credits_used}</td>
-                            <td><span class="badge ${badgeClass}">${escapeHtml(t.transaction_type)}</span></td>
-                            <td>${escapeHtml(t.description || '--')}</td>
-                            <td>${dateStr}</td>
-                        `;
+                    data.transactions.forEach(function(t) {
+                        var row = document.createElement('tr');
+                        var badgeClass = 'badge-' + (t.transaction_type || 'usage');
+                        var dateStr = t.created_at ? new Date(t.created_at).toLocaleString() : '--';
+                        row.innerHTML =
+                            '<td>' + t.id + '</td>' +
+                            '<td>' + (t.student_id || '--') + '</td>' +
+                            '<td>' + t.credits_used + '</td>' +
+                            '<td><span class="badge ' + badgeClass + '">' + escapeHtml(t.transaction_type) + '</span></td>' +
+                            '<td>' + escapeHtml(t.description || '--') + '</td>' +
+                            '<td>' + dateStr + '</td>';
                         tbody.appendChild(row);
                     });
                 }
-
                 transactionsLoaded = true;
             } catch (err) {
                 console.error('Transactions error:', err);
@@ -530,27 +710,17 @@
             }
         }
 
-        // ===== Filter Students =====
-        function filterStudents() {
-            const query = document.getElementById('searchStudent').value.toLowerCase();
-            const rows = document.querySelectorAll('#studentsBody tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
-        }
-
         // ===== Logout =====
         function firmLogout() {
             authFetch('/api/v1/firm/logout', { method: 'GET' })
-                .then(() => { window.location.href = '/firm'; })
-                .catch(() => { window.location.href = '/firm'; });
+                .then(function() { window.location.href = '/firm'; })
+                .catch(function() { window.location.href = '/firm'; });
         }
 
         // ===== Escape HTML =====
         function escapeHtml(str) {
             if (!str) return '';
-            const div = document.createElement('div');
+            var div = document.createElement('div');
             div.appendChild(document.createTextNode(str));
             return div.innerHTML;
         }
