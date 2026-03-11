@@ -1,8 +1,13 @@
 """Admin routes: admin dashboard, career scores, career report, toggle access."""
 
 import json
+import re
+import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
@@ -11,6 +16,7 @@ from extensions import db, socketio
 from models.assessment import CareerQuestion, StudentCareerResponse
 from models.consultancy import ConsultancyFirm, CreditTransaction, FirmAdmin
 from models.student import ExamProcess, StudentDetails, TestStatus
+from sqlalchemy.orm import joinedload
 from schemas.validation import validate_firm_creation
 from services.scoring import get_career_scores, load_mappings
 
@@ -43,17 +49,74 @@ def admin_dashboard():
     if claims.get("role") != "admin":
         return redirect(url_for('auth.home'))
 
-    students = StudentDetails.query.all()
+    return render_template('admin_dashboard.html')
 
-    students_with_tests = []
-    for student in students:
-        test_status = TestStatus.query.filter_by(user_id=student.id).first()
-        exam_progress = ExamProcess.query.filter_by(student_id=student.id).first()
+
+# ---------------------------------------------------------------------------
+# Paginated Admin Student List API  (Intern 1)
+# ---------------------------------------------------------------------------
+
+@admin_bp.route('/api/v1/admin/students', methods=['GET'])
+@jwt_required()
+def admin_students_list():
+    """Return a paginated, filterable list of all students for the admin."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
+    per_page = max(1, min(per_page, 100))
+
+    # Optional filters
+    firm_id = request.args.get('firm_id', type=int)
+    country = request.args.get('country', '', type=str).strip()
+    is_independent = request.args.get('is_independent', '', type=str).strip().lower()
+    curriculum = request.args.get('curriculum', '', type=str).strip()
+    school_name = request.args.get('school_name', '', type=str).strip()
+    referral_source = request.args.get('referral_source', '', type=str).strip()
+    search = request.args.get('search', '', type=str).strip()
+
+    query = StudentDetails.query.options(joinedload(StudentDetails.firm))
+
+    if firm_id is not None:
+        query = query.filter(StudentDetails.firm_id == firm_id)
+    if is_independent == 'true':
+        query = query.filter(StudentDetails.firm_id.is_(None))
+    elif is_independent == 'false':
+        query = query.filter(StudentDetails.firm_id.isnot(None))
+    if country:
+        query = query.filter(StudentDetails.country == country)
+    if curriculum:
+        query = query.filter(StudentDetails.curriculum == curriculum)
+    if school_name:
+        query = query.filter(StudentDetails.school_name == school_name)
+    if referral_source:
+        query = query.filter(StudentDetails.referral_source == referral_source)
+    if search:
+        like_term = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                StudentDetails.first_name.ilike(like_term),
+                StudentDetails.last_name.ilike(like_term),
+                StudentDetails.email.ilike(like_term),
+                StudentDetails.mobile_number.ilike(like_term),
+            )
+        )
+
+    pagination = query.order_by(StudentDetails.id).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    total_career_questions = CareerQuestion.query.count()
+
+    students = []
+    for s in pagination.items:
+        test_status = TestStatus.query.filter_by(user_id=s.id).first()
+        exam_progress = ExamProcess.query.filter_by(student_id=s.id).first()
 
         career_test_completed = False
         aptitude_test_completed = False
 
-        total_career_questions = CareerQuestion.query.count()
         if exam_progress and exam_progress.last_attempted_question_id >= total_career_questions:
             career_test_completed = True
         elif test_status and test_status.career_test_completed:
@@ -62,26 +125,35 @@ def admin_dashboard():
         if test_status and test_status.aptitude_test_completed:
             aptitude_test_completed = True
 
-        student.career_test_completed = career_test_completed
-        student.aptitude_test_completed = aptitude_test_completed
+        firm_name = "Independent"
+        if s.firm is not None:
+            firm_name = s.firm.firm_name
 
-        students_with_tests.append(student)
+        students.append({
+            "id": s.id,
+            "first_name": s.first_name,
+            "last_name": s.last_name,
+            "email": s.email,
+            "mobile": s.mobile_number,
+            "country": s.country,
+            "curriculum": s.curriculum,
+            "school_name": s.school_name,
+            "grade": s.grade,
+            "referral_source": s.referral_source,
+            "firm_id": s.firm_id,
+            "firm_name": firm_name,
+            "can_view_career_result": s.can_view_career_result,
+            "career_test_completed": career_test_completed,
+            "aptitude_test_completed": aptitude_test_completed,
+        })
 
-    unique_countries = {student.country for student in students if student.country}
-    unique_curriculums = {student.curriculum for student in students if student.curriculum}
-    unique_schools = {student.school_name for student in students if student.school_name}
-    unique_referrals = {
-        student.referral_source for student in students if student.referral_source
-    }
-
-    return render_template(
-        'admin_dashboard.html',
-        students=students_with_tests,
-        unique_countries=unique_countries,
-        unique_curriculums=unique_curriculums,
-        unique_schools=unique_schools,
-        unique_referrals=unique_referrals,
-    )
+    return jsonify({
+        "success": True,
+        "total": pagination.total,
+        "pages": pagination.pages,
+        "current_page": pagination.page,
+        "students": students,
+    })
 
 
 @admin_bp.route('/get_career_scores/<int:student_id>')
@@ -327,6 +399,9 @@ def create_firm():
     db.session.add(firm_admin)
     db.session.commit()
 
+    # Send welcome email to the new firm admin (Intern 15)
+    _send_welcome_email(firm, firm_admin, admin_password)
+
     return jsonify({
         "success": True,
         "message": "Firm and admin account created successfully",
@@ -379,6 +454,107 @@ def add_firm_credits(firm_id):
         "success": True,
         "message": f"{credits} credits added",
         "credit_balance": firm.credit_balance,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Intern 15 – Firm Branding + Welcome Email
+# ---------------------------------------------------------------------------
+
+_HEX_COLOR_RE = re.compile(r'^#[0-9A-Fa-f]{6}$')
+
+logger = logging.getLogger(__name__)
+
+
+def _send_welcome_email(firm, firm_admin, raw_password):
+    """Send a welcome email to a newly created firm admin.
+
+    Uses SMTP settings from app config.  If mail is not configured the
+    helper logs a warning and returns silently so firm creation is never
+    blocked by email delivery.
+    """
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_port = current_app.config.get('MAIL_PORT', 587)
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    mail_sender = current_app.config.get('MAIL_DEFAULT_SENDER', mail_username)
+
+    if not mail_server or not mail_username or not mail_password:
+        logger.warning('Mail not configured – skipping welcome email for %s', firm_admin.email)
+        return
+
+    login_url = request.url_root.rstrip('/') + '/firm'
+
+    subject = f"Welcome to EdgePsych – {firm.firm_name}"
+    body = (
+        f"Hello {firm_admin.username},\n\n"
+        f"Your firm admin account for {firm.firm_name} has been created.\n\n"
+        f"Login URL: {login_url}\n"
+        f"Email: {firm_admin.email}\n"
+        f"Password: {raw_password}\n\n"
+        f"Please change your password after first login.\n\n"
+        f"Best regards,\nEdgePsych Admin"
+    )
+
+    msg = MIMEMultipart()
+    msg['From'] = mail_sender
+    msg['To'] = firm_admin.email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        with smtplib.SMTP(mail_server, int(mail_port)) as server:
+            server.starttls()
+            server.login(mail_username, mail_password)
+            server.send_message(msg)
+        logger.info('Welcome email sent to %s', firm_admin.email)
+    except Exception as exc:
+        logger.error('Failed to send welcome email to %s: %s', firm_admin.email, exc)
+
+
+@admin_bp.route('/admin/firms/<int:firm_id>/branding', methods=['PATCH'])
+@jwt_required()
+def update_firm_branding(firm_id):
+    """Update branding fields (logo_url, primary_color, secondary_color) for a firm."""
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "No data provided"}), 400
+
+    firm = db.session.get(ConsultancyFirm, firm_id)
+    if firm is None:
+        return jsonify({"success": False, "message": "Firm not found"}), 404
+
+    logo_url = data.get('logo_url')
+    primary_color = data.get('primary_color')
+    secondary_color = data.get('secondary_color')
+
+    # Validate hex colours
+    for label, value in [('primary_color', primary_color), ('secondary_color', secondary_color)]:
+        if value is not None and value != '' and not _HEX_COLOR_RE.match(value):
+            return jsonify({"success": False, "message": f"Invalid {label} format. Use #RRGGBB."}), 400
+
+    if logo_url is not None:
+        firm.logo_url = logo_url or None
+    if primary_color is not None:
+        firm.primary_color = primary_color or None
+    if secondary_color is not None:
+        firm.secondary_color = secondary_color or None
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Branding updated",
+        "firm": {
+            "id": firm.id,
+            "firm_name": firm.firm_name,
+            "logo_url": firm.logo_url,
+            "primary_color": firm.primary_color,
+            "secondary_color": firm.secondary_color,
+        },
     })
 
 

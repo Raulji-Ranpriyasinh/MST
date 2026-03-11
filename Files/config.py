@@ -47,3 +47,10 @@ class Config:
     # Rate limiting
     RATELIMIT_DEFAULT = os.environ.get('RATELIMIT_DEFAULT', '200 per day')
     RATELIMIT_STORAGE_URI = os.environ.get('RATELIMIT_STORAGE_URI', 'memory://')
+
+    # ----- Mail configuration (Intern 12 / 15) -----
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')           # e.g. smtp.gmail.com
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')        # sender email
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')        # app password / SMTP password
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', MAIL_USERNAME)

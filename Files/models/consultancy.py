@@ -13,6 +13,11 @@ class ConsultancyFirm(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
+    # Branding / white-label fields (Intern 15)
+    logo_url = db.Column(db.String(500), nullable=True)
+    primary_color = db.Column(db.String(7), nullable=True)       # e.g. "#1A56DB"
+    secondary_color = db.Column(db.String(7), nullable=True)     # e.g. "#6B7280"
+
     # Relationships
     admins = db.relationship('FirmAdmin', backref='firm', lazy=True, cascade='all, delete-orphan')
     transactions = db.relationship('CreditTransaction', backref='firm', lazy=True, cascade='all, delete-orphan')

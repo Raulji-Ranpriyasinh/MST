@@ -33,7 +33,7 @@
     }
 
     .profile-btn {
-      background-color: #296eff;
+      background-color: var(--color-primary, #296eff);
       color: white;
       font-weight: 500;
       padding: 8px 16px;
@@ -47,7 +47,7 @@
     }
 
     .profile-btn:hover {
-      background-color: #1a5ad4;
+      background-color: var(--color-secondary, #1a5ad4);
     }
 
     .container {
@@ -148,12 +148,12 @@
     }
 
     .tab-btn:hover {
-      color: #0864ed;
+      color: var(--color-primary, #0864ed);
     }
 
     .tab-btn.active {
-      color: #0864ed;
-      border-bottom-color: #0864ed;
+      color: var(--color-primary, #0864ed);
+      border-bottom-color: var(--color-primary, #0864ed);
     }
 
     .tab-content {
@@ -181,7 +181,7 @@
     }
 
     th {
-      background-color: #0864ed;
+      background-color: var(--color-primary, #0864ed);
       color: white;
       font-weight: 600;
       text-transform: uppercase;
@@ -274,8 +274,8 @@
       padding: 6px 14px; border: 1px solid #ccc; background: white;
       border-radius: 5px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 13px;
     }
-    .pagination button:hover:not(:disabled) { background-color: #eaf1fb; border-color: #0864ed; }
-    .pagination button.active { background-color: #0864ed; color: white; border-color: #0864ed; }
+    .pagination button:hover:not(:disabled) { background-color: #eaf1fb; border-color: var(--color-primary, #0864ed); }
+    .pagination button.active { background-color: var(--color-primary, #0864ed); color: white; border-color: var(--color-primary, #0864ed); }
     .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
     .pagination .page-info { font-size: 13px; color: #666; }
 
@@ -296,7 +296,7 @@
     .spinner {
       width: 48px; height: 48px;
       border: 5px solid #e0e0e0;
-      border-top: 5px solid #0864ed;
+      border-top: 5px solid var(--color-primary, #0864ed);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -371,7 +371,7 @@
     </div>
 
     <div class="navbar">
-        <div class="logo">
+        <div class="logo" id="navbarLogo">
             <img src="/static/image-removebg edge.png" class="logo-icon" alt="logo" />
         </div>
         <div class="dropdown">
@@ -490,6 +490,20 @@
                 document.getElementById('firmName').textContent = data.firm_name;
                 document.getElementById('totalStudents').textContent = data.total_students;
                 document.getElementById('firmTitle').textContent = data.firm_name + ' - Dashboard';
+
+                // Intern 15: Inject branding CSS variables
+                if (data.primary_color) {
+                    document.documentElement.style.setProperty('--color-primary', data.primary_color);
+                }
+                if (data.secondary_color) {
+                    document.documentElement.style.setProperty('--color-secondary', data.secondary_color);
+                }
+
+                // Intern 15: Conditionally render firm logo
+                var logoContainer = document.getElementById('navbarLogo');
+                if (data.logo_url) {
+                    logoContainer.innerHTML = '<img src="' + escapeHtml(data.logo_url) + '" class="logo-icon" alt="' + escapeHtml(data.firm_name) + '" style="max-height:40px;" />';
+                }
 
                 // Colour-coded credit balance
                 var creditEl = document.getElementById('creditBalance');

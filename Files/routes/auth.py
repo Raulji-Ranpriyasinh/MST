@@ -1,6 +1,12 @@
 """Authentication routes: login, register, logout for students and admin."""
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+import logging
+import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -11,7 +17,7 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies,
 )
-from itsdangerous import BadSignature, SignatureExpired
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter
@@ -21,6 +27,7 @@ from models.student import StudentDetails
 from schemas.validation import validate_admin_login, validate_login, validate_registration
 
 auth_bp = Blueprint('auth', __name__)
+logger = logging.getLogger(__name__)
 
 
 @auth_bp.route('/')
@@ -255,6 +262,129 @@ def session_check():
     if not identity:
         return jsonify({"valid": False}), 401
     return jsonify({"valid": True}), 200
+
+
+# ---------------------------------------------------------------------------
+# Intern 12 – Student Password Reset
+# ---------------------------------------------------------------------------
+
+def _get_student_reset_serializer():
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+
+def _make_student_reset_token(email):
+    s = _get_student_reset_serializer()
+    return s.dumps(email, salt='student-password-reset')
+
+
+def _verify_student_reset_token(token, max_age=3600):
+    s = _get_student_reset_serializer()
+    return s.loads(token, salt='student-password-reset', max_age=max_age)
+
+
+@auth_bp.route('/auth/forgot-password', methods=['GET'])
+def forgot_password_page():
+    """Render the forgot-password form for students."""
+    return render_template('forgot_password.html', user_type='student')
+
+
+@auth_bp.route('/auth/forgot-password', methods=['POST'])
+@limiter.limit("5 per minute")
+def forgot_password():
+    """Accept email, generate reset token and send email."""
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip()
+
+    # Always return 200 – do not reveal whether the email exists
+    if email:
+        user = StudentDetails.query.filter_by(email=email).first()
+        if user:
+            token = _make_student_reset_token(email)
+            reset_url = request.url_root.rstrip('/') + f'/auth/reset-password/{token}'
+            _send_student_reset_email(email, reset_url)
+
+    return jsonify({"success": True, "message": "If that email is registered, a reset link has been sent."})
+
+
+@auth_bp.route('/auth/reset-password/<token>', methods=['GET'])
+def reset_password_page(token):
+    """Validate token and render the reset form."""
+    try:
+        _verify_student_reset_token(token)
+    except SignatureExpired:
+        return render_template('reset_password.html', error='This reset link has expired. Please request a new one.', token=token, user_type='student')
+    except BadSignature:
+        return render_template('reset_password.html', error='Invalid reset link.', token=token, user_type='student')
+    return render_template('reset_password.html', token=token, error=None, user_type='student')
+
+
+@auth_bp.route('/auth/reset-password/<token>', methods=['POST'])
+def reset_password(token):
+    """Validate token, update password."""
+    try:
+        email = _verify_student_reset_token(token)
+    except (SignatureExpired, BadSignature):
+        return jsonify({"success": False, "message": "Invalid or expired reset link."}), 400
+
+    data = request.get_json(silent=True) or {}
+    new_password = data.get('password', '')
+
+    # Validate password strength
+    if len(new_password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters."}), 400
+    if not re.search(r'[A-Z]', new_password):
+        return jsonify({"success": False, "message": "Password must contain an uppercase letter."}), 400
+    if not re.search(r'[a-z]', new_password):
+        return jsonify({"success": False, "message": "Password must contain a lowercase letter."}), 400
+    if not re.search(r'[0-9]', new_password):
+        return jsonify({"success": False, "message": "Password must contain a digit."}), 400
+
+    user = StudentDetails.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify({"success": False, "message": "Account not found."}), 404
+
+    user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Password reset successful. You can now log in."})
+
+
+def _send_student_reset_email(to_email, reset_url):
+    """Send a password-reset email via SMTP."""
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_port = current_app.config.get('MAIL_PORT', 587)
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    mail_sender = current_app.config.get('MAIL_DEFAULT_SENDER', mail_username)
+
+    if not mail_server or not mail_username or not mail_password:
+        logger.warning('Mail not configured – cannot send reset email to %s', to_email)
+        return
+
+    subject = 'EdgePsych – Password Reset'
+    body = (
+        f"Hello,\n\n"
+        f"We received a request to reset your student account password.\n\n"
+        f"Click here to reset: {reset_url}\n\n"
+        f"This link expires in 1 hour.\n\n"
+        f"If you did not request this, please ignore this email.\n\n"
+        f"Best regards,\nEdgePsych"
+    )
+
+    msg = MIMEMultipart()
+    msg['From'] = mail_sender
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        with smtplib.SMTP(mail_server, int(mail_port)) as server:
+            server.starttls()
+            server.login(mail_username, mail_password)
+            server.send_message(msg)
+        logger.info('Student reset email sent to %s', to_email)
+    except Exception as exc:
+        logger.error('Failed to send student reset email to %s: %s', to_email, exc)
 
 
 @auth_bp.route('/api/v1/firms/active', methods=['GET'])

@@ -1,8 +1,11 @@
 """Firm authentication and dashboard routes."""
 
 import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -13,7 +16,8 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies,
 )
-from werkzeug.security import check_password_hash
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter, socketio
 from models.assessment import CareerQuestion
@@ -150,6 +154,9 @@ def firm_dashboard_data():
         "credit_balance": firm.credit_balance,
         "total_students": total_students,
         "low_credit_warning": low_credit_warning,
+        "logo_url": firm.logo_url,
+        "primary_color": firm.primary_color,
+        "secondary_color": firm.secondary_color,
     })
 
 
@@ -341,3 +348,128 @@ def firm_download_career(student_id):
 
     # Reuse the same template used by the student download route
     return render_template("download_career.html", student_id=student_id)
+
+
+# ---------------------------------------------------------------------------
+# Intern 12 – Firm Admin Password Reset
+# ---------------------------------------------------------------------------
+
+def _get_reset_serializer():
+    """Return a URLSafeTimedSerializer for password reset tokens."""
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+
+
+def _make_firm_reset_token(email):
+    s = _get_reset_serializer()
+    return s.dumps(email, salt='firm-password-reset')
+
+
+def _verify_firm_reset_token(token, max_age=3600):
+    s = _get_reset_serializer()
+    return s.loads(token, salt='firm-password-reset', max_age=max_age)
+
+
+@firm_bp.route('/firm/forgot-password', methods=['GET'])
+def firm_forgot_password_page():
+    """Render the forgot-password form for firm admins."""
+    return render_template('forgot_password.html', user_type='firm')
+
+
+@firm_bp.route('/firm/forgot-password', methods=['POST'])
+@limiter.limit("5 per minute")
+def firm_forgot_password():
+    """Accept email, generate reset token and send email."""
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip()
+
+    # Always return 200 – do not reveal whether the email exists
+    if email:
+        admin = FirmAdmin.query.filter_by(email=email).first()
+        if admin:
+            token = _make_firm_reset_token(email)
+            reset_url = request.url_root.rstrip('/') + f'/firm/reset-password/{token}'
+            _send_reset_email(email, reset_url, 'Firm Admin')
+
+    return jsonify({"success": True, "message": "If that email is registered, a reset link has been sent."})
+
+
+@firm_bp.route('/firm/reset-password/<token>', methods=['GET'])
+def firm_reset_password_page(token):
+    """Validate token and render the reset form."""
+    try:
+        _verify_firm_reset_token(token)
+    except SignatureExpired:
+        return render_template('reset_password.html', error='This reset link has expired. Please request a new one.', token=token, user_type='firm')
+    except BadSignature:
+        return render_template('reset_password.html', error='Invalid reset link.', token=token, user_type='firm')
+    return render_template('reset_password.html', token=token, error=None, user_type='firm')
+
+
+@firm_bp.route('/firm/reset-password/<token>', methods=['POST'])
+def firm_reset_password(token):
+    """Validate token, update password."""
+    try:
+        email = _verify_firm_reset_token(token)
+    except (SignatureExpired, BadSignature):
+        return jsonify({"success": False, "message": "Invalid or expired reset link."}), 400
+
+    data = request.get_json(silent=True) or {}
+    new_password = data.get('password', '')
+
+    # Validate password strength
+    if len(new_password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters."}), 400
+    import re
+    if not re.search(r'[A-Z]', new_password):
+        return jsonify({"success": False, "message": "Password must contain an uppercase letter."}), 400
+    if not re.search(r'[a-z]', new_password):
+        return jsonify({"success": False, "message": "Password must contain a lowercase letter."}), 400
+    if not re.search(r'[0-9]', new_password):
+        return jsonify({"success": False, "message": "Password must contain a digit."}), 400
+
+    admin = FirmAdmin.query.filter_by(email=email).first()
+    if admin is None:
+        return jsonify({"success": False, "message": "Account not found."}), 404
+
+    admin.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Password reset successful. You can now log in."})
+
+
+def _send_reset_email(to_email, reset_url, user_label):
+    """Send a password-reset email via SMTP."""
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_port = current_app.config.get('MAIL_PORT', 587)
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    mail_sender = current_app.config.get('MAIL_DEFAULT_SENDER', mail_username)
+
+    if not mail_server or not mail_username or not mail_password:
+        logger.warning('Mail not configured – cannot send reset email to %s', to_email)
+        return
+
+    subject = 'EdgePsych – Password Reset'
+    body = (
+        f"Hello,\n\n"
+        f"We received a request to reset your {user_label} password.\n\n"
+        f"Click here to reset: {reset_url}\n\n"
+        f"This link expires in 1 hour.\n\n"
+        f"If you did not request this, please ignore this email.\n\n"
+        f"Best regards,\nEdgePsych"
+    )
+
+    msg = MIMEMultipart()
+    msg['From'] = mail_sender
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        with smtplib.SMTP(mail_server, int(mail_port)) as server:
+            server.starttls()
+            server.login(mail_username, mail_password)
+            server.send_message(msg)
+        logger.info('Reset email sent to %s', to_email)
+    except Exception as exc:
+        logger.error('Failed to send reset email to %s: %s', to_email, exc)
