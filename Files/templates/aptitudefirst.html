@@ -189,29 +189,7 @@
 
         <h4 class="second-section-title">Your Aptitude Performance</h4>
 
-        <!-- Graph 1: Percentile Score Table with Oval Markers -->
-        <div id="percentileChart" style="width: 100%; margin-top: 10px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th style="width: 35%; text-align: left; background-color: #2c6e6a; color: white; padding: 6px 8px; border: 1px solid #ccc;">Test</th>
-                        <th colspan="6" style="background-color: #2c6e6a; color: white; padding: 6px 8px; border: 1px solid #ccc; text-align: center;">Percentile Score</th>
-                    </tr>
-                    <tr>
-                        <th style="width: 35%; border: 1px solid #ccc; background-color: #f5f5f5;"></th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">0</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">20</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">40</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">60</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">80</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #f5f5f5; padding: 4px; font-weight: normal;">100</th>
-                    </tr>
-                </thead>
-                <tbody id="percentileTableBody">
-                    <!-- Rows populated by JS -->
-                </tbody>
-            </table>
-        </div>
+        <canvas id="scoreChart" class="second-graph-container"></canvas>
 
         <p style="text-align: justify; font-size: 10pt;"><strong>This information can be useful to you in several key
                 ways:</strong></p>
@@ -249,47 +227,16 @@
         </div>
         <p style="text-align: justify; font-size: 10pt;">
             Your Aptitude Test results provide a detailed analysis of your performance across different
-            categories. The table below shows three key aspects for each test: your percentile score
-            (shown as a green marker), the speed at which you completed questions, and your accuracy
-            as a percentage of correctly answered questions. This report helps assess both your
+            categories. The bar graph visually represents three key aspects: the total number of questions
+            per
+            category (gray bars), the number of correct answers (purple bars), and your accuracy percentage
+            (blue bars). Accuracy reflects the proportion of
+            correctly answered questions out of the total attempted. This report helps assess both your
             knowledge and test-taking efficiency, enabling a better understanding of your strengths and
             areas for improvement.
         </p>
-        <!-- Graph 2: Detailed Breakdown with Percentile, Speed, Accuracy -->
-        <div id="detailedChart" style="width: 100%; margin-top: 10px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th style="width: 22%; text-align: left; background-color: #2c6e6a; color: white; padding: 6px 8px; border: 1px solid #ccc;">Test</th>
-                        <th style="width: 10%; background-color: #2c6e6a; color: white; padding: 6px 4px; border: 1px solid #ccc; text-align: center;"></th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">0</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">20</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">40</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">60</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">80</th>
-                        <th style="width: 10.83%; text-align: center; border: 1px solid #ccc; background-color: #2c6e6a; color: white; padding: 4px; font-weight: normal;">100</th>
-                    </tr>
-                </thead>
-                <tbody id="detailedTableBody">
-                    <!-- Rows populated by JS -->
-                </tbody>
-            </table>
-            <!-- Key -->
-            <div style="display: flex; align-items: center; gap: 20px; margin-top: 10px; font-size: 8pt; color: #333;">
-                <span style="font-weight: bold;">Key:</span>
-                <span style="display: inline-flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 18px; height: 12px; background: radial-gradient(ellipse, #7bc67e 60%, #5aad5e 100%); border-radius: 50%;" ></span>
-                    Percentile Score
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 18px; height: 10px; background-color: #b6d8b6; border-radius: 2px;"></span>
-                    Percentage of Questions Completed (speed)
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 18px; height: 10px; background-color: #4a9e4a; border-radius: 2px;"></span>
-                    Percentage Accuracy of Questions Completed
-                </span>
-            </div>
+        <div class="three-chart-container">
+            <canvas id="three-resultChart"></canvas>
         </div>
 
 
@@ -425,18 +372,7 @@
 
 
     <script>
-        // Test descriptions for Graph 2
-        const testDescriptions = {
-            "Abstract Reasoning": "Tests the ability to discern abstract trends.",
-            "Numerical Reasoning": "Tests the ability to discover numerical relationships and patterns.",
-            "Verbal Reasoning": "Tests the candidate's ability to use verbal concepts logically in English.",
-            "Verbal Reasoning (English)": "Tests the candidate's ability to use verbal concepts logically in English.",
-            "Spatial Reasoning": "Assesses the candidate's ability to think in 2- and 3-dimensional terms.",
-            "Spelling Mistake": "Measures an ability to detect their own and other people's spelling errors.",
-            "Spelling (English)": "Measures an ability to detect their own and other people's spelling errors.",
-            "Arithmetic Calculation": "Tests the candidate's ability to use arithmetic quickly and accurately.",
-            "Working Quickly and Accurately": "Tests candidates speed and accuracy in matching alphanumerical symbols."
-        };
+        let myChart;
 
         function fetchResults() {
             const student_id = getStudentIdFromUrl();
@@ -452,62 +388,79 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Also fetch percentile scores for Graph 2
-                    fetch('/get_student_data/' + student_id)
-                        .then(r => r.json())
-                        .then(scoreData => {
-                            renderDetailedTable(data, scoreData.scores || {});
-                        })
-                        .catch(() => {
-                            renderDetailedTable(data, {});
-                        });
+                    let categories = data.map(item => item.category);
+                    let totalQuestions = data.map(item => item.total);
+                    let correctAnswers = data.map(item => item.correct);
+                    let accuracy = data.map(item => (item.correct / item.total * 100).toFixed(2)); // Accuracy %
+
+                    let ctx = document.getElementById("three-resultChart").getContext("2d");
+
+                    // Destroy old chart if exists
+                    if (myChart) myChart.destroy();
+
+                    myChart = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: categories,
+                            datasets: [
+                                {
+                                    label: "Total Questions",
+                                    data: totalQuestions,
+                                    backgroundColor: "rgba(169, 169, 169, 0.6)",
+                                    barThickness: 20
+                                },
+                                {
+                                    label: "Correct Answers",
+                                    data: correctAnswers,
+                                    backgroundColor: "rgba(128, 0, 128, 0.8)",
+                                    barThickness: 20
+                                },
+                                {
+                                    label: "Accuracy (%)",
+                                    data: accuracy,
+                                    backgroundColor: "rgba(52, 152, 219, 0.8)",  // Blue color
+                                    barThickness: 20
+                                }
+                            ]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            devicePixelRatio: 4,
+                            plugins: {
+                                legend: { position: 'top' },
+                                tooltip: {
+                                    enabled: false
+                                },
+                                datalabels: {
+                                    color: "white",
+                                    font: { size: 12, weight: "bold" },
+                                    formatter: (value, context) => {
+                                        return context.dataset.label === "Accuracy (%)" ? value + "%" : value;
+                                    },
+                                    align: "center",
+                                    anchor: "center"
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    max: 100,  // ✅ Ensure the Y-axis goes up to 100
+                                    title: { display: true, text: "Score" },
+                                    ticks: { font: { size: 12 } }
+                                },
+                                y: {
+                                    title: { display: true, text: "Category" },
+                                    ticks: { font: { size: 12 } }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
                 })
                 .catch(error => console.error("Error:", error));
-        }
-
-        function renderDetailedTable(data, percentileScores) {
-            const tbody = document.getElementById('detailedTableBody');
-            tbody.innerHTML = '';
-
-            data.forEach(function(item, idx) {
-                const category = item.category;
-                const total = item.total;
-                const correct = item.correct;
-                const percentile = percentileScores[category] !== undefined ? Number(percentileScores[category]) : 0;
-                const speedPct = total > 0 ? (total / total) * 100 : 0; // all questions attempted
-                const accuracyPct = total > 0 ? (correct / total) * 100 : 0;
-                const desc = testDescriptions[category] || '';
-                const borderBottom = idx < data.length - 1 ? 'border-bottom: 2px solid #ccc;' : '';
-
-                // Row for Percentile
-                var percentileRow = '<tr style="' + borderBottom + '">';
-                percentileRow += '<td rowspan="3" style="vertical-align: top; padding: 6px 6px; border-left: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 8pt;"><strong>' + category + '</strong><br><span style="font-size: 7pt; color: #555;">' + desc + '</span></td>';
-                percentileRow += '<td style="padding: 4px 4px; font-size: 7.5pt; color: #333; border-right: 1px solid #ccc;">Percentile</td>';
-                percentileRow += '<td colspan="6" style="padding: 4px 0; position: relative; border-right: 1px solid #ccc;">';
-                percentileRow += '<div style="position: relative; width: 100%; height: 20px;">';
-                percentileRow += '<div style="position: absolute; left: ' + percentile + '%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 16px; background: radial-gradient(ellipse, #7bc67e 60%, #5aad5e 100%); border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.2);"></div>';
-                percentileRow += '</div></td></tr>';
-
-                // Row for Speed
-                var speedRow = '<tr>';
-                speedRow += '<td style="padding: 4px 4px; font-size: 7.5pt; color: #333; border-right: 1px solid #ccc;">Speed</td>';
-                speedRow += '<td colspan="6" style="padding: 4px 4px; border-right: 1px solid #ccc;">';
-                speedRow += '<div style="position: relative; width: 100%; height: 18px; background-color: #e8e8e8; border-radius: 2px;">';
-                speedRow += '<div style="width: ' + speedPct + '%; height: 100%; background-color: #b6d8b6; border-radius: 2px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">';
-                speedRow += '<span style="font-size: 7pt; color: #333; white-space: nowrap;">' + total + ' / ' + total + ' questions answered</span>';
-                speedRow += '</div></div></td></tr>';
-
-                // Row for Accuracy
-                var accuracyRow = '<tr>';
-                accuracyRow += '<td style="padding: 4px 4px; font-size: 7.5pt; color: #333; border-right: 1px solid #ccc;">Accuracy</td>';
-                accuracyRow += '<td colspan="6" style="padding: 4px 4px; border-right: 1px solid #ccc;">';
-                accuracyRow += '<div style="position: relative; width: 100%; height: 18px; background-color: #e8e8e8; border-radius: 2px;">';
-                accuracyRow += '<div style="width: ' + accuracyPct.toFixed(0) + '%; height: 100%; background-color: #4a9e4a; border-radius: 2px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">';
-                accuracyRow += '<span style="font-size: 7pt; color: white; white-space: nowrap;">' + correct + ' / ' + total + ' answered correctly</span>';
-                accuracyRow += '</div></div></td></tr>';
-
-                tbody.innerHTML += percentileRow + speedRow + accuracyRow;
-            });
         }
     </script>
     <script>
@@ -560,29 +513,75 @@
                         return;
                     }
 
-                    // Show all pages
+                    // Show the second page before rendering the chart
                     document.querySelectorAll(".page").forEach(page => {
                         page.style.display = "block";
                     });
 
-                    // Build Graph 1: Percentile table
-                    const scoreEntries = Object.entries(data.scores);
-                    const sortedEntries = scoreEntries.sort((a, b) => b[1] - a[1]);
+                    let canvas = document.getElementById("scoreChart");
+                    if (!canvas) {
+                        console.error("Canvas element #scoreChart not found!");
+                        return;
+                    }
 
-                    const tbody = document.getElementById('percentileTableBody');
-                    tbody.innerHTML = '';
+                    let ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        console.error("Canvas context could not be initialized!");
+                        return;
+                    }
 
-                    sortedEntries.forEach(function(entry) {
-                        const category = entry[0];
-                        const score = Number(entry[1]);
-                        var row = '<tr>';
-                        row += '<td style="text-align: left; padding: 8px 8px; border: 1px solid #ccc; font-size: 9pt;">' + category + '</td>';
-                        row += '<td colspan="6" style="padding: 8px 0; border: 1px solid #ccc; position: relative;">';
-                        row += '<div style="position: relative; width: 100%; height: 22px;">';
-                        row += '<div style="position: absolute; left: ' + score + '%; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 18px; background: radial-gradient(ellipse, #7bc67e 60%, #5aad5e 100%); border-radius: 50%; box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"></div>';
-                        row += '</div></td></tr>';
-                        tbody.innerHTML += row;
-                    });
+                    // Destroy old chart instance if it exists
+                    if (window.scoreChartInstance) {
+                        window.scoreChartInstance.destroy();
+                    }
+
+                    // Add a slight delay to ensure rendering after visibility
+                    setTimeout(() => {
+    // Get entries from scores object
+    const scoreEntries = Object.entries(data.scores);
+
+    // ✅ Sort by score value descending
+    const sortedEntries = scoreEntries.sort((a, b) => b[1] - a[1]);
+
+    // Extract labels and values from sorted entries
+    const labels = sortedEntries.map(([category]) => category);
+    const values = sortedEntries.map(([_, score]) => Number(score));
+
+    console.log("✅ Sorted Labels:", labels);
+    console.log("✅ Sorted Values:", values);
+
+    window.scoreChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Score",
+                data: values,
+                backgroundColor: "rgba(128, 0, 128, 0.5)",
+                borderColor: "#800080",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            devicePixelRatio: 4,
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: false
+                }
+            },
+            scales: {
+                x: {
+                    min: 0,
+                    max: 100,
+                    ticks: { stepSize: 20 }
+                }
+            }
+        }
+    });
+}, 300);
+ // Delay to ensure visibility before rendering
                 })
                 .catch(error => console.error("Error:", error));
         }
