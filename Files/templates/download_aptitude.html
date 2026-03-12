@@ -229,7 +229,29 @@
                 </div>
 
                 <h4 class="second-section-title">Your Aptitude Performance</h4>
-                <canvas id="scoreChart" class="second-graph-container"></canvas>
+                <div id="scoreChartTable" style="width: 100%;">
+                    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 200px; padding: 4px 8px; border: 1px solid #5b9aa0; font-weight: normal; vertical-align: top; font-size: 11px; color: #333;">Test</th>
+                                <th style="border: 1px solid #5b9aa0; padding: 0;">
+                                    <div style="padding: 2px 8px; font-weight: normal; font-size: 11px; color: #333; text-align: left;">Percentile Score</div>
+                                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #5b9aa0; padding: 2px 4px; background: #eaf6f6;">
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">0</span>
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">20</span>
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">40</span>
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">60</span>
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">80</span>
+                                        <span style="font-weight: normal; font-size: 10px; color: #333;">100</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="percentileTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="second-content">
                     <p><strong>This information can be useful to you in several key ways:</strong></p>
@@ -419,112 +441,152 @@
                     </p>
 
 
-                    <div class="three-chart-container">
-                        <canvas id="three-resultChart"></canvas>
+                    <div id="detailedResultsContainer" style="width: 100%; overflow-x: auto;">
+                        <p style="font-size: 11px; color: #333; margin-bottom: 8px; text-align: left; font-weight: bold;">
+                            total Number of Questions Attempted and the Number of Correct Answers
+                        </p>
+                        <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 160px; border: 1px solid #ccc;"></th>
+                                    <th style="width: 70px; border: 1px solid #ccc;"></th>
+                                    <th style="border: 1px solid #ccc; padding: 0;">
+                                        <div style="display: flex; justify-content: space-between; padding: 2px 4px; background: #eaf6f6;">
+                                            <span style="font-weight: normal; font-size: 10px;">0</span>
+                                            <span style="font-weight: normal; font-size: 10px;">20</span>
+                                            <span style="font-weight: normal; font-size: 10px;">40</span>
+                                            <span style="font-weight: normal; font-size: 10px;">60</span>
+                                            <span style="font-weight: normal; font-size: 10px;">80</span>
+                                            <span style="font-weight: normal; font-size: 10px;">100</span>
+                                        </div>
+                                    </th>
+                                    <th style="width: 150px; border: 1px solid #ccc;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailedResultsBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                        <!-- Key -->
+                        <div style="display: flex; align-items: center; gap: 20px; margin-top: 12px; font-size: 9px; color: #333; padding: 8px; border-top: 1px solid #ccc;">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span>Key:</span>
+                                <div style="width: 24px; height: 14px; background: radial-gradient(ellipse, #b5e655 0%, #8cc63f 60%, #6aad30 100%); border-radius: 50%; border: 1px solid #6aad30; display: inline-block;"></div>
+                                <span>Percentile Score</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <div style="width: 24px; height: 14px; background: rgba(100, 80, 160, 0.5); display: inline-block;"></div>
+                                <span>Percentage of Questions Completed (speed)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <div style="width: 24px; height: 14px; background: rgba(180, 150, 210, 0.45); display: inline-block;"></div>
+                                <span>Percentage Accuracy of Questions Completed</span>
+                            </div>
+                        </div>
                     </div>
 
                     <script>
-                        let myChart;
-
                         function fetchResults() {
                             const student_id = getStudentIdFromUrl();
                             if (!student_id) {
                                 showToast("Please enter a student ID", "warning");
                                 return;
                             }
-                            console.log("Extracted Student ID:", student_id);
                             authFetch("/get_results", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ student_id: parseInt(student_id) })
                             })
-                                .then(response => response.json())
-                                .then(data => {
-                                    let categories = data.map(item => item.category);
-                                    let totalQuestions = data.map(item => item.total);
-                                    let correctAnswers = data.map(item => item.correct);
-                                    let accuracy = data.map(item => (item.correct / item.total * 100).toFixed(2)); // Accuracy %
+                            .then(response => response.json())
+                            .then(data => {
+                                const categoryInfo = {
+                                    "Abstract Reasoning": { displayName: "Abstract Reasoning", description: "Tests the ability to discern abstract trends." },
+                                    "Numerical Reasoning": { displayName: "Numerical Reasoning", description: "Tests the ability to recognise numerical relationships and patterns." },
+                                    "Verbal Reasoning": { displayName: "Verbal Reasoning (English)", description: "Tests the candidate's ability to use verbal concepts logically in English" },
+                                    "Spatial Reasoning": { displayName: "Spatial Reasoning", description: "Assesses the candidate's ability to think in 2- and 3-dimensional terms." },
+                                    "Spelling Mistake": { displayName: "Spelling (English)", description: "Measures an ability to detect their own and other people's spelling errors." },
+                                    "Arithmetic Calculation": { displayName: "Arithmetic Calculation", description: "Tests the candidate's ability to use arithmetic quickly and accurately." },
+                                    "Working Quickly and Accurately": { displayName: "Working Quickly and Accurately", description: "Tests candidates' speed and accuracy in matching alphanumerical symbols." }
+                                };
+                                const categoryOrder = [
+                                    "Abstract Reasoning", "Numerical Reasoning", "Verbal Reasoning",
+                                    "Spatial Reasoning", "Spelling Mistake", "Arithmetic Calculation",
+                                    "Working Quickly and Accurately"
+                                ];
+                                const sortedData = [];
+                                categoryOrder.forEach(function(cat) {
+                                    var item = data.find(function(d) { return d.category === cat; });
+                                    if (item) sortedData.push(item);
+                                });
+                                data.forEach(function(item) {
+                                    if (!sortedData.find(function(d) { return d.category === item.category; })) sortedData.push(item);
+                                });
 
-                                    let ctx = document.getElementById("three-resultChart").getContext("2d");
+                                var percentileScores = window.aptitudePercentileScores || {};
+                                var tbody = document.getElementById("detailedResultsBody");
+                                tbody.innerHTML = "";
 
-                                    // Destroy old chart if exists
-                                    if (myChart) myChart.destroy();
+                                sortedData.forEach(function(item) {
+                                    var cat = item.category;
+                                    var info = categoryInfo[cat] || { displayName: cat, description: "" };
+                                    var total = item.total;
+                                    var correct = item.correct;
+                                    var percentile = Math.min(percentileScores[cat] || 0, 100);
+                                    var speedPct = Math.min(total, 100);
+                                    var accuracyPct = total > 0 ? Math.min(correct, 100) : 0;
 
-                                    myChart = new Chart(ctx, {
-                                        type: "bar",
-                                        data: {
-                                            labels: categories,
-                                            datasets: [
-                                                {
-                                                    label: "Total Questions",
-                                                    data: totalQuestions,
-                                                    backgroundColor: "rgba(169, 169, 169, 0.6)",
-                                                    barThickness: 20
-                                                },
-                                                {
-                                                    label: "Correct Answers",
-                                                    data: correctAnswers,
-                                                    backgroundColor: "rgba(128, 0, 128, 0.8)",
-                                                    barThickness: 20
-                                                },
-                                                {
-                                                    label: "Accuracy (%)",
-                                                    data: accuracy,
-                                                    backgroundColor: "rgba(52, 152, 219, 0.8)",  // Blue color
-                                                    barThickness: 20
-                                                }
-                                            ]
-                                        },
-                                        options: {
-                                            indexAxis: 'y',
-                                            maintainAspectRatio: false,
-                                            responsive: true,
-                                            devicePixelRatio: 4,
-                                            plugins: {
-                                                legend: { position: 'top' },
-                                                datalabels: {
-                                                    color: "white",
-                                                    font: { size: 12, weight: "bold" },
-                                                    formatter: (value, context) => {
-                                                        return context.dataset.label === "Accuracy (%)" ? value + "%" : value;
-                                                    },
-                                                    align: "center",
-                                                    anchor: "center"
-                                                }
-                                            },
-                                            scales: {
-                                                x: {
-                                                    beginAtZero: true,
-                                                    max: 100,  // ✅ Ensure the Y-axis goes up to 100
-                                                    title: { display: true, text: "Score" },
-                                                    ticks: { font: { size: 12 } }
-                                                },
-                                                y: {
-                                                    title: {
-                                                        display: true,
-                                                        text: "Category"
-                                                    },
-                                                    position: 'left',
-                                                    ticks: {
-                                                        align: 'start',         // Align labels to the left
-                                                        crossAlign: 'near',     // Nudge text closer to axis
-                                                        autoSkip: false,        // Show all labels
-                                                        padding: 2,             // Keep labels close to axis
-                                                        font: { size: 12 },
-                                                        color: '#333',          // Dark label color for visibility
-                                                        display: true
-                                                    },
-                                                    grid: {
-                                                        display: true
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        plugins: [ChartDataLabels]
-                                    });
+                                    var row1 = document.createElement("tr");
+                                    row1.innerHTML =
+                                        '<td rowspan="3" style="padding: 6px 8px; border: 1px solid #ccc; border-bottom: 2px solid #5b9aa0; vertical-align: top; font-size: 10px; color: #333; line-height: 1.4;">' +
+                                            '<strong>' + info.displayName + '</strong><br>' +
+                                            '<span style="font-size: 9px; color: #666;">' + info.description + '</span>' +
+                                        '</td>' +
+                                        '<td style="padding: 3px 6px; border: 1px solid #ccc; font-size: 10px; color: #333; white-space: nowrap;">Percentile</td>' +
+                                        '<td style="padding: 0; border: 1px solid #ccc;">' +
+                                            '<div style="position: relative; height: 22px;">' +
+                                                '<div style="position: absolute; left: 20%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 40%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 60%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 80%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: ' + percentile + '%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 14px; background: radial-gradient(ellipse, #b5e655 0%, #8cc63f 60%, #6aad30 100%); border-radius: 50%; border: 1px solid #6aad30;"></div>' +
+                                            '</div>' +
+                                        '</td>' +
+                                        '<td style="border: 1px solid #ccc;"></td>';
 
-                                })
-                                .catch(error => console.error("Error:", error));
+                                    var row2 = document.createElement("tr");
+                                    row2.innerHTML =
+                                        '<td style="padding: 3px 6px; border: 1px solid #ccc; font-size: 10px; color: #333; white-space: nowrap;">Speed</td>' +
+                                        '<td style="padding: 0; border: 1px solid #ccc;">' +
+                                            '<div style="position: relative; height: 22px; background: #f0f0f5;">' +
+                                                '<div style="position: absolute; left: 20%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 40%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 60%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 80%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 0; top: 0; bottom: 0; width: ' + speedPct + '%; background: rgba(100, 80, 160, 0.5);"></div>' +
+                                            '</div>' +
+                                        '</td>' +
+                                        '<td style="padding: 2px 6px; border: 1px solid #ccc; font-size: 9px; color: #333; white-space: nowrap;">' + total + ' / ' + total + ' questions answered</td>';
+
+                                    var row3 = document.createElement("tr");
+                                    row3.innerHTML =
+                                        '<td style="padding: 3px 6px; border: 1px solid #ccc; border-bottom: 2px solid #5b9aa0; font-size: 10px; color: #333; white-space: nowrap;">Accuracy</td>' +
+                                        '<td style="padding: 0; border: 1px solid #ccc; border-bottom: 2px solid #5b9aa0;">' +
+                                            '<div style="position: relative; height: 22px; background: #f5f0f8;">' +
+                                                '<div style="position: absolute; left: 20%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 40%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 60%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 80%; top: 0; bottom: 0; border-left: 1px solid #ddd;"></div>' +
+                                                '<div style="position: absolute; left: 0; top: 0; bottom: 0; width: ' + accuracyPct + '%; background: rgba(180, 150, 210, 0.45);"></div>' +
+                                            '</div>' +
+                                        '</td>' +
+                                        '<td style="padding: 2px 6px; border: 1px solid #ccc; border-bottom: 2px solid #5b9aa0; font-size: 9px; color: #333; white-space: nowrap;">' + correct + ' / ' + total + ' answered correctly</td>';
+
+                                    tbody.appendChild(row1);
+                                    tbody.appendChild(row2);
+                                    tbody.appendChild(row3);
+                                });
+                            })
+                            .catch(error => console.error("Error:", error));
                         }
                     </script>
                 </div>
@@ -854,54 +916,58 @@
                     return;
                 }
 
-                // Show the second page before rendering the chart
+                // Show the second page before rendering
                 document.getElementById("second_page").style.display = "block";
 
-                let canvas = document.getElementById("scoreChart");
-                if (!canvas) {
-                    console.error("Canvas element #scoreChart not found!");
-                    return;
-                }
+                // Store scores globally for use in graph 2
+                window.aptitudePercentileScores = data.scores || {};
 
-                let ctx = canvas.getContext("2d");
-                if (!ctx) {
-                    console.error("Canvas context could not be initialized!");
-                    return;
-                }
+                var displayNames = {
+                    "Verbal Reasoning": "Verbal Reasoning (English)",
+                    "Spelling Mistake": "Spelling (English)"
+                };
 
-                // Destroy old chart instance if it exists
-                if (window.scoreChartInstance) {
-                    window.scoreChartInstance.destroy();
-                }
+                var categoryOrder = [
+                    "Abstract Reasoning",
+                    "Numerical Reasoning",
+                    "Verbal Reasoning",
+                    "Spatial Reasoning",
+                    "Spelling Mistake",
+                    "Arithmetic Calculation",
+                    "Working Quickly and Accurately"
+                ];
 
-                // Add a slight delay to ensure rendering after visibility
-                setTimeout(() => {
-                    window.scoreChartInstance = new Chart(ctx, {
-                        type: "bar",
-                        data: {
-                            labels: Object.keys(data.scores),
-                            datasets: [{
-                                label: "Score",
-                                data: Object.values(data.scores),
-                                backgroundColor: "rgba(128, 0, 128, 0.5)",
-                                borderColor: "#800080",
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            devicePixelRatio: 4,
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    min: 0,
-                                    max: 100,
-                                    ticks: { stepSize: 20 }
-                                }
-                            }
-                        }
-                    });
-                }, 300); // Delay to ensure visibility before rendering
+                var scores = data.scores || {};
+                var tbody = document.getElementById("percentileTableBody");
+                tbody.innerHTML = "";
+
+                // Sort categories by defined order, then add any extras
+                var sortedCategories = [];
+                categoryOrder.forEach(function(cat) {
+                    if (scores[cat] !== undefined) sortedCategories.push(cat);
+                });
+                Object.keys(scores).forEach(function(cat) {
+                    if (sortedCategories.indexOf(cat) === -1) sortedCategories.push(cat);
+                });
+
+                sortedCategories.forEach(function(category) {
+                    var score = Math.min(scores[category], 100);
+                    var name = displayNames[category] || category;
+
+                    var tr = document.createElement("tr");
+                    tr.innerHTML =
+                        '<td style="padding: 6px 8px; border: 1px solid #5b9aa0; font-size: 11px; color: #333;">' + name + '</td>' +
+                        '<td style="padding: 0; border: 1px solid #5b9aa0;">' +
+                            '<div style="position: relative; height: 28px;">' +
+                                '<div style="position: absolute; left: 20%; top: 0; bottom: 0; border-left: 1px solid #5b9aa0; opacity: 0.3;"></div>' +
+                                '<div style="position: absolute; left: 40%; top: 0; bottom: 0; border-left: 1px solid #5b9aa0; opacity: 0.3;"></div>' +
+                                '<div style="position: absolute; left: 60%; top: 0; bottom: 0; border-left: 1px solid #5b9aa0; opacity: 0.3;"></div>' +
+                                '<div style="position: absolute; left: 80%; top: 0; bottom: 0; border-left: 1px solid #5b9aa0; opacity: 0.3;"></div>' +
+                                '<div style="position: absolute; left: ' + score + '%; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 18px; background: radial-gradient(ellipse, #b5e655 0%, #8cc63f 60%, #6aad30 100%); border-radius: 50%; border: 1px solid #6aad30; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);"></div>' +
+                            '</div>' +
+                        '</td>';
+                    tbody.appendChild(tr);
+                });
             })
             .catch(error => console.error("Error:", error));
     }
