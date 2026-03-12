@@ -189,7 +189,34 @@
 
         <h4 class="second-section-title">Your Aptitude Performance</h4>
 
-        <canvas id="scoreChart" class="second-graph-container"></canvas>
+        <!-- Graph 1: Percentile Score Table with Hexagonal Markers -->
+        <div id="percentileChart" style="width: 100%; margin-top: 10px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 10pt; table-layout: fixed;">
+                <thead>
+                    <tr style="background-color: #dce6f0;">
+                        <th style="width: 30%; text-align: left; padding: 6px 10px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;">Test</th>
+                        <th style="width: 11.67%; text-align: left; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;">Percentile Score</th>
+                        <th style="width: 11.67%; text-align: center; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;"></th>
+                        <th style="width: 11.67%; text-align: center; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;"></th>
+                        <th style="width: 11.67%; text-align: center; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;"></th>
+                        <th style="width: 11.67%; text-align: center; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;"></th>
+                        <th style="width: 11.67%; text-align: center; padding: 6px 4px; font-weight: normal; color: #333; border-bottom: 1px solid #aab;"></th>
+                    </tr>
+                    <tr>
+                        <th style="width: 30%; padding: 2px 10px; border-bottom: 2px solid #4a7a9b;"></th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">0</th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">20</th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">40</th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">60</th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">80</th>
+                        <th style="width: 11.67%; text-align: center; padding: 2px 4px; font-weight: normal; font-size: 9pt; color: #333; border-bottom: 2px solid #4a7a9b;">100</th>
+                    </tr>
+                </thead>
+                <tbody id="percentileTableBody">
+                    <!-- Rows populated by JS -->
+                </tbody>
+            </table>
+        </div>
 
         <p style="text-align: justify; font-size: 10pt;"><strong>This information can be useful to you in several key
                 ways:</strong></p>
@@ -227,16 +254,47 @@
         </div>
         <p style="text-align: justify; font-size: 10pt;">
             Your Aptitude Test results provide a detailed analysis of your performance across different
-            categories. The bar graph visually represents three key aspects: the total number of questions
-            per
-            category (gray bars), the number of correct answers (purple bars), and your accuracy percentage
-            (blue bars). Accuracy reflects the proportion of
-            correctly answered questions out of the total attempted. This report helps assess both your
+            categories. The table below shows three key aspects for each test: your percentile score
+            (shown as a green marker), the speed at which you completed questions, and your accuracy
+            as a percentage of correctly answered questions. This report helps assess both your
             knowledge and test-taking efficiency, enabling a better understanding of your strengths and
             areas for improvement.
         </p>
-        <div class="three-chart-container">
-            <canvas id="three-resultChart"></canvas>
+        <!-- Graph 2: Detailed Breakdown with Percentile, Speed, Accuracy -->
+        <div id="detailedChart" style="width: 100%; margin-top: 10px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th style="width: 22%; text-align: left; padding: 4px 6px; font-weight: normal; color: #333; border-bottom: 2px solid #4a7a9b;">Test</th>
+                        <th style="width: 10%; padding: 4px 4px; font-weight: normal; color: #333; border-bottom: 2px solid #4a7a9b;"></th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">0</th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">20</th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">40</th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">60</th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">80</th>
+                        <th style="width: 11.33%; text-align: center; padding: 4px; font-weight: normal; font-size: 8pt; color: #333; border-bottom: 2px solid #4a7a9b;">100</th>
+                    </tr>
+                </thead>
+                <tbody id="detailedTableBody">
+                    <!-- Rows populated by JS -->
+                </tbody>
+            </table>
+            <!-- Key -->
+            <div style="display: flex; align-items: center; gap: 18px; margin-top: 12px; font-size: 7.5pt; color: #333;">
+                <span style="font-weight: bold;">Key:</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                    <svg width="20" height="14" viewBox="0 0 20 14"><polygon points="5,0 15,0 20,7 15,14 5,14 0,7" fill="#b5e2b5" stroke="#5aaa5a" stroke-width="1"/></svg>
+                    Percentile Score
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 20px; height: 10px; background-color: #d5d5d5;"></span>
+                    Percentage of Questions Completed (Speed)
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 20px; height: 10px; background-color: #8e7cc3;"></span>
+                    Percentage Accuracy of Questions Completed
+                </span>
+            </div>
         </div>
 
 
@@ -372,7 +430,30 @@
 
 
     <script>
-        let myChart;
+        // Test descriptions for Graph 2
+        const testDescriptions = {
+            "Abstract Reasoning": "Tests the ability to discern abstract trends.",
+            "Numerical Reasoning": "Tests the ability to discover numerical relationships and patterns.",
+            "Verbal Reasoning": "Tests the candidate's ability to use verbal concepts logically in English.",
+            "Verbal Reasoning (English)": "Tests the candidate's ability to use verbal concepts logically in English.",
+            "Spatial Reasoning": "Assesses the candidate's ability to think in 2- and 3-dimensional terms.",
+            "Spelling Mistake": "Measures an ability to detect their own and other people's spelling errors.",
+            "Spelling (English)": "Measures an ability to detect their own and other people's spelling errors.",
+            "Arithmetic Calculation": "Tests the candidate's ability to use arithmetic quickly and accurately.",
+            "Working Quickly and Accurately": "Tests candidates speed and accuracy in matching alphanumerical symbols."
+        };
+
+        function makeHexSvg(size) {
+            var w = size || 28;
+            var h = Math.round(w * 0.7);
+            var mid = Math.round(h / 2);
+            var inset = Math.round(w * 0.25);
+            return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">'
+                + '<polygon points="' + inset + ',0 ' + (w - inset) + ',0 ' + w + ',' + mid + ' ' + (w - inset) + ',' + h + ' ' + inset + ',' + h + ' 0,' + mid + '" '
+                + 'fill="#b5e2b5" stroke="#5aaa5a" stroke-width="1.2"/>'
+                + '<circle cx="' + Math.round(w/2) + '" cy="' + mid + '" r="1.5" fill="#5aaa5a"/>'
+                + '</svg>';
+        }
 
         function fetchResults() {
             const student_id = getStudentIdFromUrl();
@@ -388,79 +469,64 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    let categories = data.map(item => item.category);
-                    let totalQuestions = data.map(item => item.total);
-                    let correctAnswers = data.map(item => item.correct);
-                    let accuracy = data.map(item => (item.correct / item.total * 100).toFixed(2)); // Accuracy %
-
-                    let ctx = document.getElementById("three-resultChart").getContext("2d");
-
-                    // Destroy old chart if exists
-                    if (myChart) myChart.destroy();
-
-                    myChart = new Chart(ctx, {
-                        type: "bar",
-                        data: {
-                            labels: categories,
-                            datasets: [
-                                {
-                                    label: "Total Questions",
-                                    data: totalQuestions,
-                                    backgroundColor: "rgba(169, 169, 169, 0.6)",
-                                    barThickness: 20
-                                },
-                                {
-                                    label: "Correct Answers",
-                                    data: correctAnswers,
-                                    backgroundColor: "rgba(128, 0, 128, 0.8)",
-                                    barThickness: 20
-                                },
-                                {
-                                    label: "Accuracy (%)",
-                                    data: accuracy,
-                                    backgroundColor: "rgba(52, 152, 219, 0.8)",  // Blue color
-                                    barThickness: 20
-                                }
-                            ]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            maintainAspectRatio: false,
-                            responsive: true,
-                            devicePixelRatio: 4,
-                            plugins: {
-                                legend: { position: 'top' },
-                                tooltip: {
-                                    enabled: false
-                                },
-                                datalabels: {
-                                    color: "white",
-                                    font: { size: 12, weight: "bold" },
-                                    formatter: (value, context) => {
-                                        return context.dataset.label === "Accuracy (%)" ? value + "%" : value;
-                                    },
-                                    align: "center",
-                                    anchor: "center"
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    max: 100,  // ✅ Ensure the Y-axis goes up to 100
-                                    title: { display: true, text: "Score" },
-                                    ticks: { font: { size: 12 } }
-                                },
-                                y: {
-                                    title: { display: true, text: "Category" },
-                                    ticks: { font: { size: 12 } }
-                                }
-                            }
-                        },
-                        plugins: [ChartDataLabels]
-                    });
-
+                    // Also fetch percentile scores for Graph 2
+                    fetch('/get_student_data/' + student_id)
+                        .then(r => r.json())
+                        .then(scoreData => {
+                            renderDetailedTable(data, scoreData.scores || {});
+                        })
+                        .catch(() => {
+                            renderDetailedTable(data, {});
+                        });
                 })
                 .catch(error => console.error("Error:", error));
+        }
+
+        function renderDetailedTable(data, percentileScores) {
+            const tbody = document.getElementById('detailedTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(function(item, idx) {
+                const category = item.category;
+                const total = item.total;
+                const correct = item.correct;
+                const percentile = percentileScores[category] !== undefined ? Number(percentileScores[category]) : 0;
+                const speedPct = total > 0 ? (total / total) * 100 : 0;
+                const accuracyPct = total > 0 ? (correct / total) * 100 : 0;
+                const desc = testDescriptions[category] || '';
+
+                // Hexagon SVG for percentile marker
+                var hexSvg = makeHexSvg(24);
+
+                // Row for Percentile
+                var percentileRow = '<tr>';
+                percentileRow += '<td rowspan="3" style="vertical-align: top; padding: 6px 6px; border-bottom: 1px solid #ccc; font-size: 8pt;"><strong>' + category + '</strong><br><span style="font-size: 7pt; color: #555;">' + desc + '</span></td>';
+                percentileRow += '<td style="padding: 3px 4px; font-size: 7.5pt; color: #333;">Percentile</td>';
+                percentileRow += '<td colspan="6" style="padding: 3px 0; position: relative;">';
+                percentileRow += '<div style="position: relative; width: 100%; height: 20px;">';
+                percentileRow += '<div style="position: absolute; left: ' + percentile + '%; top: 50%; transform: translate(-50%, -50%);">' + hexSvg + '</div>';
+                percentileRow += '</div></td></tr>';
+
+                // Row for Speed
+                var speedRow = '<tr>';
+                speedRow += '<td style="padding: 3px 4px; font-size: 7.5pt; color: #333;">Speed</td>';
+                speedRow += '<td colspan="6" style="padding: 3px 4px;">';
+                speedRow += '<div style="position: relative; width: 100%; height: 16px; background-color: #f0f0f0;">';
+                speedRow += '<div style="width: ' + speedPct + '%; height: 100%; background-color: #d5d5d5; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">';
+                speedRow += '<span style="font-size: 7pt; color: #333; white-space: nowrap;">' + total + ' / ' + total + ' questions answered</span>';
+                speedRow += '</div></div></td></tr>';
+
+                // Row for Accuracy
+                var accuracyRow = '<tr>';
+                accuracyRow += '<td style="padding: 3px 4px; font-size: 7.5pt; color: #333; border-bottom: 1px solid #ccc;">Accuracy</td>';
+                accuracyRow += '<td colspan="6" style="padding: 3px 4px; border-bottom: 1px solid #ccc;">';
+                accuracyRow += '<div style="position: relative; width: 100%; height: 16px; background-color: #f0f0f0;">';
+                accuracyRow += '<div style="width: ' + accuracyPct.toFixed(0) + '%; height: 100%; background-color: #8e7cc3; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">';
+                accuracyRow += '<span style="font-size: 7pt; color: #fff; white-space: nowrap;">' + correct + ' / ' + total + ' answered correctly</span>';
+                accuracyRow += '</div></div></td></tr>';
+
+                tbody.innerHTML += percentileRow + speedRow + accuracyRow;
+            });
         }
     </script>
     <script>
@@ -504,6 +570,18 @@
         }
 
 
+        function makeHexSvgGraph1(size) {
+            var w = size || 32;
+            var h = Math.round(w * 0.65);
+            var mid = Math.round(h / 2);
+            var inset = Math.round(w * 0.25);
+            return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">'
+                + '<polygon points="' + inset + ',0 ' + (w - inset) + ',0 ' + w + ',' + mid + ' ' + (w - inset) + ',' + h + ' ' + inset + ',' + h + ' 0,' + mid + '" '
+                + 'fill="#b5e2b5" stroke="#5aaa5a" stroke-width="1.2"/>'
+                + '<circle cx="' + Math.round(w/2) + '" cy="' + mid + '" r="1.5" fill="#5aaa5a"/>'
+                + '</svg>';
+        }
+
         function fetchStudentScores(studentId) {
             fetch(`/get_student_data/${studentId}`)
                 .then(response => response.json())
@@ -518,70 +596,26 @@
                         page.style.display = "block";
                     });
 
-                    let canvas = document.getElementById("scoreChart");
-                    if (!canvas) {
-                        console.error("Canvas element #scoreChart not found!");
-                        return;
-                    }
+                    // Build Graph 1: Percentile table with hexagonal markers
+                    const scoreEntries = Object.entries(data.scores);
+                    const sortedEntries = scoreEntries.sort((a, b) => b[1] - a[1]);
 
-                    let ctx = canvas.getContext("2d");
-                    if (!ctx) {
-                        console.error("Canvas context could not be initialized!");
-                        return;
-                    }
+                    const tbody = document.getElementById('percentileTableBody');
+                    tbody.innerHTML = '';
 
-                    // Destroy old chart instance if it exists
-                    if (window.scoreChartInstance) {
-                        window.scoreChartInstance.destroy();
-                    }
+                    var hexSvg = makeHexSvgGraph1(32);
 
-                    // Add a slight delay to ensure rendering after visibility
-                    setTimeout(() => {
-    // Get entries from scores object
-    const scoreEntries = Object.entries(data.scores);
-
-    // ✅ Sort by score value descending
-    const sortedEntries = scoreEntries.sort((a, b) => b[1] - a[1]);
-
-    // Extract labels and values from sorted entries
-    const labels = sortedEntries.map(([category]) => category);
-    const values = sortedEntries.map(([_, score]) => Number(score));
-
-    console.log("✅ Sorted Labels:", labels);
-    console.log("✅ Sorted Values:", values);
-
-    window.scoreChartInstance = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Score",
-                data: values,
-                backgroundColor: "rgba(128, 0, 128, 0.5)",
-                borderColor: "#800080",
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            devicePixelRatio: 4,
-            responsive: true,
-            plugins: {
-                tooltip: {
-                    enabled: false
-                }
-            },
-            scales: {
-                x: {
-                    min: 0,
-                    max: 100,
-                    ticks: { stepSize: 20 }
-                }
-            }
-        }
-    });
-}, 300);
- // Delay to ensure visibility before rendering
+                    sortedEntries.forEach(function(entry) {
+                        const category = entry[0];
+                        const score = Number(entry[1]);
+                        var row = '<tr>';
+                        row += '<td style="text-align: left; padding: 10px 10px; border-bottom: 1px solid #ddd; font-size: 10pt; color: #333;">' + category + '</td>';
+                        row += '<td colspan="6" style="padding: 10px 0; border-bottom: 1px solid #ddd; position: relative;">';
+                        row += '<div style="position: relative; width: 100%; height: 24px;">';
+                        row += '<div style="position: absolute; left: ' + score + '%; top: 50%; transform: translate(-50%, -50%);">' + hexSvg + '</div>';
+                        row += '</div></td></tr>';
+                        tbody.innerHTML += row;
+                    });
                 })
                 .catch(error => console.error("Error:", error));
         }
