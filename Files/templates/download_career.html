@@ -450,7 +450,7 @@
 
             <!-- Header -->
             <div style="width: 100%; display: flex; justify-content: flex-start;  ">
-                <img src="/static/imglogopdf.png" alt="Logo" style="width: 209px; height: 73px; margin-bottom: 40px;">
+                <img src="{% if firm_logo_url %}{{ firm_logo_url }}{% else %}/static/imglogopdf.png{% endif %}" alt="Logo" class="report-logo" style="width: 209px; height: 73px; margin-bottom: 40px;">
             </div>
 
 
@@ -545,7 +545,7 @@
             <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 200px;">
                 <div style="text-align: right; margin-right: 10px;">
                     <strong style="color: #1f2d5d;"><span id="student-name"></span></strong><br>
-                    <span style="color: #7f8c8d;">Edgepsych Consulting</span>
+                    <span style="color: #7f8c8d;">{% if firm_name %}{{ firm_name }}{% else %}Edgepsych Consulting{% endif %}</span>
                 </div>
                 <div style="width: 26px; height: 42px; background-color: #FC234E;"></div>
             </div>

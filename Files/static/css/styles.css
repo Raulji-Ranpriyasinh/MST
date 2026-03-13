@@ -2322,7 +2322,45 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* 10.9 Firm Dashboard Mobile Responsiveness
+/* 10.9 Settings Tab
+   ========================================================================== */
+.page-firm-dashboard .settings-section {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.page-firm-dashboard .settings-section h3 {
+    margin: 0 0 8px;
+    color: #001e4d;
+    font-size: 18px;
+}
+
+.page-firm-dashboard .btn-primary {
+    background-color: var(--color-primary, #0864ed);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.page-firm-dashboard .btn-primary:hover {
+    background-color: var(--color-secondary, #0550c8);
+}
+
+.page-firm-dashboard .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 10.10 Firm Dashboard Mobile Responsiveness
    ========================================================================== */
 @media (max-width: 768px) {
     .page-firm-dashboard .navbar {

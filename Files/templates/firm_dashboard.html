@@ -57,6 +57,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('students')">Students</button>
             <button class="tab-btn" onclick="switchTab('transactions')">Credit Transactions</button>
+            <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
         </div>
 
         <!-- Students Tab -->
@@ -102,6 +103,42 @@
             </table>
             <div class="empty-state" id="noTransactions" style="display:none;">No transactions recorded yet.</div>
         </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="tab-settings">
+            <!-- Invite Link Section -->
+            <div class="settings-section">
+                <h3>Invite Students</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:12px;">Generate a link to invite students to register under your firm. The link expires after 30 days.</p>
+                <button class="btn-primary" id="generateInviteBtn" onclick="generateInviteLink()">Generate Invite Link</button>
+                <div id="inviteLinkResult" style="display:none; margin-top:12px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="text" id="inviteLinkUrl" readonly style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f9fa;" />
+                        <button class="btn-primary" onclick="copyInviteLink()" style="white-space:nowrap;">Copy Link</button>
+                    </div>
+                    <p style="color:#28a745; font-size:12px; margin-top:6px;">Link valid for 30 days</p>
+                </div>
+            </div>
+
+            <!-- Branding Section -->
+            <div class="settings-section" style="margin-top:24px;">
+                <h3>Firm Branding</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:12px;">Update your firm name and logo. The logo will be resized to 200x80 pixels and used in student reports.</p>
+                <form id="brandingForm" enctype="multipart/form-data" onsubmit="saveBranding(event)">
+                    <div style="margin-bottom:16px;">
+                        <label for="editFirmName" style="display:block; font-weight:500; margin-bottom:6px;">Firm Name</label>
+                        <input type="text" id="editFirmName" placeholder="Enter firm name" style="width:100%; max-width:400px; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;" />
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label for="logoUpload" style="display:block; font-weight:500; margin-bottom:6px;">Firm Logo <span style="color:#999; font-weight:400;">(200 x 80 px, png/jpg/gif/svg)</span></label>
+                        <div id="currentLogoPreview" style="margin-bottom:8px;"></div>
+                        <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/gif,image/svg+xml" style="font-size:14px;" />
+                        <div id="logoPreviewNew" style="margin-top:8px;"></div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="saveBrandingBtn">Save Changes</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="/static/js/jwt_helpers.js"></script>
@@ -119,6 +156,7 @@
             document.getElementById('tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
             if (tabName === 'transactions') loadTransactions();
+            if (tabName === 'settings') loadSettingsData();
         }
 
         // ===== Load Dashboard Data (stats only) =====
@@ -151,6 +189,9 @@
                 if (data.logo_url) {
                     logoContainer.innerHTML = '<img src="' + escapeHtml(data.logo_url) + '" class="logo-icon" alt="' + escapeHtml(data.firm_name) + '" style="max-height:40px;" />';
                 }
+
+                // Store dashboard data for settings tab
+                window._firmData = data;
 
                 // Colour-coded credit balance
                 var creditEl = document.getElementById('creditBalance');
@@ -369,6 +410,124 @@
                 console.error('Transactions error:', err);
                 showToast('Failed to load transactions.', 'error');
             }
+        }
+
+        // ===== Settings Tab =====
+        function loadSettingsData() {
+            var data = window._firmData;
+            if (!data) return;
+            document.getElementById('editFirmName').value = data.firm_name || '';
+            var preview = document.getElementById('currentLogoPreview');
+            if (data.logo_url) {
+                preview.innerHTML = '<p style="font-size:13px; color:#666; margin-bottom:4px;">Current logo:</p><img src="' + escapeHtml(data.logo_url) + '" style="max-width:200px; max-height:80px; border:1px solid #eee; border-radius:4px; padding:4px;" />';
+            } else {
+                preview.innerHTML = '<p style="font-size:13px; color:#999;">No logo uploaded yet.</p>';
+            }
+        }
+
+        // Preview new logo before upload
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoInput = document.getElementById('logoUpload');
+            if (logoInput) {
+                logoInput.addEventListener('change', function() {
+                    var file = this.files[0];
+                    var previewDiv = document.getElementById('logoPreviewNew');
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewDiv.innerHTML = '<p style="font-size:13px; color:#666;">Preview:</p><img src="' + e.target.result + '" style="max-width:200px; max-height:80px; border:1px solid #eee; border-radius:4px; padding:4px;" />';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewDiv.innerHTML = '';
+                    }
+                });
+            }
+        });
+
+        // ===== Generate Invite Link =====
+        async function generateInviteLink() {
+            var btn = document.getElementById('generateInviteBtn');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            try {
+                var res = await authFetch('/api/v1/firm/invite-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                var data = await res.json();
+                if (data.success) {
+                    document.getElementById('inviteLinkUrl').value = data.invite_url;
+                    document.getElementById('inviteLinkResult').style.display = 'block';
+                    showToast('Invite link generated!', 'success');
+                } else {
+                    showToast(data.message || 'Failed to generate invite link', 'error');
+                }
+            } catch (err) {
+                console.error('Invite link error:', err);
+                showToast('Failed to generate invite link.', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Generate Invite Link';
+        }
+
+        function copyInviteLink() {
+            var input = document.getElementById('inviteLinkUrl');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(function() {
+                showToast('Link copied to clipboard!', 'success');
+            }).catch(function() {
+                document.execCommand('copy');
+                showToast('Link copied!', 'success');
+            });
+        }
+
+        // ===== Save Branding =====
+        async function saveBranding(e) {
+            e.preventDefault();
+            var btn = document.getElementById('saveBrandingBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            var formData = new FormData();
+            var firmName = document.getElementById('editFirmName').value.trim();
+            var logoFile = document.getElementById('logoUpload').files[0];
+
+            if (firmName) formData.append('firm_name', firmName);
+            if (logoFile) formData.append('logo', logoFile);
+
+            if (!firmName && !logoFile) {
+                showToast('Please provide a firm name or upload a logo.', 'warning');
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+                return;
+            }
+
+            try {
+                var res = await authFetch('/api/v1/firm/branding', {
+                    method: 'POST',
+                    body: formData
+                });
+                var data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Branding updated!', 'success');
+                    // Refresh dashboard data
+                    await loadDashboard();
+                    // Update settings preview
+                    loadSettingsData();
+                    // Clear file input
+                    document.getElementById('logoUpload').value = '';
+                    document.getElementById('logoPreviewNew').innerHTML = '';
+                } else {
+                    showToast(data.message || 'Failed to update branding', 'error');
+                }
+            } catch (err) {
+                console.error('Branding error:', err);
+                showToast('Failed to update branding.', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
         }
 
         // ===== Logout =====

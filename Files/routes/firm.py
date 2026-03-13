@@ -1,11 +1,16 @@
 """Firm authentication and dashboard routes."""
 
 import logging
+import os
+import re
 import smtplib
+import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from flask import Blueprint, current_app, jsonify, redirect, render_template, request, url_for
+from PIL import Image
+from werkzeug.utils import secure_filename
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -27,6 +32,17 @@ from models.student import ExamProcess, StudentDetails, TestStatus
 logger = logging.getLogger(__name__)
 
 firm_bp = Blueprint("firm", __name__)
+
+# Logo upload configuration
+ALLOWED_LOGO_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
+LOGO_MAX_WIDTH = 200
+LOGO_MAX_HEIGHT = 80
+LOGO_UPLOAD_FOLDER = os.path.join('static', 'uploads', 'logos')
+
+
+def _allowed_logo_file(filename):
+    """Return True if the filename has an allowed image extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_LOGO_EXTENSIONS
 
 
 # ---------------------------------------------------------------------------
@@ -327,8 +343,14 @@ def firm_download_aptitude(student_id):
     if student.firm_id != admin.firm_id:
         return jsonify({"success": False, "message": "Student does not belong to your firm"}), 403
 
-    # Reuse the same template used by the student download route
-    return render_template("aptitudefirst.html", student_id=student_id)
+    # Pass firm branding so the report can display the firm's logo and name
+    firm = db.session.get(ConsultancyFirm, admin.firm_id)
+    return render_template(
+        "aptitudefirst.html",
+        student_id=student_id,
+        firm_logo_url=firm.logo_url if firm else None,
+        firm_name=firm.firm_name if firm else None,
+    )
 
 
 @firm_bp.route("/api/v1/firm/students/<int:student_id>/report/career", methods=["GET"])
@@ -346,8 +368,14 @@ def firm_download_career(student_id):
     if student.firm_id != admin.firm_id:
         return jsonify({"success": False, "message": "Student does not belong to your firm"}), 403
 
-    # Reuse the same template used by the student download route
-    return render_template("download_career.html", student_id=student_id)
+    # Pass firm branding so the report can display the firm's logo and name
+    firm = db.session.get(ConsultancyFirm, admin.firm_id)
+    return render_template(
+        "download_career.html",
+        student_id=student_id,
+        firm_logo_url=firm.logo_url if firm else None,
+        firm_name=firm.firm_name if firm else None,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -435,6 +463,121 @@ def firm_reset_password(token):
     db.session.commit()
 
     return jsonify({"success": True, "message": "Password reset successful. You can now log in."})
+
+
+# ---------------------------------------------------------------------------
+# Firm Admin – Invite Link Generation
+# ---------------------------------------------------------------------------
+
+@firm_bp.route("/api/v1/firm/invite-link", methods=["POST"])
+@jwt_required()
+def firm_generate_invite_link():
+    """Generate a signed invite token for the firm admin's own firm."""
+    admin = _get_firm_admin()
+    if admin is None:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    firm = db.session.get(ConsultancyFirm, admin.firm_id)
+    if firm is None:
+        return jsonify({"success": False, "message": "Firm not found"}), 404
+    if not firm.is_active:
+        return jsonify({"success": False, "message": "Firm is not active"}), 400
+
+    from routes.admin import _get_invite_serializer
+    serializer = _get_invite_serializer()
+    token = serializer.dumps({'firm_id': firm.id}, salt='firm-invite')
+
+    invite_url = url_for('auth.register_with_firm_token', token=token, _external=True)
+
+    return jsonify({
+        'success': True,
+        'token': token,
+        'invite_url': invite_url,
+        'expires_in_days': 30,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Firm Admin – Branding (Logo Upload + Firm Name Update)
+# ---------------------------------------------------------------------------
+
+@firm_bp.route("/api/v1/firm/branding", methods=["POST"])
+@jwt_required()
+def firm_update_branding():
+    """Update the firm's logo and/or display name.
+
+    Accepts multipart/form-data with optional fields:
+    - logo: image file (png/jpg/jpeg/gif/svg), resized to LOGO_MAX_WIDTH x LOGO_MAX_HEIGHT
+    - firm_name: new display name for the firm
+    """
+    admin = _get_firm_admin()
+    if admin is None:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    firm = db.session.get(ConsultancyFirm, admin.firm_id)
+    if firm is None:
+        return jsonify({"success": False, "message": "Firm not found"}), 404
+
+    updated_fields = []
+
+    # Handle firm name update
+    new_firm_name = request.form.get('firm_name', '').strip()
+    if new_firm_name:
+        # Check for duplicate firm name (excluding current firm)
+        existing = ConsultancyFirm.query.filter(
+            ConsultancyFirm.firm_name == new_firm_name,
+            ConsultancyFirm.id != firm.id,
+        ).first()
+        if existing:
+            return jsonify({"success": False, "message": "Firm name already in use"}), 400
+        firm.firm_name = new_firm_name
+        updated_fields.append('firm_name')
+
+    # Handle logo upload
+    logo_file = request.files.get('logo')
+    if logo_file and logo_file.filename:
+        if not _allowed_logo_file(logo_file.filename):
+            return jsonify({"success": False, "message": "Invalid file type. Allowed: png, jpg, jpeg, gif, svg"}), 400
+
+        # Ensure upload directory exists
+        upload_dir = os.path.join(current_app.root_path, LOGO_UPLOAD_FOLDER)
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Delete old logo if it exists
+        if firm.logo_url:
+            old_path = os.path.join(current_app.root_path, firm.logo_url.lstrip('/'))
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
+        # Generate unique filename
+        ext = logo_file.filename.rsplit('.', 1)[1].lower()
+        filename = f"firm_{firm.id}_{uuid.uuid4().hex[:8]}.{ext}"
+        filename = secure_filename(filename)
+        filepath = os.path.join(upload_dir, filename)
+
+        # Resize image to fixed dimensions (skip resize for SVG)
+        if ext == 'svg':
+            logo_file.save(filepath)
+        else:
+            img = Image.open(logo_file)
+            img = img.convert('RGBA') if img.mode == 'RGBA' else img.convert('RGB')
+            img = img.resize((LOGO_MAX_WIDTH, LOGO_MAX_HEIGHT), Image.LANCZOS)
+            img.save(filepath)
+
+        firm.logo_url = f"/{LOGO_UPLOAD_FOLDER}/{filename}"
+        updated_fields.append('logo')
+
+    if not updated_fields:
+        return jsonify({"success": False, "message": "No changes provided"}), 400
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"Updated: {', '.join(updated_fields)}",
+        "firm_name": firm.firm_name,
+        "logo_url": firm.logo_url,
+    })
 
 
 def _send_reset_email(to_email, reset_url, user_label):
