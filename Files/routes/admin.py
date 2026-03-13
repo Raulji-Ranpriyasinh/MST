@@ -13,9 +13,9 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
 from extensions import db, socketio
-from models.assessment import CareerQuestion, StudentCareerResponse
+from models.assessment import CareerQuestion, StudentCareerResponse, AptitudeImgResponse
 from models.consultancy import ConsultancyFirm, CreditTransaction, FirmAdmin
-from models.student import ExamProcess, StudentDetails, TestStatus
+from models.student import ExamProcess, StudentDetails, TestStatus, Trackaptitude
 from sqlalchemy.orm import joinedload
 from schemas.validation import validate_firm_creation
 from services.scoring import get_career_scores, load_mappings
@@ -129,6 +129,15 @@ def admin_students_list():
         if s.firm is not None:
             firm_name = s.firm.firm_name
 
+        # Last attempted aptitude category
+        track_apt = Trackaptitude.query.filter_by(student_id=s.id).first()
+        last_aptitude_category = track_apt.last_category if track_apt else None
+
+        # Last attempted career question number
+        last_career_question = None
+        if exam_progress:
+            last_career_question = exam_progress.last_attempted_question_id
+
         students.append({
             "id": s.id,
             "first_name": s.first_name,
@@ -145,6 +154,8 @@ def admin_students_list():
             "can_view_career_result": s.can_view_career_result,
             "career_test_completed": career_test_completed,
             "aptitude_test_completed": aptitude_test_completed,
+            "last_aptitude_category": last_aptitude_category,
+            "last_career_question": last_career_question,
         })
 
     return jsonify({
@@ -594,6 +605,56 @@ def generate_invite_link(firm_id):
         'token': token,
         'invite_url': invite_url,
         'expires_in_days': 30,
+    })
+
+
+@admin_bp.route('/api/v1/admin/students/<int:student_id>/reset-test', methods=['POST'])
+@jwt_required()
+def admin_reset_student_test(student_id):
+    """Reset a student's test data so they can retake the assessment.
+
+    Accepts JSON with: test_type = 'career' | 'aptitude' | 'both'
+    """
+    if not _is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+
+    student = db.session.get(StudentDetails, student_id)
+    if student is None:
+        return jsonify({"success": False, "message": "Student not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    test_type = data.get("test_type", "both")
+
+    if test_type not in ("career", "aptitude", "both"):
+        return jsonify({"success": False, "message": "Invalid test_type. Use 'career', 'aptitude', or 'both'."}), 400
+
+    reset_items = []
+
+    if test_type in ("career", "both"):
+        StudentCareerResponse.query.filter_by(student_id=student_id).delete()
+        exam = ExamProcess.query.filter_by(student_id=student_id).first()
+        if exam:
+            db.session.delete(exam)
+        ts = TestStatus.query.filter_by(user_id=student_id).first()
+        if ts:
+            ts.career_test_completed = False
+        reset_items.append("career")
+
+    if test_type in ("aptitude", "both"):
+        AptitudeImgResponse.query.filter_by(student_id=student_id).delete()
+        track = Trackaptitude.query.filter_by(student_id=student_id).first()
+        if track:
+            db.session.delete(track)
+        ts = TestStatus.query.filter_by(user_id=student_id).first()
+        if ts:
+            ts.aptitude_test_completed = False
+        reset_items.append("aptitude")
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"Reset: {', '.join(reset_items)} test(s) for student {student_id}",
     })
 
 

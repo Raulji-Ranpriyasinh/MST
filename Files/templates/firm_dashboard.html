@@ -74,8 +74,11 @@
                         <th>Grade</th>
                         <th>Career</th>
                         <th>Aptitude</th>
+                        <th>Last Aptitude Category</th>
+                        <th>Last Career Q#</th>
                         <th>Result Access</th>
                         <th>Reports</th>
+                        <th>Reset</th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
@@ -259,6 +262,9 @@
                         var aptitudeDl = s.aptitude_test_completed
                             ? '<a class="dl-btn aptitude" href="/api/v1/firm/students/' + s.id + '/report/aptitude" target="_blank">Aptitude</a>'
                             : '<span class="dl-btn aptitude disabled">Aptitude</span>';
+                        var lastAptCat = s.last_aptitude_category ? escapeHtml(s.last_aptitude_category) : '<span style="color:#999;">--</span>';
+                        var lastCareerQ = s.last_career_question ? s.last_career_question : '<span style="color:#999;">--</span>';
+                        var resetBtn = '<button class="dl-btn" style="background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;" onclick="resetStudentTest(' + s.id + ', \'' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '\')">Reset</button>';
                         row.innerHTML =
                             '<td>' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '</td>' +
                             '<td>' + escapeHtml(s.email) + '</td>' +
@@ -266,8 +272,11 @@
                             '<td>' + escapeHtml(s.grade) + '</td>' +
                             '<td>' + careerBadge + '</td>' +
                             '<td>' + aptitudeBadge + '</td>' +
+                            '<td>' + lastAptCat + '</td>' +
+                            '<td>' + lastCareerQ + '</td>' +
                             '<td><label class="toggle-switch"><input type="checkbox" ' + toggleChecked + ' onchange="toggleResultAccess(' + s.id + ', this.checked)" /><span class="toggle-slider"></span></label></td>' +
-                            '<td>' + careerDl + ' ' + aptitudeDl + '</td>';
+                            '<td>' + careerDl + ' ' + aptitudeDl + '</td>' +
+                            '<td>' + resetBtn + '</td>';
                         tbody.appendChild(row);
                     });
                     buildPagination(data.current_page, data.pages, data.total);
@@ -359,6 +368,35 @@
                 console.error('Toggle error:', err);
                 showToast('Failed to update access.', 'error');
                 loadStudents(currentPage);
+            }
+        }
+
+        // ===== Reset Student Test =====
+        async function resetStudentTest(studentId, studentName) {
+            var testType = prompt('Reset test for ' + studentName + '.\nEnter test type: career, aptitude, or both', 'both');
+            if (!testType) return;
+            testType = testType.trim().toLowerCase();
+            if (['career', 'aptitude', 'both'].indexOf(testType) === -1) {
+                showToast('Invalid test type. Use career, aptitude, or both.', 'warning');
+                return;
+            }
+            if (!confirm('Are you sure you want to reset ' + testType + ' test(s) for ' + studentName + '? This will delete their responses and they will need to retake the test.')) return;
+            try {
+                var res = await authFetch('/api/v1/firm/students/' + studentId + '/reset-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test_type: testType })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Test reset successful!', 'success');
+                    loadStudents(currentPage);
+                } else {
+                    showToast(data.message || 'Failed to reset test', 'error');
+                }
+            } catch (err) {
+                console.error('Reset test error:', err);
+                showToast('Failed to reset test.', 'error');
             }
         }
 

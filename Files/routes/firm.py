@@ -25,9 +25,9 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, limiter, socketio
-from models.assessment import CareerQuestion
+from models.assessment import CareerQuestion, StudentCareerResponse, AptitudeImgResponse
 from models.consultancy import ConsultancyFirm, CreditTransaction, FirmAdmin
-from models.student import ExamProcess, StudentDetails, TestStatus
+from models.student import ExamProcess, StudentDetails, TestStatus, Trackaptitude
 
 logger = logging.getLogger(__name__)
 
@@ -263,6 +263,15 @@ def firm_students_list():
         if test_status and test_status.aptitude_test_completed:
             aptitude_test_completed = True
 
+        # Last attempted aptitude category
+        track_apt = Trackaptitude.query.filter_by(student_id=s.id).first()
+        last_aptitude_category = track_apt.last_category if track_apt else None
+
+        # Last attempted career question number
+        last_career_question = None
+        if exam_progress:
+            last_career_question = exam_progress.last_attempted_question_id
+
         students.append({
             "id": s.id,
             "first_name": s.first_name,
@@ -274,6 +283,8 @@ def firm_students_list():
             "can_view_career_result": s.can_view_career_result,
             "career_test_completed": career_test_completed,
             "aptitude_test_completed": aptitude_test_completed,
+            "last_aptitude_category": last_aptitude_category,
+            "last_career_question": last_career_question,
         })
 
     return jsonify({
@@ -321,6 +332,70 @@ def firm_toggle_result_access(student_id):
         "success": True,
         "message": "Result access updated",
         "can_view": bool(can_view),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Firm Admin – Reset Student Test
+# ---------------------------------------------------------------------------
+
+@firm_bp.route("/api/v1/firm/students/<int:student_id>/reset-test", methods=["POST"])
+@jwt_required()
+def firm_reset_student_test(student_id):
+    """Reset a student's test data so they can retake the assessment.
+
+    Accepts JSON with: test_type = 'career' | 'aptitude' | 'both'
+    """
+    admin = _get_firm_admin()
+    if admin is None:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    student = db.session.get(StudentDetails, student_id)
+    if student is None:
+        return jsonify({"success": False, "message": "Student not found"}), 404
+
+    if student.firm_id != admin.firm_id:
+        return jsonify({"success": False, "message": "Student does not belong to your firm"}), 403
+
+    data = request.get_json(silent=True) or {}
+    test_type = data.get("test_type", "both")
+
+    if test_type not in ("career", "aptitude", "both"):
+        return jsonify({"success": False, "message": "Invalid test_type. Use 'career', 'aptitude', or 'both'."}), 400
+
+    reset_items = []
+
+    if test_type in ("career", "both"):
+        # Delete career responses
+        StudentCareerResponse.query.filter_by(student_id=student_id).delete()
+        # Reset exam process (career progress tracker)
+        exam = ExamProcess.query.filter_by(student_id=student_id).first()
+        if exam:
+            db.session.delete(exam)
+        # Update test status
+        ts = TestStatus.query.filter_by(user_id=student_id).first()
+        if ts:
+            ts.career_test_completed = False
+        reset_items.append("career")
+
+    if test_type in ("aptitude", "both"):
+        # Delete aptitude responses
+        AptitudeImgResponse.query.filter_by(student_id=student_id).delete()
+        # Reset aptitude tracker
+        track = Trackaptitude.query.filter_by(student_id=student_id).first()
+        if track:
+            db.session.delete(track)
+        # Update test status
+        ts = TestStatus.query.filter_by(user_id=student_id).first()
+        if ts:
+            ts.aptitude_test_completed = False
+        reset_items.append("aptitude")
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"Reset: {', '.join(reset_items)} test(s) for student {student_id}",
     })
 
 
