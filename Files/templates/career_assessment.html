@@ -65,7 +65,7 @@
         // Close dropdown when clicking outside
         document.addEventListener("click", function (event) {
             var dropdown = document.getElementById("dropdownMenu");
-            var button = document.querySelector(".dropdown-btn");
+            var button = document.querySelector(".profile-btn");
             if (!button.contains(event.target) && !dropdown.contains(event.target)) {
                 dropdown.style.display = "none";
             }

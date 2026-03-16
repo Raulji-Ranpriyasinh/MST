@@ -41,7 +41,7 @@
 
     <!-- hello -->
  <div class="category-scroll-wrapper">
-    <div id="category-selection" style="margin-bottom: 20px; padding: 10px;"></div>
+    <div id="category-selection" class="category-selection"></div>
 </div>
 
     <!-- <h2>Aptitude Test</h2> -->
@@ -100,28 +100,15 @@
     </div>
 
     
-<div id="category-modal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-           background: rgba(0, 0, 0, 0.5); z-index: 9999; font-family: 'Segoe UI', sans-serif;">
-    
-    <div style="background: #fff; padding: 30px 20px; max-width: 800px; margin: 5% auto;
-                border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);">
-        
-        <h2 id="modal-category-name" style="margin-bottom: 10px; font-size: 26px; color: #333;">Ready?</h2>
-        
-        <p id="modal-category-instruction" style="font-size: 16px; color: #555; line-height: 1.5;">
+<div id="category-modal" class="category-modal">
+    <div class="category-modal-content">
+        <h2 id="modal-category-name" class="category-modal-title">Ready?</h2>
+        <p id="modal-category-instruction" class="category-modal-instruction">
             You will now begin this category. Click "Let's Map your Career" when you're ready.
         </p>
-        
-        <img id="modal-category-image"
-             style="max-width: 100%; margin: 20px auto; border-radius: 8px;" alt="Category Image">
-
-        <button id="modal-ok-button"
-            style="display: block; margin: 30px auto 0 auto; padding: 12px 30px;
-                   background: linear-gradient(90deg, #015FFF, #3B72D0); color: white; border: none; border-radius: 25px;
-                   font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                   transition: background-color 0.3s;">
-            Let’s Map your Career
+        <img id="modal-category-image" class="category-modal-image" alt="Category Image">
+        <button id="modal-ok-button" class="category-modal-btn">
+            Let's Map your Career
         </button>
     </div>
 </div>

@@ -348,7 +348,7 @@
 
                 var lastAptCat = s.last_aptitude_category ? escapeHtml(s.last_aptitude_category) : '<span style="color:#999;">--</span>';
                 var lastCareerQ = s.last_career_question ? s.last_career_question : '<span style="color:#999;">--</span>';
-                var resetCell = '<button style="background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;" onclick="adminResetStudentTest(' + s.id + ', \'' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '\')">Reset</button>';
+                var resetCell = '<button class="btn btn-sm btn-danger" onclick="adminResetStudentTest(' + s.id + ', \'' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '\')">Reset</button>';
 
                 tr.innerHTML =
                     '<td data-label="ID">' + s.id + '</td>' +

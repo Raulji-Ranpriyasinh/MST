@@ -71,6 +71,194 @@
    1. COMMON / SHARED STYLES
    ========================================================================== */
 
+/* 1.0 Design Tokens / CSS Variables
+   ========================================================================== */
+:root {
+    /* Colors */
+    --color-primary: #296eff;
+    --color-primary-dark: #1a5ad4;
+    --color-secondary: #3B72D0;
+    --color-success: #4CAF50;
+    --color-danger: #dc3545;
+    --color-warning: #fade11;
+    --color-text: #333;
+    --color-text-light: #666;
+    --color-text-muted: #999;
+    --color-bg: #f8fbfd;
+    --color-white: #fff;
+    --color-border: #ddd;
+    --color-border-light: #e0e0e0;
+
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-pill: 25px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.15);
+
+    /* Typography */
+    --font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 13px;
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 26px;
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
+}
+
+/* 1.05 Standardized Button System
+   ========================================================================== */
+
+/* Base button */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    font-family: var(--font-family);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-md);
+    line-height: 1.4;
+    text-align: center;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Size variants */
+.btn-sm {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+}
+
+.btn, .btn-md {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+}
+
+.btn-lg {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-md);
+    border-radius: var(--radius-lg);
+}
+
+/* Color variants */
+.btn-primary {
+    background: linear-gradient(90deg, #015FFF, var(--color-secondary));
+    color: var(--color-white);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, var(--color-primary-dark), #2a5db8);
+}
+
+.btn-success {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.btn-success:hover {
+    background-color: #43a047;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* 1.06 Standardized Card Component
+   ========================================================================== */
+.card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    border: 2px solid #5A8CE32E;
+    box-shadow: var(--shadow-md);
+    padding: var(--space-lg) var(--space-md);
+    text-align: center;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.card-clickable {
+    cursor: pointer;
+}
+
+/* Responsive card padding */
+@media (max-width: 480px) {
+    .card {
+        padding: var(--space-md) var(--space-sm);
+        border-radius: var(--radius-lg);
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .card {
+        padding: var(--space-lg) var(--space-md);
+    }
+}
+
+@media (min-width: 769px) {
+    .card {
+        padding: 30px var(--space-lg);
+    }
+}
+
 /* 1.1 Loading Spinner Overlay
    ========================================================================== */
 .loading-overlay {
@@ -698,18 +886,18 @@
 }
 
 .page-dashboard .card {
-    background: white;
-    border-radius: 12px;
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
     border: 2px solid #5A8CE32E;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    padding: 30px 20px;
+    box-shadow: var(--shadow-md);
+    padding: 30px var(--space-lg);
     text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .page-dashboard .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-hover);
 }
 
 /* 5.3 Dashboard Mobile Responsiveness (mobile-first)
@@ -747,7 +935,7 @@
     }
 
     .page-dashboard .card {
-        padding: 18px 12px;
+        padding: var(--space-md) var(--space-sm);
     }
 }
 
@@ -783,7 +971,7 @@
     }
 
     .page-dashboard .card {
-        padding: 24px 18px;
+        padding: var(--space-lg) var(--space-md);
     }
 }
 
@@ -823,12 +1011,18 @@
 }
 
 .page-programmes .card {
-    background: white;
-    border-radius: 12px;
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
     border: 2px solid #5A8CE32E;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    padding: 30px 20px;
+    box-shadow: var(--shadow-md);
+    padding: 30px var(--space-lg);
     text-align: center;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.page-programmes .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
 }
 
 .page-programmes .card h3 {
@@ -935,20 +1129,21 @@
 /* 7.1 Question Card
    ========================================================================== */
 .page-career-assessment .question-card {
-    background-color: white;
-    border-radius: 12px;
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
     padding: 40px 30px;
     max-width: 600px;
     margin: 60px auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-lg);
     text-align: center;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .page-career-assessment .card-heading {
-    font-size: 20px;
+    font-size: var(--font-size-xl);
     font-weight: 600;
-    color: #333;
-    margin-bottom: 18px;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
 }
 
 .page-career-assessment .button-wrapper {
@@ -963,12 +1158,12 @@
 /* 7.2 Career Buttons
    ========================================================================== */
 .page-career-assessment .btn {
-    padding: 10px 28px;
+    padding: var(--space-sm) 28px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all var(--transition-fast);
     font-weight: 500;
     box-shadow: none;
 }
@@ -979,15 +1174,15 @@
 }
 
 .page-career-assessment .btn.yes {
-    background-color: #4CAF50;
+    background-color: var(--color-success);
 }
 
 .page-career-assessment .btn.maybe {
-    background-color: #fade11;
+    background-color: var(--color-warning);
 }
 
 .page-career-assessment .btn.no {
-    background-color: #e74c3c;
+    background-color: var(--color-danger);
 }
 
 /* 7.3 Career Mobile Responsiveness
@@ -1018,7 +1213,7 @@
     }
 
     .page-career-assessment .question-card {
-        padding: 24px 16px;
+        padding: var(--space-lg) var(--space-md);
         margin: 30px auto;
         max-width: 95%;
     }
@@ -1058,19 +1253,24 @@
 }
 
 .page-aptitude-questionnaire .question-container {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+    box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 305px;
-    background: white;
-    width: 504px;
+    min-height: 200px;
+    background: var(--color-white);
+    width: 100%;
+    max-width: 504px;
     text-align: center;
+    border-radius: var(--radius-lg);
+    transition: width var(--transition-base);
 }
 
 .page-aptitude-questionnaire .question-img {
-    width: 300px;
-    height: 200px;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    max-height: 200px;
     object-fit: contain;
     margin: 10px auto;
     display: block;
@@ -1110,9 +1310,12 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    height: 305px;
-    background: white;
-    width: 504px;
+    min-height: 200px;
+    background: var(--color-white);
+    width: 100%;
+    max-width: 504px;
+    border-radius: var(--radius-lg);
+    transition: width var(--transition-base);
 }
 
 .page-aptitude-questionnaire .options-container > * {
@@ -1122,12 +1325,14 @@
 }
 
 .page-aptitude-questionnaire .option-img {
-    width: 150px;
-    height: 85px;
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    max-height: 85px;
     object-fit: contain;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: 0.3s;
+    transition: var(--transition-base);
     padding: 5px;
 }
 
@@ -1147,7 +1352,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
 }
 
 .page-aptitude-questionnaire .option-text {
@@ -1155,10 +1361,10 @@
     font-weight: bold;
     text-align: center;
     padding: 5px;
-    font-size: 18px;
-    width: 150px;
-    object-fit: contain;
-    transition: transform 0.2s ease;
+    font-size: var(--font-size-lg);
+    width: 100%;
+    max-width: 150px;
+    transition: transform var(--transition-fast);
 }
 
 .page-aptitude-questionnaire .option-text:hover {
@@ -1186,9 +1392,9 @@
 
 .page-aptitude-questionnaire .progress-bar-container {
     width: 80%;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    margin: 20px auto;
+    background-color: var(--color-border-light);
+    border-radius: var(--radius-lg);
+    margin: var(--space-lg) auto;
     height: 30px;
     position: relative;
     text-align: center;
@@ -1198,11 +1404,11 @@
 .page-aptitude-questionnaire .progress-bar {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #015FFF, #3B72D0);
-    border-radius: 10px;
+    background: linear-gradient(90deg, #015FFF, var(--color-secondary));
+    border-radius: var(--radius-lg);
     transition: width 1s linear;
     line-height: 30px;
-    color: white;
+    color: var(--color-white);
 }
 
 /* 8.4 Navigation Buttons
@@ -1217,14 +1423,15 @@
 
 .page-aptitude-questionnaire .nav-btn {
     background-color: #008080;
-    color: white;
-    padding: 10px 20px;
+    color: var(--color-white);
+    padding: var(--space-sm) var(--space-lg);
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     display: inline-block;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: var(--font-size-md);
+    transition: background-color var(--transition-fast);
 }
 
 .page-aptitude-questionnaire .nav-btn:hover {
@@ -1234,13 +1441,13 @@
 /* 8.5 Category & Tile Styles
    ========================================================================== */
 .page-aptitude-questionnaire .category-button {
-    padding: 10px;
-    margin: 5px;
+    padding: var(--space-sm);
+    margin: var(--space-xs);
     cursor: pointer;
     background-color: lightgray;
     border: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-base);
 }
 
 .page-aptitude-questionnaire .category-button:hover {
@@ -1276,11 +1483,11 @@
 .page-aptitude-questionnaire .question-tile {
     width: 100%;
     height: 30px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     text-align: center;
     line-height: 30px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--font-size-sm);
     cursor: pointer;
     border: none;
     background-color: #f4f4fc;
@@ -1307,6 +1514,117 @@
 .page-aptitude-questionnaire .question-tile.unattempted {
     background-color: #f1f1f1;
     color: black;
+}
+
+/* 8.55 Category Selection (replaces inline styles)
+   ========================================================================== */
+.page-aptitude-questionnaire .category-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm);
+}
+
+/* 8.56 Category Modal (fully CSS-driven, replaces inline styles)
+   ========================================================================== */
+.page-aptitude-questionnaire .category-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    font-family: var(--font-family);
+}
+
+.page-aptitude-questionnaire .category-modal-content {
+    background: var(--color-white);
+    padding: 30px var(--space-lg);
+    width: 90%;
+    max-width: 800px;
+    margin: 5% auto;
+    border-radius: var(--radius-xl);
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.page-aptitude-questionnaire .category-modal-title {
+    margin-bottom: var(--space-sm);
+    font-size: var(--font-size-2xl);
+    color: var(--color-text);
+}
+
+.page-aptitude-questionnaire .category-modal-instruction {
+    font-size: var(--font-size-md);
+    color: var(--color-text-light);
+    line-height: 1.5;
+}
+
+.page-aptitude-questionnaire .category-modal-image {
+    max-width: 100%;
+    margin: var(--space-md) auto;
+    border-radius: var(--radius-lg);
+    display: block;
+}
+
+.page-aptitude-questionnaire .category-modal-btn {
+    display: block;
+    margin: 30px auto 0 auto;
+    padding: var(--space-sm) 30px;
+    background: linear-gradient(90deg, #015FFF, var(--color-secondary));
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-base);
+}
+
+.page-aptitude-questionnaire .category-modal-btn:hover {
+    background: linear-gradient(90deg, var(--color-primary-dark), #2a5db8);
+}
+
+/* 8.57 Tablet breakpoints for tiles and layout
+   ========================================================================== */
+@media (min-width: 481px) and (max-width: 768px) {
+    .page-aptitude-questionnaire .tiles-grid,
+    .page-aptitude-questionnaire #question-tiles-container {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 6px;
+    }
+
+    .page-aptitude-questionnaire .question-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .page-aptitude-questionnaire .question-container,
+    .page-aptitude-questionnaire .options-container {
+        max-width: 90%;
+    }
+
+    .page-aptitude-questionnaire .category-modal-content {
+        margin: 10% auto;
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .page-aptitude-questionnaire .category-modal-title {
+        font-size: var(--font-size-xl);
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .page-aptitude-questionnaire .tiles-grid,
+    .page-aptitude-questionnaire #question-tiles-container {
+        grid-template-columns: repeat(10, 1fr);
+    }
 }
 
 /* 8.6 Aptitude Mobile Responsiveness
@@ -2280,18 +2598,18 @@
 .page-firm-dashboard .stat-card {
     flex: 1;
     min-width: 200px;
-    background: white;
-    border-radius: 12px;
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
     border: 2px solid #5A8CE32E;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    padding: 24px 20px;
+    box-shadow: var(--shadow-md);
+    padding: var(--space-lg) var(--space-lg);
     text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .page-firm-dashboard .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
 }
 
 .page-firm-dashboard .stat-card h3 {
@@ -2322,11 +2640,11 @@
 
 .page-firm-dashboard .low-credit-banner {
     display: none;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 14px;
+    color: var(--color-white);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-base);
     text-align: center;
     font-weight: 500;
 }
@@ -2350,17 +2668,17 @@
 }
 
 .page-firm-dashboard .tab-btn {
-    padding: 12px 24px;
+    padding: var(--space-sm) var(--space-lg);
     border: none;
     background: none;
     font-size: 15px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-family);
     cursor: pointer;
-    color: #666;
+    color: var(--color-text-light);
     font-weight: 500;
     border-bottom: 3px solid transparent;
     margin-bottom: -2px;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .page-firm-dashboard .tab-btn:hover {
