@@ -920,7 +920,7 @@
                 }
 
                 // Single API call — backend returns pre-sorted, display-ready data
-                fetch(`/get_career_scores/${studentId}`)
+                authFetch(`/get_career_scores/${studentId}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.error) {
@@ -965,7 +965,7 @@
                     }
 
                     // Single API call — backend returns pre-sorted, display-ready data
-                    fetch(`/get_career_scores/${studentId}`)
+                    authFetch(`/get_career_scores/${studentId}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.error) {
@@ -1353,7 +1353,7 @@
 
                 try {
                     // Fetch the report data from your original route
-                    const response = await fetch(`/career_report/${studentId}`);
+                    const response = await authFetch(`/career_report/${studentId}`);
                     const data = await response.json();
 
                     if (response.status !== 200) {
@@ -1362,7 +1362,7 @@
                     }
 
                     // Fetch career scores (which should include the overall_match_score)
-                    const careerScoreResponse = await fetch(`/get_career_scores/${studentId}`);
+                    const careerScoreResponse = await authFetch(`/get_career_scores/${studentId}`);
                     const careerScoreData = await careerScoreResponse.json();
 
                     // Ensure that the response includes overall_match_score for each subject
@@ -1867,7 +1867,7 @@ be required in these careers. Tick to see how well you match these.
                         return;
                     }
 
-                    fetch(`/career_report/${studentId}`)
+                    authFetch(`/career_report/${studentId}`)
                         .then(res => res.json())
                         .then(data => {
                             if (data.error) {
@@ -2247,7 +2247,7 @@ be required in these careers. Tick to see how well you match these.
                     return;
                 }
 
-                fetch(`/career_report/${studentId}`)
+                authFetch(`/career_report/${studentId}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.error) {

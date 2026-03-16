@@ -240,12 +240,18 @@ def admin_logout():
 @auth_bp.route('/api/v1/token/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
-    """Issue a new access token using a valid refresh token."""
+    """Issue a new access token using a valid refresh token.
+
+    Preserves all custom claims (role, email, first_name, firm_id, username)
+    so the new access token works for students, admins, and firm admins alike.
+    """
     identity = get_jwt_identity()
     claims = get_jwt()
+    # Preserve all custom claims added at login time
+    preserved_keys = ("role", "email", "first_name", "firm_id", "username")
     additional_claims = {
         k: v for k, v in claims.items()
-        if k in ("role", "email", "first_name")
+        if k in preserved_keys
     }
     new_access_token = create_access_token(
         identity=identity, additional_claims=additional_claims

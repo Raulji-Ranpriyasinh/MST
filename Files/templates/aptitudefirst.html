@@ -473,7 +473,7 @@
 
             console.log("Fetching student data for ID:", studentId);  // Debugging log
 
-            fetch(`/get_student_data/${studentId}`)
+            authFetch(`/get_student_data/${studentId}`)
                 .then(response => {
                     console.log("Response Status:", response.status);  // Log status code
 
@@ -505,7 +505,7 @@
 
 
         function fetchStudentScores(studentId) {
-            fetch(`/get_student_data/${studentId}`)
+            authFetch(`/get_student_data/${studentId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
