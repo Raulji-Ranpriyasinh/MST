@@ -55,6 +55,24 @@ def firm_login_page():
     return render_template("firm_login.html")
 
 
+@firm_bp.route("/firm/<firm_name>")
+def firm_branded_login_page(firm_name):
+    """Render the firm login page with branding for a specific firm.
+
+    Allows URL-based access like /firm/EPSI instead of the generic /firm page.
+    """
+    firm = ConsultancyFirm.query.filter(
+        db.func.lower(ConsultancyFirm.firm_name) == firm_name.lower()
+    ).first()
+    if firm is None:
+        return render_template("firm_login.html", error="Firm not found"), 404
+
+    return render_template(
+        "firm_login.html",
+        firm=firm,
+    )
+
+
 @firm_bp.route("/firm/dashboard")
 @jwt_required(optional=True)
 def firm_dashboard_page():

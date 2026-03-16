@@ -30,13 +30,20 @@ def _is_admin():
 
 
 def _is_admin_or_owner(student_id):
-    """Return True if the current JWT belongs to an admin or the student themselves."""
+    """Return True if the current JWT belongs to an admin, the student
+    themselves, or a firm admin whose firm owns the student."""
     claims = get_jwt()
     role = claims.get("role")
     if role == "admin":
         return True
     identity = get_jwt_identity()
-    return role == "student" and identity is not None and int(identity) == student_id
+    if role == "student" and identity is not None and int(identity) == student_id:
+        return True
+    if role == "firm_admin":
+        student = db.session.get(StudentDetails, student_id)
+        if student and student.firm_id == claims.get("firm_id"):
+            return True
+    return False
 
 
 @admin_bp.route('/admin_dashboard')

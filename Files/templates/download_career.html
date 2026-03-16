@@ -399,24 +399,6 @@
         }
 
         const student_id = getStudentIdFromURL();
-
-        window.onload = function () {
-            if (student_id) {
-                const hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.id = "student_id";
-                hiddenInput.value = student_id;
-                document.body.appendChild(hiddenInput);
-
-                // Auto-trigger generation functions
-                loadData();
-                fetchReport();
-                generate();
-                ibgenerate();
-                loadOverallOnlyChart();
-                tableData();
-            }
-        };
     </script>
 
 
@@ -912,33 +894,6 @@
                 });
             }
 
-            function loadData() {
-                const studentId = getStudentIdFromUrl();
-                if (!studentId) {
-                    showToast("Please enter a student ID.", "warning");
-                    return;
-                }
-
-                // Single API call — backend returns pre-sorted, display-ready data
-                fetch(`/get_career_scores/${studentId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            showToast(data.error, "error");
-                            return;
-                        }
-
-                        // Use backend sort order directly — no client-side sorting
-                        let subjects = data.subjects;
-
-                        tableData(subjects);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-
-            document.addEventListener("DOMContentLoaded", loadData);
         </script>
 
 
@@ -951,14 +906,8 @@
 
 
             <script>
-
-                // let interestChart = null;
-                //let overallChart = null;
                 function loadData() {
-                    console.log("loadData() called");
-
                     const studentId = getStudentIdFromUrl();
-                    console.log(studentId);
                     if (!studentId) {
                         showToast("Please enter a student ID.", "warning");
                         return;
@@ -976,198 +925,13 @@
                             // Use backend sort order directly — no client-side sorting
                             let subjects = data.subjects;
 
-                            const labels = subjects.map(s => s.name);
-                            const interestScores = subjects.map(s => s.score);
-
-                            // Set colors for interest scores
-                            const interestColors = subjects.map((_, i) => {
-                                if (i < 9) return 'rgba(255, 99, 132, 1)';
-                                if (i < 30) return 'rgba(255, 99, 132, 0.6)';
-                                return 'rgba(255, 99, 132, 0.2)';
-                            });
-
-                            const ctx = document.getElementById('careerChart').getContext('2d');
-                            if (interestChart) {
-                                interestChart.destroy();
-                            }
-
-                            interestChart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: labels,
-                                    datasets: [
-                                        {
-                                            label: 'Interest Level (%)',
-                                            data: interestScores,
-                                            backgroundColor: interestColors,
-                                            categoryPercentage: 0.6,
-                                            barPercentage: 0.9
-                                        }
-                                    ]
-                                },
-                                options: {
-                                    indexAxis: 'y',
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    devicePixelRatio: 4,
-                                    scales: {
-                                        x: {
-                                            beginAtZero: true,
-                                            max: 100,
-                                            ticks: {
-                                                stepSize: 20,
-                                                callback: value => value + '%',
-                                                font: { size: 10 }
-                                            },
-                                            title: { display: true, text: 'Interest level (%)' },
-                                            grid: {
-                                                display: false // ❌ Hide Y-axis grid
-                                            }
-                                        },
-                                        y: {
-                                            title: { display: true, text: 'Career Fields', color: '#333' },
-                                            ticks: {
-                                                color: '#000',
-                                                align: 'start',
-                                                autoSkip: false,
-                                                font: { size: 8, weight: 'bold' }
-
-
-                                            },
-                                            grid: {
-                                                display: true // ❌ Hide Y-axis grid
-                                            }
-                                        }
-                                    },
-
-                                    plugins: {
-                                        legend: {
-                                            display: true,
-                                            position: 'top'
-                                        },
-                                        tooltip: {
-                                            enabled: false
-                                        },
-                                        datalabels: {
-                                            display: function (context) {
-                                                return context.dataset.data[context.dataIndex] > 0;
-                                            },
-                                            anchor: 'start',
-                                            align: 'start',
-                                            color: 'black',
-                                            padding: 10,
-                                            font: {
-                                                size: 7
-                                            },
-                                            formatter: function (value) {
-                                                return value.toFixed(1) + '%';
-                                            }
-                                        }
-                                    }
-                                },
-                                plugins: [ChartDataLabels]
-                            });
-                            // Render overall chart using same data — no duplicate API call
-                            loadOverallOnlyChart(subjects);
-                            // Also populate the interest table
+                            // Populate the interest table with bar graphs
                             tableData(subjects);
                         })
                         .catch(error => {
                             console.error('Error:', error);
                         });
-
                 }
-
-
-                // Accepts pre-fetched subjects from loadData — no separate API call needed
-                function loadOverallOnlyChart(subjects) {
-                            // Use backend sort order directly — no client-side sorting
-                            const labels = subjects.map(s => s.name);
-                            const overallScores = subjects.map(s => s.overall_match_score);
-                            const overallColors = subjects.map((_, i) => {
-                                if (i < 9) return 'rgba(54, 162, 235, 1)';
-                                if (i < 30) return 'rgba(54, 162, 235, 0.6)';
-                                return 'rgba(54, 162, 235, 0.2)';
-                            });
-
-                            const ctx = document.getElementById('overallcareerChart').getContext('2d');
-                            if (overallChart) {
-                                overallChart.destroy();
-                            }
-
-                            overallChart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: labels,
-                                    datasets: [
-                                        {
-                                            label: 'Overall Match (%)',
-                                            data: overallScores,
-                                            backgroundColor: overallColors,
-                                            categoryPercentage: 0.6,
-                                            barPercentage: 0.9
-                                        }
-                                    ]
-                                },
-                                options: {
-                                    indexAxis: 'y',
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    devicePixelRatio: 4,
-                                    scales: {
-                                        x: {
-                                            beginAtZero: true,
-                                            max: 100,
-                                            ticks: {
-                                                stepSize: 20,
-                                                callback: value => value + '%',
-                                                font: { size: 10 }
-                                            },
-                                            title: { display: true, text: 'Overall Match (%)' },
-                                            grid: {
-                                                display: false
-                                            }
-                                        },
-                                        y: {
-                                            title: {
-                                                title: { display: true, text: 'Career Fields' },
-                                            },
-                                            ticks: {
-                                                display: false,
-                                                align: 'start',
-                                                padding: 40,
-                                                autoSkip: false,
-                                                font: { size: 10 },
-                                                color: 'white'
-                                            },
-                                            grid: {
-                                                display: true
-                                            }
-                                        }
-                                    },
-                                    plugins: {
-                                        legend: {
-                                            display: true,
-                                            position: 'top'
-                                        },
-                                        tooltip: {
-                                            enabled: false
-                                        },
-                                        datalabels: {
-                                            display: context => context.dataset.data[context.dataIndex] > 0,
-                                            anchor: 'centre',
-                                            align: 'centre',
-                                            color: 'black',
-                                            font: { size: 5 },
-                                            formatter: value => value.toFixed(1) + '%'
-                                        }
-                                    }
-                                },
-                                plugins: [ChartDataLabels]
-                            });
-                }
-
-
             </script>
 
         <!-- /////above canvas -->

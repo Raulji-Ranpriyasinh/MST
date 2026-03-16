@@ -4,8 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/static/favicon.png">
-    <title>Edgepsych Firm-Login</title>
+    <title>{% if firm %}{{ firm.firm_name }} - Login{% else %}Edgepsych Firm-Login{% endif %}</title>
     <link rel="stylesheet" href="/static/css/styles.css">
+    {% if firm and firm.primary_color %}
+    <style>
+        .container button { background-color: {{ firm.primary_color }}; }
+        .container button:hover { opacity: 0.9; }
+    </style>
+    {% endif %}
 </head>
 <body>
 
@@ -15,8 +21,16 @@
 </div>
 
 <div class="container">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" width="250" />
-    <h2>Firm Login</h2>
+    {% if firm and firm.logo_url %}
+        <img src="{{ firm.logo_url }}" alt="{{ firm.firm_name }} Logo" width="250" />
+    {% else %}
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" width="250" />
+    {% endif %}
+    <h2>{% if firm %}{{ firm.firm_name }} Login{% else %}Firm Login{% endif %}</h2>
+
+    {% if error %}
+    <p style="color: red; margin-bottom: 10px;">{{ error }}</p>
+    {% endif %}
 
     <form id="firmLoginForm" autocomplete="off">
         <input type="email" name="email" placeholder="Enter Firm Email" required />
