@@ -25,16 +25,10 @@
   </div> -->
         <div class="dropdown">
             <button onclick="jwtLogout('/admin_logout'); return false;" class="profile-btn">
-                <span class="user-icon"><img src="/static/profile-icon.png" alt=""></span> <span style="
-    color: white;
-    text-decoration: none;
-    font-weight: 100;
-">Logout</span>
+                <span class="user-icon"><img src="/static/profile-icon.png" alt=""></span> <span class="logout-text">Logout</span>
             </button>
 
         </div>
-    </div>
-
     </div>
 
     <!-- Admin Tabs -->
@@ -140,7 +134,7 @@
                 <tbody id="firmsBody">
                 </tbody>
             </table>
-            <div style="text-align:center; padding:30px; color:#999; font-size:15px;" id="noFirms">Loading firms...</div>
+            <div class="empty-state" id="noFirms">Loading firms...</div>
         </div>
     </div><!-- end admin-tab-firms -->
 
@@ -203,11 +197,11 @@
     <div class="modal-overlay" id="inviteLinkModal">
         <div class="modal-box">
             <h3>Invite Link Generated</h3>
-            <p style="font-size:13px; color:#666; margin-bottom:12px;">Share this link with students to register under this firm. The link is valid for 30 days.</p>
+            <p class="modal-description">Share this link with students to register under this firm. The link is valid for 30 days.</p>
             <label>Invite URL</label>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <input type="text" id="inviteLinkUrl" readonly style="flex:1; background:#f4f7fb; cursor:text;" />
-                <button class="firm-btn firm-btn-primary" style="padding:8px 16px; font-size:13px; white-space:nowrap;" onclick="copyInviteLink()">Copy</button>
+            <div class="invite-link-row">
+                <input type="text" id="inviteLinkUrl" readonly class="invite-link-input" />
+                <button class="firm-btn firm-btn-primary invite-copy-btn" onclick="copyInviteLink()">Copy</button>
             </div>
             <div class="modal-actions">
                 <button class="modal-cancel" onclick="closeInviteLinkModal()">Close</button>

@@ -39,11 +39,28 @@
         </div>
     </div>
 
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/dashboard">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/programmes">Programmes</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Career Assessment</span>
+    </nav>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator" id="progressIndicator" style="max-width:700px;margin:var(--space-md) auto;">
+        <span class="progress-text" id="progressText">Q 0 / --</span>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+    </div>
+
     <!-- Career Question Container -->
 <div class="container">
     <div class="question-card">
         <h3 class="card-heading">Career Questions</h3>
-        <p class="question" id="question" style="font-size: 18px;" >Loading...</p>
+        <p class="question" id="question">Loading...</p>
         <div class="button-wrapper">
             <button class="btn yes" onclick="nextQuestion(2)">YES</button>
             <button class="btn maybe" onclick="nextQuestion(1)">MAYBE</button>
@@ -72,6 +89,18 @@
         });
 
         let currentQuestion = null;  // Stores the current question
+        let totalCareerQuestions = 0; // total questions for progress
+
+        function updateProgress() {
+            if (currentQuestion && totalCareerQuestions > 0) {
+                var num = currentQuestion.question_number || 0;
+                var pct = Math.round((num / totalCareerQuestions) * 100);
+                var textEl = document.getElementById('progressText');
+                var fillEl = document.getElementById('progressFill');
+                if (textEl) textEl.textContent = 'Q ' + num + ' / ' + totalCareerQuestions;
+                if (fillEl) fillEl.style.width = pct + '%';
+            }
+        }
 
         function loadQuestion() {
             document.getElementById('loadingOverlay').classList.add('active');
@@ -81,7 +110,9 @@
                     document.getElementById('loadingOverlay').classList.remove('active');
                     if (data.success) {
                         currentQuestion = data;  // Store the question
+                        if (data.total_questions) totalCareerQuestions = data.total_questions;
                         updateQuestion();
+                        updateProgress();
                     } else {
                         document.getElementById("question").innerText = "Thank you";
                         window.location.href = '/programmes';

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Edgepsych Admin-Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
@@ -19,8 +20,10 @@
     <h2>Admin Login</h2>
 
     <form id="adminLoginForm" autocomplete="off">
-        <input type="text" name="username" placeholder="Enter Admin Username" required />
-        <input type="password" name="password" placeholder="Enter Password" required />
+        <label for="adminUsername" class="sr-only">Admin Username</label>
+        <input type="text" id="adminUsername" name="username" placeholder="Enter Admin Username" required aria-label="Admin Username" />
+        <label for="adminPassword" class="sr-only">Password</label>
+        <input type="password" id="adminPassword" name="password" placeholder="Enter Password" required aria-label="Password" />
         <button type="submit">Login</button>
     </form>
 </div>
@@ -83,9 +86,9 @@
 
     function updateInputBackground(inputElem) {
         if (inputElem === document.activeElement || inputElem.value.trim() !== "") {
-            inputElem.style.backgroundColor = "#E1EAFA"; // light blue for focus or filled
+            inputElem.classList.add('input-filled');
         } else {
-            inputElem.style.backgroundColor = ""; // reset to default
+            inputElem.classList.remove('input-filled');
         }
     }
 

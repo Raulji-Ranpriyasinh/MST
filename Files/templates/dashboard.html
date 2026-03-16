@@ -7,8 +7,7 @@
       <link rel="icon" type="image/png" href="/static/favicon.png">
     <title>Edgepsych Dashboard</title>
 
-    <!-- ✅ Add Google Font (Poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 
@@ -37,30 +36,32 @@
         </div>
     </div>
 
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/dashboard">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Dashboard</span>
+    </nav>
+
     <div class="container">
         <h2>Dashboard</h2>
         <div class="grid">
             <div class="card card-clickable" onclick="window.location.href='/programmes';">
-                <img src="/static/programmersimg.png" alt="">
+                <img src="/static/programmersimg.png" alt="Programmes">
                 <h3>Programmes</h3>
                 <p>Take the questionnaire/tests, view results and feedback.</p>
             </div>
+        </div>
 
-            <!-- <div class="card">
-        <h3>Resources</h3>
-        <p>Documentation to view or download.</p>
-      </div>
-      <div class="card">
-        <h3>Tasks</h3>
-        <p>View tasks assigned to you.</p>
-      </div>
-      <div class="card">
-        <h3>Experiences</h3>
-        <p>Record skills developed for future applications.</p>
-      </div>
-       -->
+        <!-- Empty state for when no programmes are available -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <p>No programmes available yet. Check back later.</p>
         </div>
     </div>
+
+    <footer class="page-footer">
+        &copy; 2025 Edgepsych. All rights reserved.
+    </footer>
 
     <script src="/static/js/jwt_helpers.js"></script>
     <script>

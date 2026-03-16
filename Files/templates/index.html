@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="/static/favicon.png">
   <title>Edgepsych Student-Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 
@@ -21,8 +22,10 @@
 
     <!-- Login Form -->
     <div id="studentForm" class="hidden">
-      <input type="email" id="studentEmail" placeholder="Enter Student Email" required />
-      <input type="password" id="studentPassword" placeholder="Enter Password" required />
+      <label for="studentEmail" class="sr-only">Student Email</label>
+      <input type="email" id="studentEmail" placeholder="Enter Student Email" required aria-label="Student Email" />
+      <label for="studentPassword" class="sr-only">Password</label>
+      <input type="password" id="studentPassword" placeholder="Enter Password" required aria-label="Password" />
       <button onclick="loginStudent()">Log in</button>
       <a href="/auth/forgot-password" class="toggle-link" style="margin-top:8px;font-size:14px;">Forgot Password?</a>
       <span class="toggle-link" onclick="toggleForms()">Don't have an account? Register here</span>
@@ -31,11 +34,16 @@
     <!-- Register Form -->
     <div id="registerForm">
       <form onsubmit="return registerStudent(event)">
-        <input type="text" id="first_name" placeholder="First Name *" required />
-        <input type="text" id="last_name" placeholder="Last Name *" required />
-        <input type="email" id="email" placeholder="Email *" required />
-        <input type="text" id="mobile_number" placeholder="10-digit Mobile Number *" required maxlength="10" />
-        <input type="text" id="country" placeholder="Country *" required />
+        <label for="first_name" class="sr-only">First Name</label>
+        <input type="text" id="first_name" placeholder="First Name *" required aria-label="First Name" />
+        <label for="last_name" class="sr-only">Last Name</label>
+        <input type="text" id="last_name" placeholder="Last Name *" required aria-label="Last Name" />
+        <label for="email" class="sr-only">Email</label>
+        <input type="email" id="email" placeholder="Email *" required aria-label="Email" />
+        <label for="mobile_number" class="sr-only">Mobile Number</label>
+        <input type="text" id="mobile_number" placeholder="10-digit Mobile Number *" required maxlength="10" aria-label="Mobile Number" />
+        <label for="country" class="sr-only">Country</label>
+        <input type="text" id="country" placeholder="Country *" required aria-label="Country" />
 
         <select id="curriculum" required>
           <option value="">Select Curriculum *</option>
@@ -65,7 +73,7 @@
 
         {% if firm_token %}
         <input type="hidden" id="firm_token" name="firm_token" value="{{ firm_token }}" />
-        <div id="firmBadge" style="background:#e8f0fe;border:1px solid #296eff;border-radius:5px;padding:12px;margin:10px 0;text-align:left;font-size:14px;color:#333;">
+        <div id="firmBadge" class="firm-badge">
           Registering with firm: <strong>{{ firm_name }}</strong>
         </div>
         {% else %}
@@ -74,15 +82,17 @@
         </select>
         {% endif %}
 
-        <input type="password" id="password" placeholder="Password *" required />
-        <input type="password" id="confirmPassword" placeholder="Confirm Password *" required />
+        <label for="password" class="sr-only">Password</label>
+        <input type="password" id="password" placeholder="Password *" required aria-label="Password" />
+        <label for="confirmPassword" class="sr-only">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password *" required aria-label="Confirm Password" />
 
         <button class="register" type="submit">Register</button>
         <span class="toggle-link" onclick="toggleForms()">Already registered? Login here</span>
       </form>
     </div>
-    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-      <a href="/firm" style="color: #007bff; text-decoration: none; font-size: 14px;">Firm Login &rarr;</a>
+    <div class="auth-footer-link">
+      <a href="/firm">Firm Login &rarr;</a>
     </div>
   </div>
 
@@ -247,11 +257,20 @@ function formatNameField(id) {
 
     function updateInputBackground(inputElem) {
       if (inputElem === document.activeElement || inputElem.value.trim() !== "") {
-        inputElem.style.backgroundColor = "#E1EAFA";
+        inputElem.classList.add('input-filled');
       } else {
-        inputElem.style.backgroundColor = "";
+        inputElem.classList.remove('input-filled');
       }
     }
+
+    // Default to login for returning users (Intern 13)
+    if (localStorage.getItem('hasRegistered')) {
+      toggleForms();
+    }
+    // Mark as registered after successful registration
+    var origRegister = registerStudent;
+    // Set flag on successful login too
+    document.getElementById('studentEmail').closest('#studentForm') && localStorage.setItem('hasLoggedIn', 'true');
   </script>
 </body>
 

@@ -80,7 +80,8 @@
     --color-secondary: #3B72D0;
     --color-success: #4CAF50;
     --color-danger: #dc3545;
-    --color-warning: #fade11;
+    --color-warning: #e6a817;
+    --color-warning-light: #fff3cd;
     --color-text: #333;
     --color-text-light: #666;
     --color-text-muted: #999;
@@ -88,6 +89,8 @@
     --color-white: #fff;
     --color-border: #ddd;
     --color-border-light: #e0e0e0;
+    --color-info: #17a2b8;
+    --color-surface: #f4f7fb;
 
     /* Spacing Scale */
     --space-xs: 4px;
@@ -111,7 +114,7 @@
     --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.15);
 
     /* Typography */
-    --font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family: 'Poppins', sans-serif;
     --font-size-xs: 11px;
     --font-size-sm: 13px;
     --font-size-base: 14px;
@@ -119,6 +122,13 @@
     --font-size-lg: 18px;
     --font-size-xl: 20px;
     --font-size-2xl: 26px;
+    --font-size-3xl: 32px;
+
+    /* Heading Scale */
+    --heading-1: var(--font-size-3xl);
+    --heading-2: var(--font-size-2xl);
+    --heading-3: var(--font-size-xl);
+    --heading-4: var(--font-size-lg);
 
     /* Transitions */
     --transition-fast: 0.2s ease;
@@ -314,11 +324,331 @@
     }
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 .btn-loading {
     opacity: 0.7;
     pointer-events: none;
 }
 
+/* 1.3 Global Heading Scale (Intern 11)
+   ========================================================================== */
+h1, h2, h3, h4 {
+    font-family: var(--font-family);
+    line-height: 1.3;
+    color: var(--color-text);
+}
+
+h1 { font-size: var(--heading-1); font-weight: 700; }
+h2 { font-size: var(--heading-2); font-weight: 600; }
+h3 { font-size: var(--heading-3); font-weight: 600; }
+h4 { font-size: var(--heading-4); font-weight: 500; }
+
+/* 1.4 Page Fade-In Animation (Intern 15)
+   ========================================================================== */
+body {
+    animation: fadeIn 0.35s ease-out;
+}
+
+/* 1.5 Breadcrumb Navigation (Intern 13)
+   ========================================================================== */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.breadcrumb a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb .breadcrumb-separator {
+    color: var(--color-text-muted);
+    margin: 0 2px;
+}
+
+.breadcrumb .breadcrumb-current {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+/* 1.6 SVG Icon Buttons (Intern 15 - replaces emojis)
+   ========================================================================== */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+}
+
+.icon-check {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: var(--color-success);
+    border-radius: 50%;
+    position: relative;
+}
+
+.icon-check::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.icon-doc {
+    display: inline-block;
+    width: 14px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-radius: 2px;
+    position: relative;
+}
+
+.icon-doc::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 2px;
+    right: 2px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 4px 0 currentColor;
+}
+
+/* 1.7 Standardized Footer (Intern 15)
+   ========================================================================== */
+.page-footer {
+    text-align: center;
+    padding: var(--space-lg) var(--space-md);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    border-top: 1px solid var(--color-border-light);
+    margin-top: auto;
+}
+
+/* 1.8 Form Accessibility (Intern 14)
+   ========================================================================== */
+.form-group {
+    margin-bottom: var(--space-md);
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+/* Focus rings for inputs (Intern 14) */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+    border-color: var(--color-primary);
+}
+
+/* Validation states (Intern 14) */
+.input-error {
+    border-color: var(--color-danger) !important;
+    background-color: #fff5f5;
+}
+
+.input-error:focus {
+    outline-color: var(--color-danger);
+}
+
+.input-success {
+    border-color: var(--color-success) !important;
+    background-color: #f0fff4;
+}
+
+.input-success:focus {
+    outline-color: var(--color-success);
+}
+
+.field-error-msg {
+    color: var(--color-danger);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-xs);
+}
+
+.field-success-msg {
+    color: var(--color-success);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-xs);
+}
+
+/* Input filled/focus state via CSS (replaces inline JS backgroundColor) */
+.input-filled,
+input:focus,
+select:focus {
+    background-color: #E1EAFA;
+}
+
+/* 1.9 Progress Indicator (Intern 12)
+   ========================================================================== */
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: var(--space-md) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.progress-indicator .progress-track {
+    flex: 1;
+    height: 6px;
+    background-color: var(--color-border-light);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.progress-indicator .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-pill);
+    transition: width var(--transition-base);
+}
+
+.progress-indicator .progress-text {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* 1.10 Screen-reader only (accessibility helper)
+   ========================================================================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 1.11 Logout text utility (replaces inline styles)
+   ========================================================================== */
+.logout-text {
+    color: white;
+    text-decoration: none;
+    font-weight: 400;
+}
+
+/* 1.12 Auth footer link (replaces inline styles)
+   ========================================================================== */
+.auth-footer-link {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.auth-footer-link a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: var(--font-size-base);
+}
+
+.auth-footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* 1.13 Firm badge (replaces inline styles)
+   ========================================================================== */
+.firm-badge {
+    background: #e8f0fe;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    margin: var(--space-sm) 0;
+    text-align: left;
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+}
+
+/* 1.14 Modal description (replaces inline styles)
+   ========================================================================== */
+.modal-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-bottom: var(--space-md);
+}
+
+/* 1.15 Invite link row (replaces inline styles in admin_dashboard)
+   ========================================================================== */
+.invite-link-row {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.invite-link-input {
+    flex: 1;
+    background: var(--color-surface);
+    cursor: text;
+}
+
+.invite-copy-btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+/* 1.16 Empty state styling
+   ========================================================================== */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+}
 
 /* ==========================================================================
    2. AUTH PAGES (Login / Register / Forgot / Reset Password)
@@ -331,8 +661,8 @@
 .page-firm-login body,
 .page-forgot-password body,
 .page-reset-password body {
-    font-family: Arial, sans-serif;
-    background-color: #f8fbfd;
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
     margin: 0;
     display: flex;
     justify-content: center;
@@ -457,15 +787,17 @@
 
 .page-admin-login input:focus,
 .page-admin-login select:focus {
-    outline: none;
-    border-color: #E8F0FE;
-    box-shadow: none;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+    border-color: var(--color-primary);
+    background-color: #E1EAFA;
 }
 
 .page-firm-login input:focus {
-    outline: none;
-    border-color: #E8F0FE;
-    box-shadow: none;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+    border-color: var(--color-primary);
+    background-color: #E1EAFA;
 }
 
 .page-admin-login form {
@@ -1069,6 +1401,21 @@
     opacity: 0.7;
 }
 
+/* Active/disabled visual cues for programme cards (Intern 12) */
+.page-programmes .card.card-completed {
+    border-color: var(--color-success);
+    background: linear-gradient(to bottom, #f0fff4, var(--color-white));
+}
+
+.page-programmes .card.card-active {
+    border-color: var(--color-primary);
+}
+
+.page-programmes .card.card-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 /* 6.3 Programmes Mobile Responsiveness
    ========================================================================== */
 @media (max-width: 768px) {
@@ -1175,14 +1522,17 @@
 
 .page-career-assessment .btn.yes {
     background-color: var(--color-success);
+    color: var(--color-white);
 }
 
 .page-career-assessment .btn.maybe {
     background-color: var(--color-warning);
+    color: var(--color-white);
 }
 
 .page-career-assessment .btn.no {
     background-color: var(--color-danger);
+    color: var(--color-white);
 }
 
 /* 7.3 Career Mobile Responsiveness
