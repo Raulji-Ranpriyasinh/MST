@@ -136,7 +136,7 @@
    2. AUTH PAGES (Login / Register / Forgot / Reset Password)
    ========================================================================== */
 
-/* 2.1 Auth Base Layout
+/* 2.1 Auth Base Layout (mobile-first)
    ========================================================================== */
 .page-index body,
 .page-admin-login body,
@@ -150,6 +150,16 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Responsive auth logo */
+.auth-logo {
+    width: 180px;
+    max-width: 60%;
+    height: auto;
+    transition: width 0.3s ease;
 }
 
 .page-index .container,
@@ -157,25 +167,26 @@
 .page-firm-login .container,
 .page-forgot-password .container,
 .page-reset-password .container {
-    width: 400px;
+    width: 90%;
+    max-width: 420px;
     background: #fff;
-    padding: 24px 32px;
+    padding: 20px 16px;
     border-radius: 8px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     text-align: center;
+    transition: padding 0.3s ease, max-width 0.3s ease;
 }
 
 /* Index page has slightly different container */
 .page-index .container {
     box-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
-    padding: 24px 32px;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 /* Admin login & firm login have bottom padding */
 .page-admin-login .container,
 .page-firm-login .container {
-    padding: 24px 32px 32px;
+    padding: 20px 16px 24px;
 }
 
 /* 2.2 Auth Form Elements
@@ -365,26 +376,18 @@
     color: #ccc;
 }
 
-/* 2.5 Auth Mobile Responsiveness
+/* 2.5 Auth Mobile Responsiveness (mobile-first: base is 0-480px)
    ========================================================================== */
+
+/* Base mobile styles (0-480px) are already set above in 2.1 */
+
+/* Small mobile: tighten font sizes */
 @media (max-width: 480px) {
-    .page-index .container,
-    .page-admin-login .container,
-    .page-firm-login .container {
-        width: 90%;
-        padding: 20px 16px;
-        margin-top: 20px;
-    }
-
-    .page-index .container img,
-    .page-admin-login .container img,
-    .page-firm-login .container img {
-        width: 180px;
-    }
-
     .page-index h2,
     .page-admin-login h2,
-    .page-firm-login h2 {
+    .page-firm-login h2,
+    .page-forgot-password h2,
+    .page-reset-password h2 {
         font-size: 20px;
     }
 
@@ -395,31 +398,71 @@
     }
 
     .page-admin-login input,
-    .page-firm-login input {
+    .page-firm-login input,
+    .page-forgot-password input,
+    .page-reset-password input {
         font-size: 14px;
         padding: 10px;
     }
 
     .page-index button,
     .page-admin-login button,
-    .page-firm-login button {
+    .page-firm-login button,
+    .page-forgot-password button,
+    .page-reset-password button {
         font-size: 14px;
         padding: 10px;
     }
 
-    .page-forgot-password .container,
-    .page-reset-password .container {
-        width: 90%;
-        padding: 20px 16px;
+    .auth-logo {
+        width: 160px;
     }
 }
 
-@media (max-width: 768px) and (min-width: 481px) {
+/* Tablet: 481-768px */
+@media (min-width: 481px) {
+    .auth-logo {
+        width: 220px;
+    }
+
     .page-index .container,
     .page-admin-login .container,
-    .page-firm-login .container {
+    .page-firm-login .container,
+    .page-forgot-password .container,
+    .page-reset-password .container {
         width: 80%;
         max-width: 450px;
+        padding: 24px 28px;
+    }
+
+    .page-admin-login .container,
+    .page-firm-login .container {
+        padding: 24px 28px 28px;
+    }
+
+    .page-index .container {
+        margin-top: 30px;
+    }
+}
+
+/* Desktop: 769px+ */
+@media (min-width: 769px) {
+    .auth-logo {
+        width: 250px;
+    }
+
+    .page-index .container,
+    .page-admin-login .container,
+    .page-firm-login .container,
+    .page-forgot-password .container,
+    .page-reset-password .container {
+        max-width: 420px;
+        padding: 24px 32px;
+    }
+
+    .page-admin-login .container,
+    .page-firm-login .container {
+        padding: 24px 32px 32px;
     }
 }
 
@@ -649,8 +692,9 @@
 
 .page-dashboard .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    transition: gap 0.3s ease;
 }
 
 .page-dashboard .card {
@@ -668,9 +712,47 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* 5.3 Dashboard Mobile Responsiveness
+/* 5.3 Dashboard Mobile Responsiveness (mobile-first)
    ========================================================================== */
-@media (max-width: 768px) {
+
+/* Base (0-480px): single column, already set above */
+@media (max-width: 480px) {
+    .page-dashboard .navbar {
+        background-size: auto 30px, auto 30px;
+        background-position: left center, right center;
+        padding: 8px 10px;
+    }
+
+    .page-dashboard .logo img {
+        height: 28px;
+    }
+
+    .page-dashboard .profile-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .page-dashboard .dropdown-content {
+        min-width: 150px;
+        top: 36px;
+    }
+
+    .page-dashboard .container {
+        padding: 16px 10px;
+    }
+
+    .page-dashboard .container h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+
+    .page-dashboard .card {
+        padding: 18px 12px;
+    }
+}
+
+/* Tablet: 481-768px */
+@media (min-width: 481px) and (max-width: 768px) {
     .page-dashboard .navbar {
         background-size: auto 40px, auto 40px;
         background-position: left center, right center;
@@ -696,18 +778,35 @@
     }
 
     .page-dashboard .container h2 {
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-
-    .page-dashboard .grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
+        font-size: 22px;
+        margin-bottom: 24px;
     }
 
     .page-dashboard .card {
-        padding: 20px 15px;
+        padding: 24px 18px;
     }
+}
+
+/* Tablet landscape / small desktop: 769-1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .page-dashboard .grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* Desktop: 1025-1200px+ */
+@media (min-width: 1025px) {
+    .page-dashboard .grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* Center single card when others are absent */
+.page-dashboard .grid .card:only-child {
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 
@@ -1407,6 +1506,54 @@
     border-radius: 5px;
 }
 
+/* Admin search bar (replaces inline styles) */
+.page-admin-dashboard .admin-search-bar {
+    margin: 20px auto;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.page-admin-dashboard .admin-search-input {
+    padding: 10px;
+    margin: 5px;
+    width: 100%;
+    max-width: 350px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    transition: width 0.3s ease;
+}
+
+/* Admin filter selects (replaces inline styles) */
+.page-admin-dashboard .admin-filter-select {
+    padding: 10px;
+    margin: 5px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    appearance: none;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    transition: width 0.3s ease;
+}
+
+.page-admin-dashboard .admin-independent-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.page-admin-dashboard .admin-independent-checkbox {
+    width: 16px;
+    height: 16px;
+}
+
 /* 9.1 Admin Tables
    ========================================================================== */
 .page-admin-dashboard table {
@@ -1906,7 +2053,128 @@
 
 /* 9.9 Admin Mobile Responsiveness
    ========================================================================== */
-@media (max-width: 768px) {
+
+/* Mobile card layout for admin tables */
+@media (max-width: 480px) {
+    .page-admin-dashboard .navbar {
+        background-size: auto 30px, auto 30px;
+        background-position: left center, right center;
+        padding: 6px 8px;
+    }
+
+    .page-admin-dashboard .logo img {
+        height: 26px;
+    }
+
+    .page-admin-dashboard .profile-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .page-admin-dashboard .admin-search-bar {
+        padding: 0 5px;
+    }
+
+    .page-admin-dashboard .admin-search-input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .page-admin-dashboard .filters {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 5px;
+    }
+
+    .page-admin-dashboard .admin-filter-select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .page-admin-dashboard .admin-independent-label {
+        margin: 8px 0;
+    }
+
+    .page-admin-dashboard .container {
+        width: 100%;
+        padding: 8px;
+        overflow-x: auto;
+    }
+
+    .page-admin-dashboard .admin-tab-bar {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .page-admin-dashboard .admin-tab-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    /* Card layout for tables on small mobile */
+    .page-admin-dashboard table {
+        border: none;
+        background: transparent;
+    }
+
+    .page-admin-dashboard table thead {
+        display: none;
+    }
+
+    .page-admin-dashboard table tbody tr {
+        display: block;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-admin-dashboard table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        text-align: right;
+    }
+
+    .page-admin-dashboard table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .page-admin-dashboard table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #001e4d;
+        text-align: left;
+        flex: 1;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    .page-admin-dashboard .btn {
+        font-size: 11px;
+        padding: 4px 7px;
+    }
+
+    .page-admin-dashboard .pagination-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .page-admin-dashboard .firm-container {
+        width: 100%;
+        padding: 8px;
+    }
+}
+
+/* Tablet: 481-768px */
+@media (min-width: 481px) and (max-width: 768px) {
     .page-admin-dashboard .navbar {
         background-size: auto 40px, auto 40px;
         background-position: left center, right center;
@@ -1922,30 +2190,24 @@
         font-size: 12px;
     }
 
-    .page-admin-dashboard div[style*="margin: 20px auto; text-align: center;"] {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 0 10px;
-    }
-
-    .page-admin-dashboard div[style*="margin: 20px auto; text-align: center."] input {
-        width: 90% !important;
+    .page-admin-dashboard .admin-search-input {
+        width: 100%;
+        max-width: 350px;
     }
 
     .page-admin-dashboard .filters {
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
         padding: 0 10px;
     }
 
-    .page-admin-dashboard .filters select {
-        width: 90% !important;
+    .page-admin-dashboard .admin-filter-select {
+        width: calc(50% - 12px);
     }
 
     .page-admin-dashboard .container {
-        width: 100% !important;
+        width: 100%;
         padding: 10px;
         overflow-x: auto;
     }
@@ -1969,6 +2231,23 @@
     .page-admin-dashboard .pagination-controls {
         flex-direction: column;
         gap: 10px;
+    }
+}
+
+/* Tablet landscape: 769-1200px */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .page-admin-dashboard .admin-filter-select {
+        width: 200px;
+    }
+
+    .page-admin-dashboard table {
+        font-size: 13px;
+    }
+
+    .page-admin-dashboard th,
+    .page-admin-dashboard td {
+        padding: 10px 8px;
+        font-size: 13px;
     }
 }
 
@@ -2360,9 +2639,202 @@
     cursor: not-allowed;
 }
 
+/* 10.9 Settings Tab Styles (replaces inline styles)
+   ========================================================================== */
+.page-firm-dashboard .settings-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.page-firm-dashboard .invite-link-result {
+    display: none;
+    margin-top: 12px;
+}
+
+.page-firm-dashboard .invite-link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-firm-dashboard .invite-link-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #f8f9fa;
+    min-width: 0;
+}
+
+.page-firm-dashboard .invite-copy-btn {
+    white-space: nowrap;
+}
+
+.page-firm-dashboard .invite-link-validity {
+    color: #28a745;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.page-firm-dashboard .settings-section-spacing {
+    margin-top: 24px;
+}
+
+.page-firm-dashboard .settings-form-group {
+    margin-bottom: 16px;
+}
+
+.page-firm-dashboard .settings-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.page-firm-dashboard .settings-label-hint {
+    color: #999;
+    font-weight: 400;
+}
+
+.page-firm-dashboard .settings-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: max-width 0.3s ease;
+}
+
+.page-firm-dashboard .settings-logo-preview {
+    margin-bottom: 8px;
+}
+
+.page-firm-dashboard .settings-file-input {
+    font-size: 14px;
+}
+
+.page-firm-dashboard .settings-logo-preview-new {
+    margin-top: 8px;
+}
+
 /* 10.10 Firm Dashboard Mobile Responsiveness
    ========================================================================== */
-@media (max-width: 768px) {
+
+/* Mobile: 0-480px - card layout for tables */
+@media (max-width: 480px) {
+    .page-firm-dashboard .navbar {
+        background-size: auto 30px, auto 30px;
+        background-position: left center, right center;
+        padding: 6px 8px;
+    }
+
+    .page-firm-dashboard .logo img {
+        height: 26px;
+    }
+
+    .page-firm-dashboard .profile-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .page-firm-dashboard .stats-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .page-firm-dashboard .stat-card {
+        min-width: unset;
+        padding: 16px 14px;
+    }
+
+    .page-firm-dashboard .container {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .page-firm-dashboard .tab-bar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-firm-dashboard .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .page-firm-dashboard .search-bar input {
+        width: 100%;
+        box-sizing: border-box;
+        transition: width 0.3s ease;
+    }
+
+    /* Card layout for firm tables on mobile */
+    .page-firm-dashboard table {
+        border: none;
+        background: transparent;
+    }
+
+    .page-firm-dashboard table thead {
+        display: none;
+    }
+
+    .page-firm-dashboard table tbody tr {
+        display: block;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-firm-dashboard table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        text-align: right;
+    }
+
+    .page-firm-dashboard table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .page-firm-dashboard table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #001e4d;
+        text-align: left;
+        flex: 1;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    .page-firm-dashboard .settings-input {
+        max-width: 100%;
+    }
+
+    .page-firm-dashboard .invite-link-row {
+        flex-direction: column;
+    }
+
+    .page-firm-dashboard .invite-link-input {
+        width: 100%;
+    }
+
+    .page-firm-dashboard .settings-section {
+        padding: 16px;
+    }
+}
+
+/* Tablet: 481-768px */
+@media (min-width: 481px) and (max-width: 768px) {
     .page-firm-dashboard .navbar {
         background-size: auto 40px, auto 40px;
         background-position: left center, right center;
@@ -2387,13 +2859,13 @@
     }
 
     .page-firm-dashboard .container {
-        width: 100% !important;
+        width: 100%;
         padding: 10px;
         overflow-x: auto;
     }
 
     .page-firm-dashboard table {
-        min-width: 900px;
+        min-width: 800px;
         font-size: 12px;
     }
 
@@ -2411,6 +2883,32 @@
     .page-firm-dashboard .search-bar input {
         width: 100%;
         box-sizing: border-box;
+        transition: width 0.3s ease;
+    }
+
+    .page-firm-dashboard .settings-input {
+        max-width: 100%;
+    }
+}
+
+/* Tablet landscape: 769-1200px */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .page-firm-dashboard .stats-row {
+        flex-wrap: wrap;
+    }
+
+    .page-firm-dashboard .stat-card {
+        min-width: 180px;
+    }
+
+    .page-firm-dashboard table {
+        font-size: 13px;
+    }
+
+    .page-firm-dashboard th,
+    .page-firm-dashboard td {
+        padding: 10px 8px;
+        font-size: 13px;
     }
 }
 

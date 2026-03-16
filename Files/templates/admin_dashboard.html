@@ -47,35 +47,34 @@
     <div class="admin-tab-content active" id="admin-tab-students">
 
     <!-- Search bar -->
-    <div style="margin: 20px auto; text-align: center;">
-        <input type="text" id="searchInput" placeholder="Search by name, email or mobile..."
-            style="padding: 10px; margin: 5px; width: 350px; border: 1px solid #ccc; border-radius: 5px;" />
+    <div class="admin-search-bar">
+        <input type="text" id="searchInput" placeholder="Search by name, email or mobile..." class="admin-search-input" />
     </div>
 
     <!-- Filters (populated dynamically from API data) -->
-    <div class="filters" style="margin: 20px auto; text-align: center;">
-        <select id="countryFilter" style="padding: 10px; margin: 5px; width: 250px; border: 1px solid #ccc; border-radius: 5px; appearance: none;">
+    <div class="filters">
+        <select id="countryFilter" class="admin-filter-select">
             <option value="">Select Country</option>
         </select>
 
-        <select id="curriculumFilter" style="padding: 10px; margin: 5px; width: 250px; border: 1px solid #ccc; border-radius: 5px; appearance: none;">
+        <select id="curriculumFilter" class="admin-filter-select">
             <option value="">Select Curriculum</option>
         </select>
 
-        <select id="referralFilter" style="padding: 10px; margin: 5px; width: 250px; border: 1px solid #ccc; border-radius: 5px; appearance: none;">
+        <select id="referralFilter" class="admin-filter-select">
             <option value="">Select Referral Source</option>
         </select>
 
-        <select id="schoolFilter" style="padding: 10px; margin: 5px; width: 250px; border: 1px solid #ccc; border-radius: 5px; appearance: none;">
+        <select id="schoolFilter" class="admin-filter-select">
             <option value="">Select School</option>
         </select>
 
-        <select id="firmFilter" style="padding: 10px; margin: 5px; width: 250px; border: 1px solid #ccc; border-radius: 5px; appearance: none;">
+        <select id="firmFilter" class="admin-filter-select">
             <option value="">Filter by Firm</option>
         </select>
 
-        <label style="display: inline-flex; align-items: center; gap: 6px; margin: 5px 10px; font-size: 14px; cursor: pointer;">
-            <input type="checkbox" id="independentToggle" style="width: 16px; height: 16px;" />
+        <label class="admin-independent-label">
+            <input type="checkbox" id="independentToggle" class="admin-independent-checkbox" />
             Independent Only
         </label>
     </div>
@@ -352,22 +351,22 @@
                 var resetCell = '<button style="background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;" onclick="adminResetStudentTest(' + s.id + ', \'' + escapeHtml(s.first_name) + ' ' + escapeHtml(s.last_name) + '\')">Reset</button>';
 
                 tr.innerHTML =
-                    '<td>' + s.id + '</td>' +
-                    '<td>' + escapeHtml(s.first_name) + '</td>' +
-                    '<td>' + escapeHtml(s.last_name) + '</td>' +
-                    '<td>' + escapeHtml(s.email) + '</td>' +
-                    '<td>' + escapeHtml(s.mobile) + '</td>' +
-                    '<td>' + escapeHtml(s.country) + '</td>' +
-                    '<td>' + escapeHtml(s.curriculum) + '</td>' +
-                    '<td>' + escapeHtml(s.school_name) + '</td>' +
-                    '<td>' + escapeHtml(s.grade) + '</td>' +
-                    '<td>' + escapeHtml(s.referral_source) + '</td>' +
-                    '<td>' + firmCell + '</td>' +
-                    '<td>' + lastAptCat + '</td>' +
-                    '<td>' + lastCareerQ + '</td>' +
-                    '<td>' + actionsCell + '</td>' +
-                    '<td style="text-align:center;">' + toggleCell + '</td>' +
-                    '<td>' + resetCell + '</td>';
+                    '<td data-label="ID">' + s.id + '</td>' +
+                    '<td data-label="First Name">' + escapeHtml(s.first_name) + '</td>' +
+                    '<td data-label="Last Name">' + escapeHtml(s.last_name) + '</td>' +
+                    '<td data-label="Email">' + escapeHtml(s.email) + '</td>' +
+                    '<td data-label="Mobile">' + escapeHtml(s.mobile) + '</td>' +
+                    '<td data-label="Country">' + escapeHtml(s.country) + '</td>' +
+                    '<td data-label="Curriculum">' + escapeHtml(s.curriculum) + '</td>' +
+                    '<td data-label="School">' + escapeHtml(s.school_name) + '</td>' +
+                    '<td data-label="Class">' + escapeHtml(s.grade) + '</td>' +
+                    '<td data-label="Referral">' + escapeHtml(s.referral_source) + '</td>' +
+                    '<td data-label="Firm">' + firmCell + '</td>' +
+                    '<td data-label="Last Apt. Cat.">' + lastAptCat + '</td>' +
+                    '<td data-label="Last Career Q#">' + lastCareerQ + '</td>' +
+                    '<td data-label="Actions">' + actionsCell + '</td>' +
+                    '<td data-label="Result Access" style="text-align:center;">' + toggleCell + '</td>' +
+                    '<td data-label="Reset">' + resetCell + '</td>';
                 tbody.appendChild(tr);
             });
 
